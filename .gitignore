@@ -5,3 +5,9 @@ dist/
 .env.*
 !.env.example
 .DS_Store
+data/
+artifacts/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
