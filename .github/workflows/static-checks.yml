@@ -1,0 +1,26 @@
+name: Static checks
+on:
+  push:
+  pull_request:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check expected files and HTML metadata
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from html.parser import HTMLParser
+          class Validator(HTMLParser):
+              pass
+          for name in ['index.html', 'apps/dead-drop/index.html', 'apps/appeal-2049/index.html']:
+              path=Path(name)
+              assert path.is_file(), name
+              content=path.read_text(encoding='utf-8')
+              assert '<!doctype html>' in content.lower(), name
+              assert '<title>' in content, name
+              assert 'name="viewport"' in content, name
+              Validator().feed(content)
+              print('OK',name)
+          PY
