@@ -160,6 +160,12 @@
     ["The AI processing can be turned on only by your explicit choice.","ИИ включается только по вашему явному согласию.","仅在您明确选择后启用 AI 处理。"]
   ];
 
+  entries.push(
+    ["Private mission intelligence will be shared with the OpenAI API ONLY if BOTH agents independently opt in. Either agent can withdraw consent before finalization. The result is not fact-checked.","Данные миссии будут отправлены в OpenAI API, ТОЛЬКО ЕСЛИ ОБА агента отдельно дадут согласие. Каждый может отозвать согласие до завершения. Результат не проверен на достоверность.","仅在双方特工各自明确同意后，任务中的私人信息才会发送到 OpenAI API。任意一方可在生成前撤回同意，结果未经事实核查。"],
+    ["GRANTED","ДАНО","已同意"],
+    ["OFF","НЕТ","未同意"],
+    ["Interface language","Язык интерфейса","界面语言"]
+  );
   const maps = { ru: new Map(), zh: new Map() };
   const reverse = new Map();
   for (const [en, ru, zh] of entries) {
