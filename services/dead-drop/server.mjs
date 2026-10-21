@@ -168,6 +168,7 @@ const STATIC_FILES = new Map([
   ['/apps/dead-drop/', 'apps/dead-drop/index.html'],
   ['/apps/dead-drop/index.html', 'apps/dead-drop/index.html'],
   ['/apps/dead-drop/app.js', 'apps/dead-drop/app.js'],
+  ['/apps/dead-drop/i18n.js', 'apps/dead-drop/i18n.js'],
   ['/apps/dead-drop/style.css', 'apps/dead-drop/style.css'],
   ['/apps/dead-drop/favicon.svg', 'apps/dead-drop/favicon.svg'],
   ['/apps/appeal-2049/', 'apps/appeal-2049/index.html'],
