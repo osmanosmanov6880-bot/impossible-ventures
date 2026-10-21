@@ -4,6 +4,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { createReadStream, existsSync, mkdirSync, statSync } from 'node:fs';
 import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { refineDossier } from './creative-engine.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const CURRENT_FILE = fileURLToPath(import.meta.url);
@@ -112,6 +113,7 @@ function buildDossier(mission) {
       audienceAgent: audienceSignal ? audienceSignal.text : ''
     },
     validation: 'Compare this concept with a direct-response control. Measure qualified actions and repeat engagement, not just clicks.',
+    generationMethod: 'rules',
     disclosure: 'Creative hypothesis only. Product evidence is user-supplied and has not been independently verified. No live AI model was used.'
   };
 }
@@ -219,11 +221,19 @@ function throttle(map, request, now) {
   if (entry.count > 90) throw new ApiError(429, 'Request limit exceeded; retry later');
 }
 
-export function createApp({ dbPath = process.env.DB_PATH || join(ROOT, 'data', 'missions.sqlite'), now = Date.now } = {}) {
+export function createApp({
+  dbPath = process.env.DB_PATH || join(ROOT, 'data', 'missions.sqlite'),
+  now = Date.now,
+  aiKey = process.env.OPENAI_API_KEY,
+  aiModel = process.env.OPENAI_MODEL,
+  modelRefiner = refineDossier
+} = {}) {
   if (dbPath !== ':memory:') mkdirSync(dirname(resolve(dbPath)), { recursive: true });
   const db = new DatabaseSync(dbPath);
   db.exec('PRAGMA journal_mode = WAL; CREATE TABLE IF NOT EXISTS missions (code TEXT PRIMARY KEY, created_at INTEGER NOT NULL, payload TEXT NOT NULL);');
   const requestsByIP = new Map();
+  const aiAvailable = Boolean(aiKey && aiModel);
+  const finalizing = new Set();
   const server = createServer(async (request, response) => {
     response.setHeader('X-Content-Type-Options', 'nosniff');
     response.setHeader('Referrer-Policy', 'no-referrer');
@@ -233,7 +243,7 @@ export function createApp({ dbPath = process.env.DB_PATH || join(ROOT, 'data', '
       const url = new URL(request.url || '/', 'http://localhost');
       const pathname = url.pathname;
       if (request.method === 'GET' && pathname === '/api/v1/health') {
-        return sendJSON(response, 200, { ok: true, service: 'dead-drop', mode: 'cooperative', persistent: dbPath !== ':memory:' });
+        return sendJSON(response, 200, { ok: true, service: 'dead-drop', mode: 'cooperative', persistent: dbPath !== ':memory:', aiAvailable });
       }
       if (pathname.startsWith('/api/')) {
         if (request.method === 'POST') throttle(requestsByIP, request, now);
@@ -259,16 +269,20 @@ export function createApp({ dbPath = process.env.DB_PATH || join(ROOT, 'data', '
         }
         const match = /^\/api\/v1\/missions\/([A-Z2-9]{8})(?:\/(join|messages|finalize))?$/.exec(pathname);
         if (!match) throw new ApiError(404, 'API route not found');
-        const mission = loadMission(db, match[1], now);
+        let mission = loadMission(db, match[1], now);
         const action = match[2];
         if (request.method === 'POST' && action === 'join') {
-          if (mission.guest || mission.status === 'finalized') throw new ApiError(409, 'Mission already has two agents');
           const body = await jsonBody(request);
-          mission.guest = {
+          const guest = {
             audience: requiredText(body.audience, 'Audience', 160),
             friction: requiredText(body.friction, 'Audience tension', 220),
             channel: enumValue(body.channel, ['social', 'video', 'landing'], 'channel')
           };
+          // Body parsing is asynchronous. Re-read the room before changing it,
+          // so two simultaneous join requests cannot overwrite one another.
+          mission = loadMission(db, match[1], now);
+          if (mission.guest || mission.status !== 'waiting') throw new ApiError(409, 'Mission already has two agents');
+          mission.guest = guest;
           const token = newToken();
           mission.guestTokenHash = tokenDigest(token).toString('hex');
           mission.status = 'active';
@@ -280,25 +294,50 @@ export function createApp({ dbPath = process.env.DB_PATH || join(ROOT, 'data', '
           return sendJSON(response, 200, { mission: sessionView(mission, role) });
         }
         if (action === 'messages' && request.method === 'POST') {
+          const body = await jsonBody(request);
+          const text = requiredText(body.text, 'Transmission', 280);
+          // Validate the fresh persisted state after asynchronously reading the body.
+          mission = loadMission(db, match[1], now);
+          authorizedRole(request, mission);
+          if (finalizing.has(mission.code)) throw new ApiError(409, 'The dossier is being finalized');
           if (!mission.guest) throw new ApiError(409, 'Waiting for second agent');
           if (mission.status !== 'active') throw new ApiError(409, 'Mission is closed');
           const used = mission.messages.filter(m => m.role === role).length;
           if (used >= MAX_MESSAGES) throw new ApiError(409, 'Transmission quota exhausted');
-          const body = await jsonBody(request);
-          const text = requiredText(body.text, 'Transmission', 280);
           mission.messages.push({ role, text, at: now() });
           saveMission(db, mission);
           return sendJSON(response, 201, { mission: sessionView(mission, role) });
         }
         if (action === 'finalize' && request.method === 'POST') {
+          const body = await jsonBody(request);
+          if (body.ai !== undefined && typeof body.ai !== 'boolean') throw new ApiError(400, 'Invalid AI consent');
+          const language = enumValue(body.language || 'en', ['en', 'ru', 'zh'], 'language');
+          mission = loadMission(db, match[1], now);
+          authorizedRole(request, mission);
           if (!mission.guest || mission.status !== 'active') throw new ApiError(409, 'Mission is not active');
           if (!mission.messages.some(m => m.role === 'product') || !mission.messages.some(m => m.role === 'audience')) {
             throw new ApiError(409, 'Both agents must transmit at least once');
           }
-          mission.status = 'finalized';
-          mission.dossier = buildDossier(mission);
-          saveMission(db, mission);
-          return sendJSON(response, 200, { mission: sessionView(mission, role) });
+          if (finalizing.has(mission.code)) throw new ApiError(409, 'Finalization already in progress');
+          finalizing.add(mission.code);
+          try {
+            let dossier = buildDossier(mission);
+            if (body.ai === true && aiAvailable) {
+              try {
+                dossier = await modelRefiner({ mission, draft: dossier, language, apiKey: aiKey, model: aiModel });
+              } catch {
+                // Provider failures never erase a completed mission. Do not log
+                // provider payloads or user-supplied campaign intelligence.
+                dossier.aiNotice = 'AI generation was unavailable; rules-based dossier created instead.';
+              }
+            }
+            mission.status = 'finalized';
+            mission.dossier = dossier;
+            saveMission(db, mission);
+            return sendJSON(response, 200, { mission: sessionView(mission, role) });
+          } finally {
+            finalizing.delete(mission.code);
+          }
         }
         throw new ApiError(405, 'Method not allowed');
       }
