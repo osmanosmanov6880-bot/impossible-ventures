@@ -71,7 +71,7 @@ test('the AI request is server-side, small, not stored, with bounded structured 
       assert.equal(body.text.format.type, 'json_schema');
       assert.equal(body.text.format.strict, true);
       assert.equal(body.max_output_tokens, 1300);
-      assert.match(JSON.stringify(body.input), /"outputLanguage":"ru"/);
+      assert.equal(JSON.parse(body.input[0].content).outputLanguage, 'ru');
       assert.ok(!JSON.stringify(body).includes('test-only-secret'));
       return {
         ok: true, status: 200,
