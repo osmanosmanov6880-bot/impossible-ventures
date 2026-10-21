@@ -1,33 +1,40 @@
 # Impossible Ventures
 
-Seven independent creative-technology ventures in one portfolio.
+An experimental portfolio of seven independent creative-technology ventures. **Two working browser demos**, five concepts.
 
-## First working prototype
-
-Open [Dead Drop Agency](apps/dead-drop/index.html) in a browser. No installation or API key is required. The demo uses deterministic rules and does not send data to a server.
-
-## Seven ventures
-
-1. Dead Drop Agency — campaign creation missions (working browser prototype)
-2. Appeal 2049 — adversarial review of advertising ideas (planned)
-3. AntiPersona — creativity training (planned)
-4. Brief Theatre — scripts from evolving briefs (planned)
-5. AdBiome — creative variant exploration (planned)
-6. Museum of Attention — interactive creative exhibits (planned)
-7. Attention Republic — collaborative creative challenges (planned)
-
-See [portfolio architecture](docs/portfolio.md).
-
-## Local launch
-
-From the repository root:
+## Run locally
 
 ```bash
+git clone https://github.com/osmanosmanov6880-bot/impossible-ventures.git
+cd impossible-ventures
 python3 -m http.server 8000
 ```
 
-Open http://localhost:8000/apps/dead-drop/
+Open:
+- **Portfolio:** http://localhost:8000/
+- **Dead Drop Agency:** http://localhost:8000/apps/dead-drop/
+- **Appeal 2049:** http://localhost:8000/apps/appeal-2049/
 
-## Current limits
+These are static demos. They require no account or API keys and send no campaign data to a server.
 
-No production deployment, authentication, persistence, payments, multiplayer, or real AI model. Brand and domain availability have not been verified. Do not commit secrets or user data.
+## Portfolio status
+
+| Venture | Status |
+|---|---|
+| Dead Drop Agency | Interactive browser prototype |
+| Appeal 2049 | Interactive browser prototype |
+| AntiPersona | Concept |
+| Brief Theatre | Concept |
+| AdBiome | Concept |
+| Museum of Attention | Concept |
+| Attention Republic | Concept |
+
+See [portfolio architecture](docs/portfolio.md) and [release roadmap](docs/roadmap.md).
+
+## Validation
+
+GitHub Actions checks that all three HTML entrypoints exist and contain basic document metadata. This is **not** a browser test or production security audit.
+
+## Production gaps
+
+No deployed domain, real AI model, authentication, multiplayer, persistence, payments, or legal company registrations. Brand and domain availability are unverified. Do not commit secrets or private customer data.
