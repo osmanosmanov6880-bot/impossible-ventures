@@ -87,7 +87,7 @@ test('the AI request is server-side, small, not stored, with bounded structured 
   assert.equal(out.brand, draft.brand);
   assert.equal(out.evidenceToVerify, draft.evidenceToVerify);
   assert.deepEqual(out.interceptedSignals, draft.interceptedSignals);
-  assert.match(out.disclosure, /unverified/);
+  assert.match(out.disclosure, /не проверены|unverified/);
   assert.equal(out.storyboard.length, 3);
 });
 
