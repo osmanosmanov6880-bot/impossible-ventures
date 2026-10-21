@@ -71,3 +71,19 @@ All endpoints use JSON. API version `/api/v1`.
 - Test keyboard flow, mobile layout, screen reader announcements, color contrast and browser compatibility manually before public release.
 
 See [security notes](security.md) and [roadmap](roadmap.md).
+
+
+## v0.4: Multilingual UI and consent-gated AI
+
+- Language switcher: English, Russian, Simplified Chinese. Locale is stored only in browser localStorage.
+- Deterministic dossiers for all three languages, including offline training.
+- Optional server-side model refinement uses the OpenAI Responses API (strict JSON output schema, bounded output and timeout). If not configured or if provider fails, a rules-based dossier is returned.
+- **Both agents must independently consent** in the active mission before the server transmits product/audience data and shared messages to the model. Each can revoke consent until finalization. Consent is a feature safeguard, not a substitute for a legal basis/privacy review.
+- New endpoint: `POST /api/v1/missions/:code/ai-consent` with an authorized role Bearer token and JSON `{"allow":true|false}`. Response includes only consent booleans in role-scoped view.
+- On `POST /finalize`, JSON `{"ai":true,"language":"ru"}` is accepted only if AI is configured and **both** agent consents are true. Otherwise the user must finalize without AI. The persisted result reports `generationMethod`: `rules` or `ai-assisted`.
+- Source-of-truth product evidence, audience fields and agent messages cannot be replaced by model output. Model output is a draft requiring independent review.
+- Corrected asynchronous join/message races; a per-room finalization lock stops mid-generation writes and duplicate model calls in this single-process alpha.
+
+Use `npm run start:ai` after creating a local `.env` file from `.env.example` and adding your own API configuration. `npm start` remains entirely functional without any key.
+
+This is NOT a certified GDPR-compliant app or a production-ready multi-tenant platform.

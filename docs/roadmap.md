@@ -51,3 +51,23 @@ Updated 2026-10-22. **Statements of implementation are scoped to source files, n
 ## Not completed
 
 No live hosted cooperative server, production security certification, LLM connection, paid accounts, complete accessibility audit, enterprise SLAs or confirmed commercial demand. Existing demos are prototypes only.
+
+
+## v0.4 implementation increment (source)
+
+- Optional server-side model editing with strict output schema and bounded request size.
+- Server-enforced mutual agent consent and revocation before model data transfer.
+- RU/EN/zh-CN UI language switcher and localized rule-based dossiers.
+- Integration coverage for concurrency, role permissions, consent, AI fallback and translations.
+- Browser regression tests for language selection and two-agent consent.
+- Private local mission database and `.env` excluded from Git.
+
+**Release criterion:** both GitHub Actions quality gates and real Chromium end-to-end tests must pass before merge. Production host, real paid-model connection and commercial market fit remain unverified.
+
+## Next development priorities
+
+1. Verified staging deployment with HTTPS, telemetry, backup policy and complete retention deletion.
+2. Replace bearer-only room identities with optional managed accounts and tenant isolation.
+3. Independent privacy/security review of consent, supplier processing and rate/spend controls.
+4. User testing (including Russian/English/Chinese usability and accessibility) and paid pilot validation.
+5. Improve model evaluations against factuality, creativity and conversion-oriented usefulness.

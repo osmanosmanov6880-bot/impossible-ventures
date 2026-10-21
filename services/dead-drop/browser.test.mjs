@@ -4,8 +4,8 @@ import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright';
 import { createApp } from './server.mjs';
 
-async function setup(t, width = 1400, height = 900) {
-  const app = createApp({ dbPath: ':memory:' });
+async function setup(t, width = 1400, height = 900, options = {}) {
+  const app = createApp({ dbPath: ':memory:', ...options });
   await new Promise(resolve => app.server.listen(0, '127.0.0.1', resolve));
   const base = 'http://127.0.0.1:' + app.server.address().port;
   const browser = await chromium.launch({ headless: true });
@@ -112,5 +112,119 @@ test('local simulation exercises both roles without server multiplayer state', a
   await page.getByRole('button', { name: /DECODE THE CREATIVE DOSSIER/i }).click();
   await page.getByText('Signal decoded.').waitFor();
   assert.match(await page.locator('body').innerText(), /Freelance illustrators/);
+  assert.deepEqual(errors, []);
+});
+
+
+test('language switch changes the interface in RU and ZH and preserves unfinished input', async t => {
+  const { context, base } = await setup(t, 390, 844);
+  const page = await context.newPage();
+  const errors = [];
+  attachErrors(page, errors);
+  await page.goto(base + '/apps/dead-drop/');
+  await page.locator('#languageSelect').selectOption('ru');
+  await page.getByText('Большие идеи').waitFor();
+  await page.getByRole('button', { name: /Создать миссию/i }).click();
+  await page.locator('#brand').fill('Мастерская Арктика');
+  await page.locator('#product').fill('Подписка на мастер-классы');
+  await page.locator('#proof').fill('Есть видеозапись открытого мастер-класса');
+  await page.locator('#languageSelect').selectOption('zh');
+  assert.equal(await page.locator('#brand').inputValue(), 'Мастерская Арктика');
+  assert.equal(await page.locator('#product').inputValue(), 'Подписка на мастер-классы');
+  await page.getByText('定义').waitFor({ timeout: 3000 }).catch(async () => {
+    // Some languages join a headline with another text node.
+    assert.match(await page.locator('.screen-heading').innerText(), /定义/);
+  });
+  await page.locator('#languageSelect').selectOption('en');
+  assert.equal(await page.locator('#brand').inputValue(), 'Мастерская Арктика');
+  await page.getByRole('button', { name: /CREATE CLASSIFIED ROOM/i }).waitFor();
+  assert.deepEqual(errors, []);
+});
+
+test('offline training creates a localized Russian dossier without any AI processing', async t => {
+  const { context, base } = await setup(t, 430, 844);
+  const page = await context.newPage();
+  const errors = [];
+  attachErrors(page, errors);
+  await page.goto(base + '/apps/dead-drop/');
+  await page.locator('#languageSelect').selectOption('ru');
+  await page.getByRole('button', { name: /Тренировочная миссия/i }).click();
+  await page.locator('#brand').fill('Студия Маяк');
+  await page.locator('#product').fill('Обучающая программа по дизайну');
+  await page.locator('#proof').fill('Доступен бесплатный ознакомительный урок');
+  await page.locator('#objective').selectOption('awareness');
+  await page.locator('#hostForm').evaluate(form => form.requestSubmit());
+  await page.locator('#audience').fill('Молодые предприниматели');
+  await page.locator('#friction').fill('Сложно выбрать полезную программу');
+  await page.locator('#channel').selectOption('social');
+  await page.locator('#trainingGuestForm').evaluate(form => form.requestSubmit());
+  await page.locator('#messageText').fill('Какая проблема волнует аудиторию?');
+  await page.locator('#messageForm').evaluate(form => form.requestSubmit());
+  await page.locator('[data-action="switch-role"]').click();
+  await page.locator('#messageText').fill('Нужны понятные доказательства пользы');
+  await page.locator('#messageForm').evaluate(form => form.requestSubmit());
+  await page.locator('[data-action="finalize"]').click();
+  await page.getByText('расшифрован.').waitFor();
+  const result = await page.locator('.dossier-grid').first().innerText();
+  assert.match(result, /Молодые предприниматели/);
+  assert.match(result, /Превратите знакомую проблему/);
+  assert.deepEqual(errors, []);
+});
+
+test('both agents consent independently before model assistance is available', async t => {
+  let modelCalls = 0;
+  const { context, browser, base } = await setup(t, 1300, 900, {
+    aiKey: 'test-no-network',
+    aiModel: 'fake-model',
+    modelRefiner: async ({ draft }) => {
+      modelCalls++;
+      return { ...draft, generationMethod: 'ai-assisted', concept: 'Agent-tested creative concept' };
+    }
+  });
+  const secondContext = await browser.newContext({ viewport: { width: 425, height: 850 } });
+  t.after(() => secondContext.close());
+  const hostPage = await context.newPage();
+  const guestPage = await secondContext.newPage();
+  const errors = [];
+  attachErrors(hostPage, errors);
+  attachErrors(guestPage, errors);
+
+  await hostPage.goto(base + '/apps/dead-drop/');
+  await hostPage.getByRole('button', { name: /Create a mission/i }).click();
+  await hostPage.locator('#brand').fill('Cipher Studio');
+  await hostPage.locator('#product').fill('Creative research toolkit');
+  await hostPage.locator('#proof').fill('Documented public product demonstrations');
+  await hostPage.locator('#objective').selectOption('leads');
+  await hostPage.locator('#hostForm').evaluate(form => form.requestSubmit());
+  await hostPage.locator('.room-code strong').waitFor();
+  const roomCode = (await hostPage.locator('.room-code strong').textContent()).trim();
+
+  await guestPage.goto(base + '/apps/dead-drop/');
+  await guestPage.getByRole('button', { name: /Join as Agent Echo/i }).click();
+  await guestPage.locator('#roomCode').fill(roomCode);
+  await guestPage.locator('#audience').fill('Independent design agencies');
+  await guestPage.locator('#friction').fill('Brief quality changes from client to client');
+  await guestPage.locator('#channel').selectOption('landing');
+  await guestPage.locator('#guestForm').evaluate(form => form.requestSubmit());
+  await guestPage.locator('#aiConsent').waitFor();
+
+  // After only one agent consents, no AI call may happen.
+  await guestPage.locator('#aiConsent').check();
+  await guestPage.waitForFunction(() => document.querySelector('.ai-consent-state')?.innerText.includes('YOUR CONSENT: GRANTED'));
+  await hostPage.locator('#aiConsent').waitFor();
+  await hostPage.waitForFunction(() => document.querySelector('.ai-consent-state')?.innerText.includes('PARTNER CONSENT: GRANTED'), { timeout: 9000 });
+  assert.equal(modelCalls, 0);
+  await hostPage.locator('#aiConsent').check();
+  await hostPage.waitForFunction(() => document.querySelector('.ai-consent-state')?.innerText.includes('YOUR CONSENT: GRANTED'));
+  await guestPage.waitForFunction(() => document.querySelector('.ai-consent-state')?.innerText.includes('PARTNER CONSENT: GRANTED'), { timeout: 9000 });
+
+  await hostPage.locator('#messageText').fill('Can we show the actual research workflow?');
+  await hostPage.locator('#messageForm').evaluate(form => form.requestSubmit());
+  await guestPage.locator('#messageText').fill('Agencies need clear expectations before kickoff.');
+  await guestPage.locator('#messageForm').evaluate(form => form.requestSubmit());
+  await hostPage.waitForFunction(() => document.body.innerText.includes('Agencies need clear expectations'), { timeout: 9000 });
+  await hostPage.locator('[data-action="finalize"]').click();
+  await hostPage.getByText('AI-ASSISTED CREATIVE DRAFT').waitFor();
+  assert.equal(modelCalls, 1);
   assert.deepEqual(errors, []);
 });

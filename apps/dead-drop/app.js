@@ -14,6 +14,9 @@ const state = {
   token: '',
   mission: null,
   training: null,
+  aiAvailable: false,
+  aiConsent: false,
+  locale: window.DeadDropLocale ? window.DeadDropLocale.locale : 'en',
   busy: false
 };
 let refreshTimer = null;
@@ -33,6 +36,10 @@ const agentNames = {
   product: 'AGENT VECTOR',
   audience: 'AGENT ECHO'
 };
+
+function t(value) {
+  return window.DeadDropLocale ? window.DeadDropLocale.translate(value) : value;
+}
 
 function safe(value) {
   return String(value === undefined || value === null ? '' : value)
@@ -89,6 +96,7 @@ function clearMission() {
   state.token = '';
   state.mission = null;
   state.training = null;
+  state.aiConsent = false;
   state.busy = false;
   render();
 }
@@ -104,7 +112,7 @@ async function api(path, method = 'GET', body) {
   if (body !== undefined) headers['Content-Type'] = 'application/json';
   if (state.token) headers.Authorization = 'Bearer ' + state.token;
   const abort = new AbortController();
-  const timeout = setTimeout(() => abort.abort(), 12000);
+  const timeout = setTimeout(() => abort.abort(), path.endsWith('/finalize') ? 25000 : 12000);
   try {
     const response = await fetch('/api/v1' + path, {
       method, headers,
@@ -168,7 +176,7 @@ function field(label, name, placeholder, options = {}) {
   const hint = options.hint ? '<small>' + safe(options.hint) + '</small>' : '';
   if (options.items) {
     return '<div class="field"><label for="' + name + '">' + label + '</label><select id="' + name + '" name="' + name + '" required>' +
-      options.items.map(item => '<option value="' + safe(item[0]) + '">' + safe(item[1]) + '</option>').join('') +
+      options.items.map(item => '<option value="' + safe(item[0]) + '">' + safe(t(item[1])) + '</option>').join('') +
       '</select>' + hint + '</div>';
   }
   const limit = Number(options.max || 160);
@@ -246,7 +254,7 @@ function buildTrainingDossier(mission) {
   const messages = mission.messages;
   const channel = { social: 'social sequence', video: 'short-form film', landing: 'interactive landing experience' }[guest.channel];
   const action = { awareness: 'Discover the story', leads: 'Request the briefing', launch: 'See what is new' }[host.objective];
-  return {
+  return window.DeadDropLocale.localizeRuleDossier(mission, {
     campaign: 'OPERATION / THE UNSENT SIGNAL',
     brand: host.brand,
     audience: guest.audience,
@@ -266,7 +274,7 @@ function buildTrainingDossier(mission) {
     },
     validation: 'Compare this concept with a direct-response control. Measure qualified actions and repeat engagement, not just clicks.',
     disclosure: 'Creative hypothesis only. Product evidence is user-supplied and has not been independently verified. No live AI model was used.'
-  };
+  }, state.locale);
 }
 
 function renderRoom() {
@@ -277,8 +285,8 @@ function renderRoom() {
   const isProduct = mission.role === 'product';
   const title = isProduct ? 'PRODUCT INTELLIGENCE' : 'AUDIENCE INTELLIGENCE';
   const intel = isProduct
-    ? [['THE PRODUCT', mission.ownIntel.product], ['EVIDENCE TO VERIFY', mission.ownIntel.proof], ['CAMPAIGN OBJECTIVE', objectiveLabels[mission.objective]]]
-    : [['THE AUDIENCE', mission.ownIntel.audience], ['THE FRICTION', mission.ownIntel.friction], ['CHANNEL', channelLabels[mission.ownIntel.channel]]];
+    ? [['THE PRODUCT', mission.ownIntel.product], ['EVIDENCE TO VERIFY', mission.ownIntel.proof], ['CAMPAIGN OBJECTIVE', t(objectiveLabels[mission.objective])]]
+    : [['THE AUDIENCE', mission.ownIntel.audience], ['THE FRICTION', mission.ownIntel.friction], ['CHANNEL', t(channelLabels[mission.ownIntel.channel])]];
   const countProduct = mission.messages.filter(m => m.role === 'product').length;
   const countAudience = mission.messages.filter(m => m.role === 'audience').length;
   const canFinalize = mission.joined && countProduct > 0 && countAudience > 0;
@@ -297,7 +305,7 @@ function renderRoom() {
   return '<div class="room-head"><div><div class="eyebrow">' +
     (state.mode === 'training' ? 'TRAINING OPERATION / TWO ROLES' : 'PRIVATE ROLE ROOM / TWO AGENTS') +
     '</div><h1>' + safe(agentNames[mission.role]) + '<span class="accent">_</span></h1><p>' +
-    safe(mission.brand) + ' · ' + safe(objectiveLabels[mission.objective]) +
+    safe(mission.brand) + ' · ' + safe(t(objectiveLabels[mission.objective])) +
     '<br>' + (mission.joined ? 'Both operatives are in position.' : 'Waiting for Agent Echo to join.') +
     '</p></div><div class="room-code"><span class="micro-label">OPERATION CODE</span><strong>' +
     safe(mission.code) + '</strong>' +
@@ -322,6 +330,11 @@ function renderRoom() {
     (mission.joined ? 'EVERY WORD COUNTS' : 'AWAITING SECOND AGENT') +
     '</span><button class="btn btn-small btn-primary" type="submit"' +
     (canTransmit ? '' : ' disabled') + '>TRANSMIT ↗</button></div><div class="form-error" role="alert"></div></form></section></div>' +
+    (state.mode === 'live' && state.aiAvailable && mission.joined ?
+      '<div class="ai-optin"><label class="ai-optin-inner"><input type="checkbox" id="aiConsent" ' + (mission.aiConsent?.self ? 'checked' : '') + '>' +
+      '<span><strong>OPTIONAL AI CREATIVE REFINEMENT</strong><small>Private mission intelligence will be shared with the OpenAI API ONLY if BOTH agents independently opt in. Either agent can withdraw consent before finalization. The result is not fact-checked.</small></span></label>' +
+      '<div class="ai-consent-state"><span>YOUR CONSENT</span>: <span>' + (mission.aiConsent?.self ? 'GRANTED' : 'OFF') +
+      '</span> · <span>PARTNER CONSENT</span>: <span>' + (mission.aiConsent?.partner ? 'GRANTED' : 'OFF') + '</span></div></div>' : '') +
     '<div class="room-actions"><button type="button" class="btn btn-primary" data-action="finalize"' +
     (canFinalize ? '' : ' disabled') + '>DECODE THE CREATIVE DOSSIER ↗</button><small>' +
     (canFinalize ? 'Both agents have transmitted. Your dossier is ready.' :
@@ -339,7 +352,9 @@ function renderDossier(dossier) {
   return '<div class="dossier-heading"><div class="eyebrow">MISSION ACCOMPLISHED / CLASSIFIED DOSSIER</div>' +
     '<h1>Signal <span class="gradient-text">decoded.</span></h1><p class="subheading">' +
     'A concept built from two different perspectives. This structured creative brief is a starting point for human review.</p>' +
-    '<div class="badge signal">' + safe(dossier.campaign) + '</div></div>' +
+    '<div class="badge signal">' + safe(dossier.campaign) + '</div> ' +
+    '<span class="badge ' + (dossier.generationMethod === 'ai-assisted' ? 'amber' : '') + '">' +
+    (dossier.generationMethod === 'ai-assisted' ? 'AI-ASSISTED CREATIVE DRAFT' : 'RULES-BASED CREATIVE DRAFT') + '</span></div>' +
     '<div class="dossier-grid">' +
     resultCard('01 / THE OPENING HOOK', 'Stop the scroll.', dossier.openingHook, true) +
     resultCard('02 / CREATIVE DIRECTION', 'The big idea.', dossier.concept, true) +
@@ -353,7 +368,8 @@ function renderDossier(dossier) {
     resultCard('06 / MEASUREMENT', 'Run a real test.', dossier.validation) +
     resultCard('07 / AGENT VECTOR', 'Intercepted product signal.', dossier.interceptedSignals.productAgent) +
     resultCard('08 / AGENT ECHO', 'Intercepted audience signal.', dossier.interceptedSignals.audienceAgent) +
-    '</div><div class="callout warning"><strong>Editorial note:</strong> ' + safe(dossier.disclosure) + '</div>' +
+    '</div>' + (dossier.aiNotice ? '<div class="callout warning">' + safe(dossier.aiNotice) + '</div>' : '') +
+    '<div class="callout warning"><strong>Editorial note:</strong> ' + safe(dossier.disclosure) + '</div>' +
     '<div class="form-footer"><button class="btn btn-primary" data-action="copy-dossier" type="button">COPY DOSSIER ↗</button>' +
     '<button class="btn btn-ghost" data-action="download-dossier" type="button">EXPORT .TXT ↓</button>' +
     '<button class="btn btn-ghost" data-action="new-operation" type="button">NEW OPERATION</button></div>';
@@ -365,6 +381,7 @@ function render() {
   else if (state.view === 'host' || state.view === 'training-host') root.innerHTML = renderHost();
   else if (state.view === 'join' || state.view === 'training-guest') root.innerHTML = renderJoin(state.view === 'training-guest');
   else root.innerHTML = renderRoom();
+  if (window.DeadDropLocale) window.DeadDropLocale.apply(document.body);
 }
 
 function formValues(form) {
@@ -399,6 +416,7 @@ root.addEventListener('submit', event => {
         state.room = result.code;
         state.token = result.token;
         state.mission = result.mission;
+        state.aiConsent = false;
         state.view = 'room';
         saveSession();
         render();
@@ -469,7 +487,10 @@ root.addEventListener('click', event => {
       m.dossier = buildTrainingDossier(m);
       m.status = 'finalized';
     } else {
-      const result = await api('/missions/' + state.room + '/finalize', 'POST', {});
+      const result = await api('/missions/' + state.room + '/finalize', 'POST', {
+        ai: state.aiAvailable && Boolean(state.mission?.aiConsent?.self && state.mission?.aiConsent?.partner),
+        language: state.locale
+      });
       state.mission = result.mission;
     }
     stopRefresh();
@@ -497,7 +518,33 @@ root.addEventListener('click', event => {
   }
 });
 
+root.addEventListener('change', event => {
+  if (event.target && event.target.id === 'aiConsent' && state.mode === 'live' && state.room) {
+    const allow = event.target.checked;
+    withBusy(async () => {
+      const result = await api('/missions/' + state.room + '/ai-consent', 'POST', { allow });
+      state.mission = result.mission;
+      render();
+    });
+  }
+});
+
 document.getElementById('resetButton').addEventListener('click', clearMission);
+document.getElementById('languageSelect').addEventListener('change', event => {
+  if (!window.DeadDropLocale) return;
+  // Preserve unfinished brief fields and transmissions while changing language.
+  const oldForm = root.querySelector('form');
+  const previous = oldForm ? { id: oldForm.id, fields: Array.from(oldForm.querySelectorAll('[name]')).map(field => ({ name: field.name, value: field.value })) } : null;
+  state.locale = window.DeadDropLocale.setLocale(event.target.value);
+  render();
+  const nextForm = previous ? root.querySelector('form') : null;
+  if (nextForm && nextForm.id === previous.id) {
+    for (const item of previous.fields) {
+      const element = Array.from(nextForm.querySelectorAll('[name]')).find(field => field.name === item.name);
+      if (element) element.value = item.value;
+    }
+  }
+});
 
 function dossierText(dossier) {
   return [
@@ -535,8 +582,10 @@ async function bootstrap() {
     const response = await fetch('/api/v1/health', { cache: 'no-store' });
     const health = await response.json();
     state.online = response.ok && health.ok && health.mode === 'cooperative';
+    state.aiAvailable = state.online && health.aiAvailable === true;
   } catch {
     state.online = false;
+    state.aiAvailable = false;
   }
   if (state.online) {
     try {

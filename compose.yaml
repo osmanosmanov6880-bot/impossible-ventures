@@ -6,6 +6,8 @@ services:
     environment:
       PORT: "3000"
       DB_PATH: /data/missions.sqlite
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
     volumes:
       - mission-data:/data
     restart: unless-stopped
