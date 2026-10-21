@@ -1,0 +1,49 @@
+name: Publish static portfolio preview
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify runtime and API source
+        run: npm run check
+      - name: Prepare public static preview
+        run: |
+          mkdir -p _site/apps
+          cp index.html _site/index.html
+          cp -R apps/dead-drop _site/apps/dead-drop
+          cp -R apps/appeal-2049 _site/apps/appeal-2049
+          touch _site/.nojekyll
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload static site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy preview
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,26 +1,44 @@
-name: Static checks
+name: Quality gates
+
 on:
   push:
   pull_request:
+
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - name: Check expected files and HTML metadata
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check syntax and execute integration tests
+        run: npm run check
+      - name: Validate static entrypoints and metadata
         run: |
           python3 - <<'PY'
           from pathlib import Path
           from html.parser import HTMLParser
           class Validator(HTMLParser):
               pass
-          for name in ['index.html', 'apps/dead-drop/index.html', 'apps/appeal-2049/index.html']:
-              path=Path(name)
-              assert path.is_file(), name
-              content=path.read_text(encoding='utf-8')
-              assert '<!doctype html>' in content.lower(), name
-              assert '<title>' in content, name
-              assert 'name="viewport"' in content, name
-              Validator().feed(content)
-              print('OK',name)
+          files = [
+              'index.html',
+              'apps/dead-drop/index.html',
+              'apps/appeal-2049/index.html',
+          ]
+          for filename in files:
+              path = Path(filename)
+              assert path.is_file(), filename
+              text = path.read_text(encoding='utf-8')
+              assert '<!doctype html>' in text.lower(), filename
+              assert '<title>' in text, filename
+              assert 'name="viewport"' in text, filename
+              Validator().feed(text)
+              print('PASS', filename)
           PY

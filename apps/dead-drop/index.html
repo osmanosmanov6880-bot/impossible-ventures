@@ -1,48 +1,69 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Dead Drop Agency — turn a business challenge into a creative campaign mission.">
-<title>Dead Drop Agency — Creative Intelligence</title>
-<style>
-:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#080d0a;color:#e9f2e8}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 75% 0%,#1d3820 0,transparent 42%),#080d0a}header,main,footer{max-width:850px;margin:auto;padding:22px}header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2a392b}.brand{font-weight:900;letter-spacing:-.04em;font-size:23px}.brand span,.accent{color:#c7ff78}.status{font:11px ui-monospace,monospace;color:#c7ff78;border:1px solid #486348;border-radius:20px;padding:8px}main{padding-top:56px;min-height:70vh}.eyebrow{color:#c7ff78;font:12px ui-monospace,monospace;letter-spacing:.16em}h1{font-size:clamp(38px,7vw,70px);line-height:1.02;letter-spacing:-.055em;margin:18px 0}p{color:#a7b5a8;line-height:1.6;max-width:650px}.grid{display:grid;gap:12px;margin-top:24px}.field{display:block;margin-top:16px;color:#a7b5a8;font:12px ui-monospace,monospace;letter-spacing:.08em}input{display:block;margin-top:8px;width:100%;border:1px solid #405442;background:#121b14;color:#fff;border-radius:10px;padding:15px;font:16px inherit}button{font:inherit;cursor:pointer}.choice{width:100%;padding:18px;text-align:left;border:1px solid #405442;border-radius:10px;background:#111b14;color:#e9f2e8}.choice:hover,.choice[aria-pressed=true]{border-color:#c7ff78;background:#21331d}.choice strong{display:block}.choice small{display:block;margin-top:5px;color:#a7b5a8}.primary{background:#c7ff78;color:#12200e;border:0;border-radius:10px;padding:16px 22px;font-weight:800;margin-top:25px}.primary:focus-visible,.choice:focus-visible,input:focus-visible{outline:3px solid #fff;outline-offset:3px}.secondary{background:transparent;color:#e9f2e8;border:1px solid #536954;border-radius:10px;padding:15px 20px;margin:25px 0 0 12px}.progress{height:4px;background:#2c3e2e;border-radius:8px;margin:0 0 30px}.progress div{height:100%;background:#c7ff78;transition:width .2s}.report{white-space:pre-wrap;line-height:1.7;padding:22px;border:1px solid #425942;background:#111b14;border-radius:12px;overflow-wrap:anywhere}.error{color:#ffb1a5;min-height:1.4em}footer{border-top:1px solid #2a392b;color:#829385;font:11px ui-monospace,monospace}@media(max-width:600px){header,main,footer{padding:18px}main{padding-top:32px}.status{font-size:9px}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090e0b">
+  <meta name="description" content="Dead Drop Agency — a two-person classified creative mission. Combine private product and audience intelligence to create a campaign dossier.">
+  <title>Dead Drop Agency — The Classified Creative Studio</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js" defer></script>
 </head>
 <body>
-<header><div class="brand">DEAD DROP<span>.</span></div><div class="status">● SYSTEM ONLINE · DEMO</div></header>
-<main><div class="eyebrow" id="stage">01 / 04 — THE MISSION</div><div class="progress" aria-label="Mission progress"><div id="progress" style="width:25%"></div></div><section id="screen" aria-live="polite"></section></main>
-<footer>DEAD DROP AGENCY / EXPERIMENTAL BUILD · NO ACCOUNT REQUIRED · NO DATA SENT TO A SERVER</footer>
-<script>
-'use strict';
-const state={step:0,brand:'',offer:'',audience:'',objective:'',style:'',channel:''};
-const options={
- objective:[['awareness','Build brand awareness','Make the brand memorable'],['leads','Generate qualified leads','Turn attention into conversations'],['launch','Launch a product','Create a compelling introduction']],
- style:[['mystery','Cinematic mystery','Intrigue, atmosphere, reveal'],['bold','Bold disruption','Unexpected and confident'],['human','Human connection','Authentic and empathetic']],
- channel:[['social','Social campaign','A three-part content sequence'],['video','Short-form video','A 20-second story'],['landing','Interactive landing','A participatory conversion journey']]
-};
-const screen=document.getElementById('screen');
-function el(tag,txt,cls){const n=document.createElement(tag);if(txt!==undefined)n.textContent=txt;if(cls)n.className=cls;return n}
-function add(tag,txt,cls,parent=screen){const n=el(tag,txt,cls);parent.append(n);return n}
-function heading(k,title,desc){add('div',k,'eyebrow');add('h1',title);add('p',desc)}
-function field(label,key,placeholder){const l=add('label',label,'field');const i=el('input');i.placeholder=placeholder;i.maxLength=140;i.value=state[key];i.addEventListener('input',()=>state[key]=i.value);l.append(i)}
-function button(label,handler,cls='primary'){const b=add('button',label,cls);b.type='button';b.addEventListener('click',handler);return b}
-function pick(key){const group=add('div',undefined,'grid');for(const [id,title,desc] of options[key]){const b=el('button',undefined,'choice');b.type='button';b.setAttribute('aria-pressed',String(state[key]===id));b.append(el('strong',title),el('small',desc));b.addEventListener('click',()=>{state[key]=id;render()});group.append(b)}}
-function next(){const required=[['brand','offer','audience'],['objective'],['style'],['channel']][state.step];if(required.some(k=>!state[k].trim())){document.getElementById('error').textContent='Complete the fields or select an option to continue.';return}state.step++;render()}
-function dossier(){
- const hook={mystery:'Something is hiding in plain sight.',bold:'The category has rules. We are here to break one.',human:'The best stories begin with something real.'}[state.style];
- const angle={awareness:'Introduce a memorable brand symbol.',leads:'Use an interactive challenge before the call to action.',launch:'Create a reveal that makes the product the answer.'}[state.objective];
- const format={social:'Three posts: hook → reveal → invitation.',video:'20 seconds: hook → tension → reveal → action.',landing:'Hero challenge → choice → personalized reveal → action.'}[state.channel];
- return ['DEAD DROP AGENCY — CREATIVE DOSSIER','','BRAND: '+state.brand,'OFFER: '+state.offer,'AUDIENCE: '+state.audience,'OBJECTIVE: '+state.objective,'','CAMPAIGN: THE SIGNAL','','BIG IDEA','Turn a conventional marketing message into a discovery mission. Invite '+state.audience+' to participate before presenting '+state.offer+'.','','OPENING HOOK',hook,'','CREATIVE DIRECTION',angle,'','EXECUTION',format,'','VALIDATION','Compare against a direct-response control and measure qualified actions.','','STATUS: CONCEPT DRAFT — NOT A PERFORMANCE PREDICTION'].join('\n')
-}
-function render(){
- screen.replaceChildren();document.getElementById('progress').style.width=(state.step===4?100:(state.step+1)*25)+'%';document.getElementById('stage').textContent=['01 / 04 — THE MISSION','02 / 04 — OBJECTIVE','03 / 04 — CREATIVE DNA','04 / 04 — DEPLOYMENT','MISSION COMPLETE'][state.step];
- if(state.step===0){heading('INCOMING TRANSMISSION','Ordinary ads are dead. Build the unexpected.','Turn a real business challenge into a campaign concept. Four steps. One classified dossier.');field('BRAND NAME','brand','e.g. Northstar Coffee');field('PRODUCT OR SERVICE','offer','e.g. Specialty coffee subscription');field('TARGET AUDIENCE','audience','e.g. Remote workers in cities')}
- if(state.step===1){heading('MISSION CONTROL','What must this campaign achieve?','Select the primary business objective.');pick('objective')}
- if(state.step===2){heading('CREATIVE INTELLIGENCE','Choose your creative DNA.','Pick the creative world that best fits your campaign.');pick('style')}
- if(state.step===3){heading('DEPLOYMENT','Where should the signal launch?','Choose the first campaign format.');pick('channel')}
- if(state.step<4){button('Continue →',next);add('div','','error').id='error'}
- else{heading('✓ INTELLIGENCE PACKAGE READY','Operation: The Signal','Your first creative concept. It is a starting point, not an AI-generated performance forecast.');add('div',dossier(),'report');button('Copy dossier',async()=>{try{await navigator.clipboard.writeText(dossier());alert('Dossier copied')}catch{alert('Copy unavailable; select and copy the dossier manually.')} });button('Start new mission',()=>{Object.assign(state,{step:0,brand:'',offer:'',audience:'',objective:'',style:'',channel:''});render()},'secondary')}
-}
-render();
-</script>
-</body></html>
+  <div class="page-glow" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="logo" href="../../" aria-label="Impossible Ventures portfolio">
+      <span class="logo-glyph" aria-hidden="true">D<span>·</span></span>
+      <span class="logo-copy"><strong>DEAD DROP</strong><small>CREATIVE INTELLIGENCE</small></span>
+    </a>
+    <div class="topbar-center"><span class="pulse-dot" aria-hidden="true"></span> CLASSIFIED CREATIVE OPERATIONS</div>
+    <div class="topbar-right">
+      <span id="serverState" class="connection-label">CHECKING CONNECTION</span>
+      <button id="resetButton" class="header-button" type="button">NEW OPERATION <span aria-hidden="true">↗</span></button>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <aside class="rail">
+      <div class="rail-heading">MISSION SEQUENCE <span>001</span></div>
+      <ol class="rail-steps" aria-label="Mission progress">
+        <li class="active" id="nav-brief"><span class="rail-number">01</span><span><strong>THE BRIEF</strong><small>Classify the mission</small></span></li>
+        <li id="nav-partner"><span class="rail-number">02</span><span><strong>THE PARTNER</strong><small>Combine intelligence</small></span></li>
+        <li id="nav-signal"><span class="rail-number">03</span><span><strong>SIGNAL EXCHANGE</strong><small>Limited transmissions</small></span></li>
+        <li id="nav-dossier"><span class="rail-number">04</span><span><strong>FINAL DOSSIER</strong><small>Concept and validation</small></span></li>
+      </ol>
+      <div class="rail-divider"></div>
+      <div class="rail-footnote"><span class="mono accent">// PROTOCOL 007</span><p>The best ideas come from information no single person possesses alone.</p></div>
+      <div class="rail-version">DDA / EXPERIMENTAL ALPHA<br>NO LIVE AI MODEL</div>
+    </aside>
+
+    <main class="main-stage">
+      <div class="stage-topline"><span id="stageIndex">MISSION / READY</span><span id="roomIndicator">ENCRYPTED ROLES · NO ACCOUNT</span></div>
+      <div id="appRoot" class="app-content" aria-live="polite"></div>
+    </main>
+
+    <aside class="handler">
+      <div class="handler-top"><span class="mono eyebrow">INTELLIGENCE CHANNEL</span><span class="handler-indicator">● LIVE GUIDE</span></div>
+      <div class="handler-portrait" aria-hidden="true">
+        <div class="orbital orbital-one"></div><div class="orbital orbital-two"></div>
+        <div class="portrait-symbol">S</div>
+        <div class="portrait-glow"></div>
+      </div>
+      <div class="handler-name">MISS SALT<span class="accent">_</span></div>
+      <p class="handler-title">Your mission controller</p>
+      <div class="handler-quote">
+        <span class="mono accent">INCOMING TRANSMISSION</span>
+        <p id="handlerMessage">Welcome, Agent. Two different perspectives. One exceptional campaign. Your mission starts here.</p>
+      </div>
+      <div class="handler-bottom"><span class="pulse-dot" aria-hidden="true"></span> INTELLIGENCE FEED ACTIVE</div>
+    </aside>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <footer class="legal-strip">
+    <span>DEAD DROP AGENCY © 2026 · AN IMPOSSIBLE VENTURES EXPERIMENT</span>
+    <span>RESEARCH PROTOTYPE · USER-SUPPLIED CLAIMS ARE UNVERIFIED</span>
+  </footer>
+</body>
+</html>

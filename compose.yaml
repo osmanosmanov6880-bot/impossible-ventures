@@ -1,0 +1,14 @@
+services:
+  impossible-ventures:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: "3000"
+      DB_PATH: /data/missions.sqlite
+    volumes:
+      - mission-data:/data
+    restart: unless-stopped
+
+volumes:
+  mission-data:
