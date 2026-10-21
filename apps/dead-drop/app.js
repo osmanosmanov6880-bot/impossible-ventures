@@ -138,8 +138,8 @@ function modeCard(icon, title, description, action, disabled = false, wide = fal
   return '<button type="button" class="mode-card' + (wide ? ' mode-card-wide secondary' : '') +
     '" data-action="' + action + '"' + (disabled ? ' disabled' : '') + '>' +
     '<span class="mode-icon" aria-hidden="true">' + icon + '</span>' +
-    '<span><span class="mode-title" style="display:block">' + title + '</span>' +
-    '<span class="mode-description" style="display:block">' + description + '</span></span>' +
+    '<span><span class="mode-title">' + title + '</span>' +
+    '<span class="mode-description">' + description + '</span></span>' +
     '<span class="mode-arrow">ENTER PROTOCOL ↗</span></button>';
 }
 
@@ -189,7 +189,7 @@ function renderHost() {
     '<h1 class="screen-heading">Define the<br><span class="gradient-text">operation.</span></h1>' +
     '<p class="subheading">Your partner will not see your confidential product notes until the final dossier. Only share information you have permission to use.</p>' +
     '<form id="hostForm"><div class="fields">' +
-    '<div class="fields two-column" style="margin-top:0">' +
+    '<div class="fields two-column">' +
     field('BRAND / ORGANIZATION', 'brand', 'Northstar Coffee', { max: 100 }) +
     field('WHAT ARE WE PROMOTING?', 'product', 'Specialty coffee subscription') + '</div>' +
     field('EVIDENCE TO SUPPORT THE CLAIM', 'proof', 'Verified example, demonstration or measured customer outcome', { max: 220, type: 'textarea', hint: 'Evidence is user-supplied and will be marked unverified.' }) +
