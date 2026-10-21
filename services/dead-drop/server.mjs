@@ -1,0 +1,326 @@
+import { createServer } from 'node:http';
+import { randomBytes, createHash, timingSafeEqual } from 'node:crypto';
+import { DatabaseSync } from 'node:sqlite';
+import { createReadStream, existsSync, mkdirSync, statSync } from 'node:fs';
+import { dirname, extname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+const CURRENT_FILE = fileURLToPath(import.meta.url);
+const ROOM_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const MAX_MESSAGES = 3;
+const MAX_ROOM_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+class ApiError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.status = status;
+  }
+}
+
+function requiredText(value, label, limit = 180) {
+  if (typeof value !== 'string') throw new ApiError(400, label + ' is required');
+  const normalized = value.trim().replace(/\s+/g, ' ');
+  if (normalized.length < 3 || normalized.length > limit) {
+    throw new ApiError(400, label + ' must be 3–' + limit + ' characters');
+  }
+  return normalized;
+}
+
+function enumValue(value, allowed, label) {
+  if (!allowed.includes(value)) throw new ApiError(400, 'Invalid ' + label);
+  return value;
+}
+
+function newRoom() {
+  const bytes = randomBytes(8);
+  return Array.from(bytes, byte => ROOM_ALPHABET[byte % ROOM_ALPHABET.length]).join('');
+}
+
+function newToken() {
+  return randomBytes(32).toString('base64url');
+}
+
+function tokenDigest(token) {
+  return createHash('sha256').update(token).digest();
+}
+
+function matchesToken(supplied, storedHex) {
+  if (typeof supplied !== 'string' || !storedHex || supplied.length > 128) return false;
+  const expected = Buffer.from(storedHex, 'hex');
+  const actual = tokenDigest(supplied);
+  return expected.length === actual.length && timingSafeEqual(actual, expected);
+}
+
+function sessionView(mission, role) {
+  const messages = mission.messages.map(entry => ({
+    role: entry.role,
+    text: entry.text,
+    at: entry.at
+  }));
+  return {
+    code: mission.code,
+    brand: mission.host.brand,
+    objective: mission.host.objective,
+    status: mission.status,
+    role,
+    joined: Boolean(mission.guest),
+    ownIntel: role === 'product'
+      ? {
+          product: mission.host.product,
+          proof: mission.host.proof
+        }
+      : {
+          audience: mission.guest.audience,
+          friction: mission.guest.friction,
+          channel: mission.guest.channel
+        },
+    messages,
+    quota: {
+      used: mission.messages.filter(m => m.role === role).length,
+      max: MAX_MESSAGES,
+      partnerUsed: mission.messages.filter(m => m.role !== role).length
+    },
+    createdAt: mission.createdAt,
+    dossier: mission.status === 'finalized' ? mission.dossier : null
+  };
+}
+
+function buildDossier(mission) {
+  const host = mission.host;
+  const guest = mission.guest;
+  const productSignal = mission.messages.find(m => m.role === 'product');
+  const audienceSignal = mission.messages.find(m => m.role === 'audience');
+  const channelLabel = { social: 'social sequence', video: 'short-form film', landing: 'interactive landing experience' }[guest.channel];
+  const action = { awareness: 'Discover the story', leads: 'Request the briefing', launch: 'See what is new' }[host.objective];
+  return {
+    campaign: 'OPERATION / THE UNSENT SIGNAL',
+    brand: host.brand,
+    audience: guest.audience,
+    openingHook: 'What if the answer to ' + guest.friction + ' was closer than you thought?',
+    concept: 'Turn a familiar tension for ' + guest.audience + ' into a mystery. The audience chooses whether to decode the message before discovering ' + host.product + ' from ' + host.brand + '.',
+    execution: 'Build a ' + channelLabel + ' in three beats: interruption, audience choice, and evidence-led reveal.',
+    storyboard: [
+      { beat: '01 / INTERCEPT', direction: 'Open with the real audience tension: ' + guest.friction + '.' },
+      { beat: '02 / DECISION', direction: 'Offer two short choices that expose what the audience values. Avoid asking for personal data.' },
+      { beat: '03 / REVEAL', direction: 'Introduce ' + host.product + ' as a possible response; support the claim only with verified evidence.' }
+    ],
+    callToAction: action,
+    evidenceToVerify: host.proof,
+    interceptedSignals: {
+      productAgent: productSignal ? productSignal.text : '',
+      audienceAgent: audienceSignal ? audienceSignal.text : ''
+    },
+    validation: 'Compare this concept with a direct-response control. Measure qualified actions and repeat engagement, not just clicks.',
+    disclosure: 'Creative hypothesis only. Product evidence is user-supplied and has not been independently verified. No live AI model was used.'
+  };
+}
+
+function saveMission(db, mission) {
+  db.prepare('INSERT INTO missions (code, created_at, payload) VALUES (?, ?, ?) ON CONFLICT(code) DO UPDATE SET payload = excluded.payload')
+    .run(mission.code, mission.createdAt, JSON.stringify(mission));
+}
+
+function loadMission(db, code, now) {
+  const row = db.prepare('SELECT payload FROM missions WHERE code = ?').get(code);
+  if (!row) throw new ApiError(404, 'Mission not found');
+  const mission = JSON.parse(row.payload);
+  if (now() - mission.createdAt > MAX_ROOM_AGE_MS) {
+    db.prepare('DELETE FROM missions WHERE code = ?').run(code);
+    throw new ApiError(410, 'Mission expired');
+  }
+  return mission;
+}
+
+function authorizedRole(request, mission) {
+  const header = request.headers.authorization || '';
+  if (!header.startsWith('Bearer ')) throw new ApiError(401, 'Agent token required');
+  const token = header.slice(7);
+  if (matchesToken(token, mission.hostTokenHash)) return 'product';
+  if (matchesToken(token, mission.guestTokenHash)) return 'audience';
+  throw new ApiError(403, 'Agent token invalid');
+}
+
+async function jsonBody(request) {
+  if (!(request.headers['content-type'] || '').toLowerCase().startsWith('application/json')) {
+    throw new ApiError(415, 'JSON content type required');
+  }
+  let size = 0;
+  const chunks = [];
+  for await (const chunk of request) {
+    size += chunk.length;
+    if (size > 16_384) throw new ApiError(413, 'Request too large');
+    chunks.push(chunk);
+  }
+  try {
+    const data = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Not an object');
+    return data;
+  } catch {
+    throw new ApiError(400, 'Invalid JSON object');
+  }
+}
+
+const STATIC_FILES = new Map([
+  ['/', 'index.html'],
+  ['/apps/dead-drop/', 'apps/dead-drop/index.html'],
+  ['/apps/dead-drop/index.html', 'apps/dead-drop/index.html'],
+  ['/apps/dead-drop/app.js', 'apps/dead-drop/app.js'],
+  ['/apps/dead-drop/style.css', 'apps/dead-drop/style.css'],
+  ['/apps/appeal-2049/', 'apps/appeal-2049/index.html'],
+  ['/apps/appeal-2049/index.html', 'apps/appeal-2049/index.html']
+]);
+
+function sendJSON(response, status, payload) {
+  const text = JSON.stringify(payload);
+  response.writeHead(status, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
+    'Content-Length': Buffer.byteLength(text)
+  });
+  response.end(text);
+}
+
+function sendStatic(response, pathname) {
+  const filename = STATIC_FILES.get(pathname);
+  if (!filename) throw new ApiError(404, 'Page not found');
+  const path = resolve(ROOT, filename);
+  if (!existsSync(path)) throw new ApiError(404, 'Page not found');
+  const mime = {
+    '.html': 'text/html; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.js': 'text/javascript; charset=utf-8'
+  }[extname(path)] || 'application/octet-stream';
+  if (pathname.startsWith('/apps/dead-drop/')) {
+    response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
+  }
+  response.writeHead(200, {
+    'Content-Type': mime,
+    'Content-Length': statSync(path).size,
+    'Cache-Control': 'no-cache'
+  });
+  createReadStream(path).pipe(response);
+}
+
+function throttle(map, request, now) {
+  const ip = request.socket.remoteAddress || 'unknown';
+  const current = now();
+  const existing = map.get(ip);
+  const entry = existing && current - existing.window < 60_000 ? existing : { window: current, count: 0 };
+  entry.count += 1;
+  map.set(ip, entry);
+  if (map.size > 5000) {
+    for (const [key, value] of map) {
+      if (current - value.window > 60_000) map.delete(key);
+    }
+  }
+  if (entry.count > 90) throw new ApiError(429, 'Request limit exceeded; retry later');
+}
+
+export function createApp({ dbPath = process.env.DB_PATH || join(ROOT, 'data', 'missions.sqlite'), now = Date.now } = {}) {
+  if (dbPath !== ':memory:') mkdirSync(dirname(resolve(dbPath)), { recursive: true });
+  const db = new DatabaseSync(dbPath);
+  db.exec('PRAGMA journal_mode = WAL; CREATE TABLE IF NOT EXISTS missions (code TEXT PRIMARY KEY, created_at INTEGER NOT NULL, payload TEXT NOT NULL);');
+  const requestsByIP = new Map();
+  const server = createServer(async (request, response) => {
+    response.setHeader('X-Content-Type-Options', 'nosniff');
+    response.setHeader('Referrer-Policy', 'no-referrer');
+    response.setHeader('X-Frame-Options', 'DENY');
+    response.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    try {
+      const url = new URL(request.url || '/', 'http://localhost');
+      const pathname = url.pathname;
+      if (request.method === 'GET' && pathname === '/api/v1/health') {
+        return sendJSON(response, 200, { ok: true, service: 'dead-drop', mode: 'cooperative', persistent: dbPath !== ':memory:' });
+      }
+      if (pathname.startsWith('/api/')) {
+        if (request.method === 'POST') throttle(requestsByIP, request, now);
+        if (pathname === '/api/v1/missions' && request.method === 'POST') {
+          const body = await jsonBody(request);
+          const host = {
+            brand: requiredText(body.brand, 'Brand', 100),
+            product: requiredText(body.product, 'Product', 160),
+            proof: requiredText(body.proof, 'Evidence', 220),
+            objective: enumValue(body.objective, ['awareness', 'leads', 'launch'], 'objective')
+          };
+          const token = newToken();
+          let code;
+          do { code = newRoom(); } while (db.prepare('SELECT 1 FROM missions WHERE code = ?').get(code));
+          const mission = {
+            code, createdAt: now(), status: 'waiting',
+            host, guest: null, messages: [], dossier: null,
+            hostTokenHash: tokenDigest(token).toString('hex'),
+            guestTokenHash: null
+          };
+          saveMission(db, mission);
+          return sendJSON(response, 201, { code, token, mission: sessionView(mission, 'product') });
+        }
+        const match = /^\/api\/v1\/missions\/([A-Z2-9]{8})(?:\/(join|messages|finalize))?$/.exec(pathname);
+        if (!match) throw new ApiError(404, 'API route not found');
+        const mission = loadMission(db, match[1], now);
+        const action = match[2];
+        if (request.method === 'POST' && action === 'join') {
+          if (mission.guest || mission.status === 'finalized') throw new ApiError(409, 'Mission already has two agents');
+          const body = await jsonBody(request);
+          mission.guest = {
+            audience: requiredText(body.audience, 'Audience', 160),
+            friction: requiredText(body.friction, 'Audience tension', 220),
+            channel: enumValue(body.channel, ['social', 'video', 'landing'], 'channel')
+          };
+          const token = newToken();
+          mission.guestTokenHash = tokenDigest(token).toString('hex');
+          mission.status = 'active';
+          saveMission(db, mission);
+          return sendJSON(response, 201, { code: mission.code, token, mission: sessionView(mission, 'audience') });
+        }
+        const role = authorizedRole(request, mission);
+        if (!action && request.method === 'GET') {
+          return sendJSON(response, 200, { mission: sessionView(mission, role) });
+        }
+        if (action === 'messages' && request.method === 'POST') {
+          if (!mission.guest) throw new ApiError(409, 'Waiting for second agent');
+          if (mission.status !== 'active') throw new ApiError(409, 'Mission is closed');
+          const used = mission.messages.filter(m => m.role === role).length;
+          if (used >= MAX_MESSAGES) throw new ApiError(409, 'Transmission quota exhausted');
+          const body = await jsonBody(request);
+          const text = requiredText(body.text, 'Transmission', 280);
+          mission.messages.push({ role, text, at: now() });
+          saveMission(db, mission);
+          return sendJSON(response, 201, { mission: sessionView(mission, role) });
+        }
+        if (action === 'finalize' && request.method === 'POST') {
+          if (!mission.guest || mission.status !== 'active') throw new ApiError(409, 'Mission is not active');
+          if (!mission.messages.some(m => m.role === 'product') || !mission.messages.some(m => m.role === 'audience')) {
+            throw new ApiError(409, 'Both agents must transmit at least once');
+          }
+          mission.status = 'finalized';
+          mission.dossier = buildDossier(mission);
+          saveMission(db, mission);
+          return sendJSON(response, 200, { mission: sessionView(mission, role) });
+        }
+        throw new ApiError(405, 'Method not allowed');
+      }
+      if (request.method !== 'GET' && request.method !== 'HEAD') throw new ApiError(405, 'Method not allowed');
+      return sendStatic(response, pathname);
+    } catch (error) {
+      const status = error instanceof ApiError ? error.status : 500;
+      if (status === 500) console.error('Dead Drop internal error:', error);
+      if (!response.headersSent) sendJSON(response, status, { error: status === 500 ? 'Internal server error' : error.message });
+      else response.destroy();
+    }
+  });
+  return { server, db, close: () => { server.close(); db.close(); } };
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === resolve(CURRENT_FILE)) {
+  const app = createApp();
+  const port = Number(process.env.PORT || 3000);
+  app.server.listen(port, '0.0.0.0', () => {
+    console.log('Dead Drop cooperative server listening on http://localhost:' + port);
+  });
+  const shutdown = () => {
+    app.server.close(() => { app.db.close(); process.exit(0); });
+  };
+  process.once('SIGINT', shutdown);
+  process.once('SIGTERM', shutdown);
+}
