@@ -326,9 +326,11 @@ function renderRoom() {
     (mission.joined ? 'EVERY WORD COUNTS' : 'AWAITING SECOND AGENT') +
     '</span><button class="btn btn-small btn-primary" type="submit"' +
     (canTransmit ? '' : ' disabled') + '>TRANSMIT ↗</button></div><div class="form-error" role="alert"></div></form></section></div>' +
-    (state.mode === 'live' && state.aiAvailable && canFinalize ?
-      '<div class="ai-optin"><label class="ai-optin-inner"><input type="checkbox" id="aiConsent" ' + (state.aiConsent ? 'checked' : '') + '>' +
-      '<span><strong>OPTIONAL AI CREATIVE REFINEMENT</strong><small>Only when enabled, your private product and audience details are sent to the OpenAI API for creative refinement. The result is not fact-checked. Default: off.</small></span></label></div>' : '') +
+    (state.mode === 'live' && state.aiAvailable && mission.joined ?
+      '<div class="ai-optin"><label class="ai-optin-inner"><input type="checkbox" id="aiConsent" ' + (mission.aiConsent?.self ? 'checked' : '') + '>' +
+      '<span><strong>OPTIONAL AI CREATIVE REFINEMENT</strong><small>Private mission intelligence will be shared with the OpenAI API ONLY if BOTH agents independently opt in. Either agent can withdraw consent before finalization. The result is not fact-checked.</small></span></label>' +
+      '<div class="ai-consent-state">YOUR CONSENT: ' + (mission.aiConsent?.self ? 'GRANTED' : 'OFF') +
+      ' · PARTNER CONSENT: ' + (mission.aiConsent?.partner ? 'GRANTED' : 'OFF') + '</div></div>' : '') +
     '<div class="room-actions"><button type="button" class="btn btn-primary" data-action="finalize"' +
     (canFinalize ? '' : ' disabled') + '>DECODE THE CREATIVE DOSSIER ↗</button><small>' +
     (canFinalize ? 'Both agents have transmitted. Your dossier is ready.' :
@@ -482,7 +484,7 @@ root.addEventListener('click', event => {
       m.status = 'finalized';
     } else {
       const result = await api('/missions/' + state.room + '/finalize', 'POST', {
-        ai: state.aiAvailable && state.aiConsent,
+        ai: state.aiAvailable && Boolean(state.mission?.aiConsent?.self && state.mission?.aiConsent?.partner),
         language: state.locale
       });
       state.mission = result.mission;
@@ -513,7 +515,14 @@ root.addEventListener('click', event => {
 });
 
 root.addEventListener('change', event => {
-  if (event.target && event.target.id === 'aiConsent') state.aiConsent = event.target.checked;
+  if (event.target && event.target.id === 'aiConsent' && state.mode === 'live' && state.room) {
+    const allow = event.target.checked;
+    withBusy(async () => {
+      const result = await api('/missions/' + state.room + '/ai-consent', 'POST', { allow });
+      state.mission = result.mission;
+      render();
+    });
+  }
 });
 
 document.getElementById('resetButton').addEventListener('click', clearMission);
