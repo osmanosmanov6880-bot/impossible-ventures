@@ -97,7 +97,7 @@ function buildDossier(mission) {
     campaign: 'OPERATION / THE UNSENT SIGNAL',
     brand: host.brand,
     audience: guest.audience,
-    openingHook: 'What if the answer to ' + guest.friction + ' was closer than you thought?',
+    openingHook: 'THE STATUS QUO — ' + guest.friction.replace(/[.!?]+$/, '') + '. What would a better alternative look like?',
     concept: 'Turn a familiar tension for ' + guest.audience + ' into a mystery. The audience chooses whether to decode the message before discovering ' + host.product + ' from ' + host.brand + '.',
     execution: 'Build a ' + channelLabel + ' in three beats: interruption, audience choice, and evidence-led reveal.',
     storyboard: [
