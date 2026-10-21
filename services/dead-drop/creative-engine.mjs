@@ -54,7 +54,7 @@ function cleanText(value, label, limit = 700) {
   return text;
 }
 
-export function validateCreativeResponse(value, draft) {
+export function validateCreativeResponse(value, draft, language = 'en') {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error('AI response must be an object');
   }
@@ -83,7 +83,12 @@ export function validateCreativeResponse(value, draft) {
     interceptedSignals: draft.interceptedSignals,
     campaign: draft.campaign,
     generationMethod: 'ai-assisted',
-    disclosure: 'AI-assisted creative hypothesis. Product evidence and model output are unverified; a human must review all claims, targeting and compliance before publishing.'
+    outputLanguage: language,
+    disclosure: {
+      en: 'AI-assisted creative hypothesis. Product evidence and model output are unverified; a human must review all claims, targeting and compliance before publishing.',
+      ru: 'Черновая креативная гипотеза с помощью ИИ. Данные о продукте и результат модели не проверены. Перед публикацией человек должен проверить факты, аудиторию и соответствие требованиям.',
+      zh: '这是 AI 辅助的创意假设。产品证据与模型结果均未经核实，发布前必须由人工审查宣传主张、受众定位和合规性。'
+    }[language] || 'AI-assisted creative hypothesis requiring human fact-checking.'
   };
 }
 
@@ -158,5 +163,5 @@ export async function refineDossier({
   let parsed;
   try { parsed = JSON.parse(output); }
   catch { throw new Error('AI output was not valid JSON'); }
-  return validateCreativeResponse(parsed, draft);
+  return validateCreativeResponse(parsed, draft, language);
 }
