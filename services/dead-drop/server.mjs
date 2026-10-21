@@ -67,6 +67,10 @@ function sessionView(mission, role) {
     status: mission.status,
     role,
     joined: Boolean(mission.guest),
+    aiConsent: {
+      self: Boolean(mission.aiConsent?.[role]),
+      partner: Boolean(mission.aiConsent?.[role === 'product' ? 'audience' : 'product'])
+    },
     ownIntel: role === 'product'
       ? {
           product: mission.host.product,
@@ -128,6 +132,7 @@ function loadMission(db, code, now) {
   const row = db.prepare('SELECT payload FROM missions WHERE code = ?').get(code);
   if (!row) throw new ApiError(404, 'Mission not found');
   const mission = JSON.parse(row.payload);
+  if (!mission.aiConsent) mission.aiConsent = { product: false, audience: false };
   if (now() - mission.createdAt > MAX_ROOM_AGE_MS) {
     db.prepare('DELETE FROM missions WHERE code = ?').run(code);
     throw new ApiError(410, 'Mission expired');
@@ -263,13 +268,14 @@ export function createApp({
           const mission = {
             code, createdAt: now(), status: 'waiting',
             host, guest: null, messages: [], dossier: null,
+            aiConsent: { product: false, audience: false },
             hostTokenHash: tokenDigest(token).toString('hex'),
             guestTokenHash: null
           };
           saveMission(db, mission);
           return sendJSON(response, 201, { code, token, mission: sessionView(mission, 'product') });
         }
-        const match = /^\/api\/v1\/missions\/([A-Z2-9]{8})(?:\/(join|messages|finalize))?$/.exec(pathname);
+        const match = /^\/api\/v1\/missions\/([A-Z2-9]{8})(?:\/(join|messages|finalize|ai-consent))?$/.exec(pathname);
         if (!match) throw new ApiError(404, 'API route not found');
         let mission = loadMission(db, match[1], now);
         const action = match[2];
@@ -295,6 +301,18 @@ export function createApp({
         if (!action && request.method === 'GET') {
           return sendJSON(response, 200, { mission: sessionView(mission, role) });
         }
+        if (action === 'ai-consent' && request.method === 'POST') {
+          const body = await jsonBody(request);
+          if (typeof body.allow !== 'boolean') throw new ApiError(400, 'Consent must be true or false');
+          mission = loadMission(db, match[1], now);
+          const currentRole = authorizedRole(request, mission);
+          if (!mission.guest || mission.status !== 'active' || finalizing.has(mission.code)) {
+            throw new ApiError(409, 'Mission cannot accept consent updates');
+          }
+          mission.aiConsent[currentRole] = body.allow;
+          saveMission(db, mission);
+          return sendJSON(response, 200, { mission: sessionView(mission, currentRole) });
+        }
         if (action === 'messages' && request.method === 'POST') {
           const body = await jsonBody(request);
           const text = requiredText(body.text, 'Transmission', 280);
@@ -319,6 +337,12 @@ export function createApp({
           if (!mission.guest || mission.status !== 'active') throw new ApiError(409, 'Mission is not active');
           if (!mission.messages.some(m => m.role === 'product') || !mission.messages.some(m => m.role === 'audience')) {
             throw new ApiError(409, 'Both agents must transmit at least once');
+          }
+          if (body.ai === true) {
+            if (!aiAvailable) throw new ApiError(409, 'AI is not configured');
+            if (!(mission.aiConsent.product && mission.aiConsent.audience)) {
+              throw new ApiError(409, 'Both agents must explicitly consent to AI processing');
+            }
           }
           if (finalizing.has(mission.code)) throw new ApiError(409, 'Finalization already in progress');
           finalizing.add(mission.code);
