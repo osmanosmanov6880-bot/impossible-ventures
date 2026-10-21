@@ -1,0 +1,35 @@
+name: Browser integration
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  browsers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned browser testing tools
+        run: npm install --no-save --package-lock=false playwright@1.55.0
+      - name: Install Chromium for CI
+        run: npx playwright install --with-deps chromium
+      - name: Test live two-agent and training experiences
+        run: node --test services/dead-drop/browser.test.mjs
+      - name: Upload desktop and mobile snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dead-drop-browser-screenshots
+          path: artifacts/
+          if-no-files-found: ignore
