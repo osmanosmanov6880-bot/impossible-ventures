@@ -37,6 +37,10 @@ const agentNames = {
   audience: 'AGENT ECHO'
 };
 
+function t(value) {
+  return window.DeadDropLocale ? window.DeadDropLocale.translate(value) : value;
+}
+
 function safe(value) {
   return String(value === undefined || value === null ? '' : value)
     .replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
@@ -172,7 +176,7 @@ function field(label, name, placeholder, options = {}) {
   const hint = options.hint ? '<small>' + safe(options.hint) + '</small>' : '';
   if (options.items) {
     return '<div class="field"><label for="' + name + '">' + label + '</label><select id="' + name + '" name="' + name + '" required>' +
-      options.items.map(item => '<option value="' + safe(item[0]) + '">' + safe(item[1]) + '</option>').join('') +
+      options.items.map(item => '<option value="' + safe(item[0]) + '">' + safe(t(item[1])) + '</option>').join('') +
       '</select>' + hint + '</div>';
   }
   const limit = Number(options.max || 160);
@@ -281,8 +285,8 @@ function renderRoom() {
   const isProduct = mission.role === 'product';
   const title = isProduct ? 'PRODUCT INTELLIGENCE' : 'AUDIENCE INTELLIGENCE';
   const intel = isProduct
-    ? [['THE PRODUCT', mission.ownIntel.product], ['EVIDENCE TO VERIFY', mission.ownIntel.proof], ['CAMPAIGN OBJECTIVE', objectiveLabels[mission.objective]]]
-    : [['THE AUDIENCE', mission.ownIntel.audience], ['THE FRICTION', mission.ownIntel.friction], ['CHANNEL', channelLabels[mission.ownIntel.channel]]];
+    ? [['THE PRODUCT', mission.ownIntel.product], ['EVIDENCE TO VERIFY', mission.ownIntel.proof], ['CAMPAIGN OBJECTIVE', t(objectiveLabels[mission.objective])]]
+    : [['THE AUDIENCE', mission.ownIntel.audience], ['THE FRICTION', mission.ownIntel.friction], ['CHANNEL', t(channelLabels[mission.ownIntel.channel])]];
   const countProduct = mission.messages.filter(m => m.role === 'product').length;
   const countAudience = mission.messages.filter(m => m.role === 'audience').length;
   const canFinalize = mission.joined && countProduct > 0 && countAudience > 0;
@@ -301,7 +305,7 @@ function renderRoom() {
   return '<div class="room-head"><div><div class="eyebrow">' +
     (state.mode === 'training' ? 'TRAINING OPERATION / TWO ROLES' : 'PRIVATE ROLE ROOM / TWO AGENTS') +
     '</div><h1>' + safe(agentNames[mission.role]) + '<span class="accent">_</span></h1><p>' +
-    safe(mission.brand) + ' · ' + safe(objectiveLabels[mission.objective]) +
+    safe(mission.brand) + ' · ' + safe(t(objectiveLabels[mission.objective])) +
     '<br>' + (mission.joined ? 'Both operatives are in position.' : 'Waiting for Agent Echo to join.') +
     '</p></div><div class="room-code"><span class="micro-label">OPERATION CODE</span><strong>' +
     safe(mission.code) + '</strong>' +
@@ -329,8 +333,8 @@ function renderRoom() {
     (state.mode === 'live' && state.aiAvailable && mission.joined ?
       '<div class="ai-optin"><label class="ai-optin-inner"><input type="checkbox" id="aiConsent" ' + (mission.aiConsent?.self ? 'checked' : '') + '>' +
       '<span><strong>OPTIONAL AI CREATIVE REFINEMENT</strong><small>Private mission intelligence will be shared with the OpenAI API ONLY if BOTH agents independently opt in. Either agent can withdraw consent before finalization. The result is not fact-checked.</small></span></label>' +
-      '<div class="ai-consent-state">YOUR CONSENT: ' + (mission.aiConsent?.self ? 'GRANTED' : 'OFF') +
-      ' · PARTNER CONSENT: ' + (mission.aiConsent?.partner ? 'GRANTED' : 'OFF') + '</div></div>' : '') +
+      '<div class="ai-consent-state"><span>YOUR CONSENT</span>: <span>' + (mission.aiConsent?.self ? 'GRANTED' : 'OFF') +
+      '</span> · <span>PARTNER CONSENT</span>: <span>' + (mission.aiConsent?.partner ? 'GRANTED' : 'OFF') + '</span></div></div>' : '') +
     '<div class="room-actions"><button type="button" class="btn btn-primary" data-action="finalize"' +
     (canFinalize ? '' : ' disabled') + '>DECODE THE CREATIVE DOSSIER ↗</button><small>' +
     (canFinalize ? 'Both agents have transmitted. Your dossier is ready.' :
@@ -527,9 +531,18 @@ root.addEventListener('change', event => {
 
 document.getElementById('resetButton').addEventListener('click', clearMission);
 document.getElementById('languageSelect').addEventListener('change', event => {
-  if (window.DeadDropLocale) {
-    state.locale = window.DeadDropLocale.setLocale(event.target.value);
-    render();
+  if (!window.DeadDropLocale) return;
+  // Preserve unfinished brief fields and transmissions while changing language.
+  const oldForm = root.querySelector('form');
+  const previous = oldForm ? { id: oldForm.id, fields: Array.from(oldForm.querySelectorAll('[name]')).map(field => ({ name: field.name, value: field.value })) } : null;
+  state.locale = window.DeadDropLocale.setLocale(event.target.value);
+  render();
+  const nextForm = previous ? root.querySelector('form') : null;
+  if (nextForm && nextForm.id === previous.id) {
+    for (const item of previous.fields) {
+      const element = Array.from(nextForm.querySelectorAll('[name]')).find(field => field.name === item.name);
+      if (element) element.value = item.value;
+    }
   }
 });
 
