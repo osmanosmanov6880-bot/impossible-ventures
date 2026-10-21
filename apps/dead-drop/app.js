@@ -16,7 +16,7 @@ const state = {
   training: null,
   aiAvailable: false,
   aiConsent: false,
-  locale: 'en',
+  locale: window.DeadDropLocale ? window.DeadDropLocale.locale : 'en',
   busy: false
 };
 let refreshTimer = null;
@@ -375,6 +375,7 @@ function render() {
   else if (state.view === 'host' || state.view === 'training-host') root.innerHTML = renderHost();
   else if (state.view === 'join' || state.view === 'training-guest') root.innerHTML = renderJoin(state.view === 'training-guest');
   else root.innerHTML = renderRoom();
+  if (window.DeadDropLocale) window.DeadDropLocale.apply(document.body);
 }
 
 function formValues(form) {
@@ -516,6 +517,12 @@ root.addEventListener('change', event => {
 });
 
 document.getElementById('resetButton').addEventListener('click', clearMission);
+document.getElementById('languageSelect').addEventListener('change', event => {
+  if (window.DeadDropLocale) {
+    state.locale = window.DeadDropLocale.setLocale(event.target.value);
+    render();
+  }
+});
 
 function dossierText(dossier) {
   return [
