@@ -241,6 +241,8 @@ test('explicit AI consent invokes the refiner once, retaining fallback when mode
   const host = await request(base, '/api/v1/missions', { method: 'POST', body: productIntel });
   const path = '/api/v1/missions/' + host.data.code;
   const guest = await request(base, path + '/join', { method: 'POST', body: audienceIntel });
+  await request(base, path + '/ai-consent', { method: 'POST', token: host.data.token, body: { allow: true } });
+  await request(base, path + '/ai-consent', { method: 'POST', token: guest.data.token, body: { allow: true } });
   await request(base, path + '/messages', { method: 'POST', token: host.data.token, body: { text: 'Our product has proof.' } });
   await request(base, path + '/messages', { method: 'POST', token: guest.data.token, body: { text: 'They need a better morning ritual.' } });
   const finale = await request(base, path + '/finalize', {
@@ -264,6 +266,8 @@ test('provider errors fall back to deterministic dossier without losing a missio
   const host = await request(base, '/api/v1/missions', { method: 'POST', body: productIntel });
   const path = '/api/v1/missions/' + host.data.code;
   const guest = await request(base, path + '/join', { method: 'POST', body: audienceIntel });
+  await request(base, path + '/ai-consent', { method: 'POST', token: host.data.token, body: { allow: true } });
+  await request(base, path + '/ai-consent', { method: 'POST', token: guest.data.token, body: { allow: true } });
   await request(base, path + '/messages', { method: 'POST', token: host.data.token, body: { text: 'We can offer delivery tracking.' } });
   await request(base, path + '/messages', { method: 'POST', token: guest.data.token, body: { text: 'People want consistency.' } });
   const result = await request(base, path + '/finalize', { method: 'POST', token: guest.data.token, body: { ai: true } });
@@ -290,6 +294,8 @@ test('finalization lock blocks duplicate model costs and mid-generation writes',
   const host = await request(base, '/api/v1/missions', { method: 'POST', body: productIntel });
   const path = '/api/v1/missions/' + host.data.code;
   const guest = await request(base, path + '/join', { method: 'POST', body: audienceIntel });
+  await request(base, path + '/ai-consent', { method: 'POST', token: host.data.token, body: { allow: true } });
+  await request(base, path + '/ai-consent', { method: 'POST', token: guest.data.token, body: { allow: true } });
   await request(base, path + '/messages', { method: 'POST', token: host.data.token, body: { text: 'Our shipment tracking is documented.' } });
   await request(base, path + '/messages', { method: 'POST', token: guest.data.token, body: { text: 'Quality matters more than novelty.' } });
   const firstFinalization = request(base, path + '/finalize', { method: 'POST', token: host.data.token, body: { ai: true } });
@@ -304,4 +310,69 @@ test('finalization lock blocks duplicate model costs and mid-generation writes',
   const completed = await firstFinalization;
   assert.equal(completed.status, 200);
   assert.equal(completed.data.mission.dossier.generationMethod, 'ai-assisted');
+});
+
+
+test('AI processing requires independent, revocable consent from both roles', async t => {
+  let calls = 0;
+  const base = await fixture(t, ':memory:', {
+    aiKey: 'test-key', aiModel: 'test-model',
+    modelRefiner: async ({ draft }) => { calls++; return { ...draft, generationMethod: 'ai-assisted' }; }
+  });
+  const host = await request(base, '/api/v1/missions', { method: 'POST', body: productIntel });
+  const path = '/api/v1/missions/' + host.data.code;
+  const guest = await request(base, path + '/join', { method: 'POST', body: audienceIntel });
+  const singleConsent = await request(base, path + '/ai-consent', {
+    method: 'POST', token: host.data.token, body: { allow: true }
+  });
+  assert.equal(singleConsent.status, 200);
+  assert.equal(singleConsent.data.mission.aiConsent.self, true);
+  assert.equal(singleConsent.data.mission.aiConsent.partner, false);
+  await request(base, path + '/messages', { method: 'POST', token: host.data.token, body: { text: 'We have a supportable benefit.' } });
+  await request(base, path + '/messages', { method: 'POST', token: guest.data.token, body: { text: 'Audience members want transparency.' } });
+  const notAllowed = await request(base, path + '/finalize', {
+    method: 'POST', token: host.data.token, body: { ai: true }
+  });
+  assert.equal(notAllowed.status, 409);
+  assert.match(notAllowed.data.error, /Both agents/);
+  assert.equal(calls, 0);
+  await request(base, path + '/ai-consent', { method: 'POST', token: guest.data.token, body: { allow: true } });
+  const withdrawn = await request(base, path + '/ai-consent', {
+    method: 'POST', token: host.data.token, body: { allow: false }
+  });
+  assert.equal(withdrawn.data.mission.aiConsent.self, false);
+  assert.equal(withdrawn.data.mission.aiConsent.partner, true);
+  const revoked = await request(base, path + '/finalize', {
+    method: 'POST', token: guest.data.token, body: { ai: true }
+  });
+  assert.equal(revoked.status, 409);
+  assert.equal(calls, 0);
+  await request(base, path + '/ai-consent', { method: 'POST', token: host.data.token, body: { allow: true } });
+  const allowed = await request(base, path + '/finalize', {
+    method: 'POST', token: guest.data.token, body: { ai: true }
+  });
+  assert.equal(allowed.status, 200);
+  assert.equal(calls, 1);
+});
+
+test('Russian and Chinese deterministic dossiers preserve the submitted facts', async t => {
+  const base = await fixture(t);
+  for (const language of ['ru', 'zh']) {
+    const host = await request(base, '/api/v1/missions', { method: 'POST', body: productIntel });
+    const path = '/api/v1/missions/' + host.data.code;
+    const guest = await request(base, path + '/join', { method: 'POST', body: audienceIntel });
+    await request(base, path + '/messages', { method: 'POST', token: host.data.token, body: { text: 'Product signal here' } });
+    await request(base, path + '/messages', { method: 'POST', token: guest.data.token, body: { text: 'Audience signal here' } });
+    const finale = await request(base, path + '/finalize', {
+      method: 'POST', token: host.data.token, body: { language }
+    });
+    assert.equal(finale.status, 200);
+    const dossier = finale.data.mission.dossier;
+    assert.equal(dossier.outputLanguage, language);
+    assert.equal(dossier.brand, productIntel.brand);
+    assert.equal(dossier.audience, audienceIntel.audience);
+    assert.equal(dossier.evidenceToVerify, productIntel.proof);
+    assert.equal(dossier.storyboard.length, 3);
+    assert.ok(language === 'ru' ? /мисси|операц|аудитор|сигнал/i.test(dossier.campaign + dossier.concept) : /行动|受众|创意/.test(dossier.campaign + dossier.concept));
+  }
 });
