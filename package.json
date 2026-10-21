@@ -1,0 +1,16 @@
+{
+  "name": "impossible-ventures",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Seven creative technology ventures. Dead Drop cooperative mission server.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node services/dead-drop/server.mjs",
+    "dev": "node services/dead-drop/server.mjs",
+    "test": "node --test services/dead-drop/server.test.mjs",
+    "check": "node --check services/dead-drop/server.mjs && node --check apps/dead-drop/app.js && npm test"
+  }
+}
