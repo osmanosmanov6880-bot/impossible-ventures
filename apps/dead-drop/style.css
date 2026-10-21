@@ -165,3 +165,6 @@ h1,h2,h3,p{margin-top:0}
 @media(max-width:850px){.workspace{display:block}.rail{display:none}.topbar-center{display:none}.main-stage{padding:28px 24px 70px}.topbar{height:75px}.legal-strip{flex-wrap:wrap}.logo{min-width:0}}
 @media(max-width:600px){.connection-label{display:none}.logo-copy strong{font-size:15px}.logo-glyph{height:40px;width:40px;font-size:25px}.logo-copy small{font-size:8px}.header-button{padding:10px;font-size:9px}.main-stage{padding:20px 16px 60px}.stage-topline{font-size:8px}.mode-grid,.room-grid,.dossier-grid,.fields.two-column,.story-grid{grid-template-columns:1fr}.mode-card-wide{grid-column:auto;min-height:170px;flex-direction:column;align-items:flex-start}.mode-card-wide .mode-arrow{margin-top:auto;margin-left:0}.mode-card-wide .mode-icon{margin-bottom:5px}.mode-card{min-height:190px;padding:21px}.room-head{flex-direction:column}.room-code{text-align:left}.room-code strong{font-size:20px}.legal-strip{padding:14px 16px}.hero{padding-top:30px}.hero h1{font-size:clamp(38px,10vw,57px)}.form-shell .screen-heading{font-size:37px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+.mode-title,.mode-description{display:block}
+.fields.two-column{margin-top:0}
