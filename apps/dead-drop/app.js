@@ -14,6 +14,9 @@ const state = {
   token: '',
   mission: null,
   training: null,
+  aiAvailable: false,
+  aiConsent: false,
+  locale: 'en',
   busy: false
 };
 let refreshTimer = null;
@@ -89,6 +92,7 @@ function clearMission() {
   state.token = '';
   state.mission = null;
   state.training = null;
+  state.aiConsent = false;
   state.busy = false;
   render();
 }
@@ -104,7 +108,7 @@ async function api(path, method = 'GET', body) {
   if (body !== undefined) headers['Content-Type'] = 'application/json';
   if (state.token) headers.Authorization = 'Bearer ' + state.token;
   const abort = new AbortController();
-  const timeout = setTimeout(() => abort.abort(), 12000);
+  const timeout = setTimeout(() => abort.abort(), path.endsWith('/finalize') ? 25000 : 12000);
   try {
     const response = await fetch('/api/v1' + path, {
       method, headers,
@@ -322,6 +326,9 @@ function renderRoom() {
     (mission.joined ? 'EVERY WORD COUNTS' : 'AWAITING SECOND AGENT') +
     '</span><button class="btn btn-small btn-primary" type="submit"' +
     (canTransmit ? '' : ' disabled') + '>TRANSMIT ↗</button></div><div class="form-error" role="alert"></div></form></section></div>' +
+    (state.mode === 'live' && state.aiAvailable && canFinalize ?
+      '<div class="ai-optin"><label class="ai-optin-inner"><input type="checkbox" id="aiConsent" ' + (state.aiConsent ? 'checked' : '') + '>' +
+      '<span><strong>OPTIONAL AI CREATIVE REFINEMENT</strong><small>Only when enabled, your private product and audience details are sent to the OpenAI API for creative refinement. The result is not fact-checked. Default: off.</small></span></label></div>' : '') +
     '<div class="room-actions"><button type="button" class="btn btn-primary" data-action="finalize"' +
     (canFinalize ? '' : ' disabled') + '>DECODE THE CREATIVE DOSSIER ↗</button><small>' +
     (canFinalize ? 'Both agents have transmitted. Your dossier is ready.' :
@@ -339,7 +346,9 @@ function renderDossier(dossier) {
   return '<div class="dossier-heading"><div class="eyebrow">MISSION ACCOMPLISHED / CLASSIFIED DOSSIER</div>' +
     '<h1>Signal <span class="gradient-text">decoded.</span></h1><p class="subheading">' +
     'A concept built from two different perspectives. This structured creative brief is a starting point for human review.</p>' +
-    '<div class="badge signal">' + safe(dossier.campaign) + '</div></div>' +
+    '<div class="badge signal">' + safe(dossier.campaign) + '</div> ' +
+    '<span class="badge ' + (dossier.generationMethod === 'ai-assisted' ? 'amber' : '') + '">' +
+    (dossier.generationMethod === 'ai-assisted' ? 'AI-ASSISTED CREATIVE DRAFT' : 'RULES-BASED CREATIVE DRAFT') + '</span></div>' +
     '<div class="dossier-grid">' +
     resultCard('01 / THE OPENING HOOK', 'Stop the scroll.', dossier.openingHook, true) +
     resultCard('02 / CREATIVE DIRECTION', 'The big idea.', dossier.concept, true) +
@@ -353,7 +362,8 @@ function renderDossier(dossier) {
     resultCard('06 / MEASUREMENT', 'Run a real test.', dossier.validation) +
     resultCard('07 / AGENT VECTOR', 'Intercepted product signal.', dossier.interceptedSignals.productAgent) +
     resultCard('08 / AGENT ECHO', 'Intercepted audience signal.', dossier.interceptedSignals.audienceAgent) +
-    '</div><div class="callout warning"><strong>Editorial note:</strong> ' + safe(dossier.disclosure) + '</div>' +
+    '</div>' + (dossier.aiNotice ? '<div class="callout warning">' + safe(dossier.aiNotice) + '</div>' : '') +
+    '<div class="callout warning"><strong>Editorial note:</strong> ' + safe(dossier.disclosure) + '</div>' +
     '<div class="form-footer"><button class="btn btn-primary" data-action="copy-dossier" type="button">COPY DOSSIER ↗</button>' +
     '<button class="btn btn-ghost" data-action="download-dossier" type="button">EXPORT .TXT ↓</button>' +
     '<button class="btn btn-ghost" data-action="new-operation" type="button">NEW OPERATION</button></div>';
@@ -399,6 +409,7 @@ root.addEventListener('submit', event => {
         state.room = result.code;
         state.token = result.token;
         state.mission = result.mission;
+        state.aiConsent = false;
         state.view = 'room';
         saveSession();
         render();
@@ -469,7 +480,10 @@ root.addEventListener('click', event => {
       m.dossier = buildTrainingDossier(m);
       m.status = 'finalized';
     } else {
-      const result = await api('/missions/' + state.room + '/finalize', 'POST', {});
+      const result = await api('/missions/' + state.room + '/finalize', 'POST', {
+        ai: state.aiAvailable && state.aiConsent,
+        language: state.locale
+      });
       state.mission = result.mission;
     }
     stopRefresh();
@@ -495,6 +509,10 @@ root.addEventListener('click', event => {
       showToast('Dossier exported.');
     }
   }
+});
+
+root.addEventListener('change', event => {
+  if (event.target && event.target.id === 'aiConsent') state.aiConsent = event.target.checked;
 });
 
 document.getElementById('resetButton').addEventListener('click', clearMission);
@@ -535,8 +553,10 @@ async function bootstrap() {
     const response = await fetch('/api/v1/health', { cache: 'no-store' });
     const health = await response.json();
     state.online = response.ok && health.ok && health.mode === 'cooperative';
+    state.aiAvailable = state.online && health.aiAvailable === true;
   } catch {
     state.online = false;
+    state.aiAvailable = false;
   }
   if (state.online) {
     try {
