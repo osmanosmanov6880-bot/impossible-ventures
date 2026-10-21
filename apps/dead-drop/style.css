@@ -168,3 +168,12 @@ h1,h2,h3,p{margin-top:0}
 
 .mode-title,.mode-description{display:block}
 .fields.two-column{margin-top:0}
+
+/* Readability pass: production-minded minimum sizes for primary content. */
+:root{--muted:#a7bba9;--dim:#819783}
+.mode-description,.room-head p{font-size:14px}
+.result-card p{font-size:15px;line-height:1.72}
+.story-card p,.transmission p{font-size:14px}
+.card-title{font-size:14px}
+.intel-value{font-size:15px}
+.field label{font-size:12px}
