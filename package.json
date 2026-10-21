@@ -11,6 +11,7 @@
     "start": "node services/dead-drop/server.mjs",
     "dev": "node services/dead-drop/server.mjs",
     "test": "node --test services/dead-drop/server.test.mjs services/dead-drop/creative-engine.test.mjs",
-    "check": "node --check services/dead-drop/server.mjs && node --check services/dead-drop/creative-engine.mjs && node --check apps/dead-drop/app.js && npm test"
+    "check": "node --check services/dead-drop/server.mjs && node --check services/dead-drop/creative-engine.mjs && node --check apps/dead-drop/app.js && npm test",
+    "start:ai": "node --env-file=.env services/dead-drop/server.mjs"
   }
 }
