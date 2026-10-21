@@ -167,6 +167,7 @@ const STATIC_FILES = new Map([
   ['/apps/dead-drop/index.html', 'apps/dead-drop/index.html'],
   ['/apps/dead-drop/app.js', 'apps/dead-drop/app.js'],
   ['/apps/dead-drop/style.css', 'apps/dead-drop/style.css'],
+  ['/apps/dead-drop/favicon.svg', 'apps/dead-drop/favicon.svg'],
   ['/apps/appeal-2049/', 'apps/appeal-2049/index.html'],
   ['/apps/appeal-2049/index.html', 'apps/appeal-2049/index.html']
 ]);
@@ -189,7 +190,8 @@ function sendStatic(response, pathname) {
   const mime = {
     '.html': 'text/html; charset=utf-8',
     '.css': 'text/css; charset=utf-8',
-    '.js': 'text/javascript; charset=utf-8'
+    '.js': 'text/javascript; charset=utf-8',
+    '.svg': 'image/svg+xml'
   }[extname(path)] || 'application/octet-stream';
   if (pathname.startsWith('/apps/dead-drop/')) {
     response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
