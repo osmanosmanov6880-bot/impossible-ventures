@@ -5,6 +5,7 @@ import { createReadStream, existsSync, mkdirSync, statSync } from 'node:fs';
 import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { refineDossier } from './creative-engine.mjs';
+import { localizeRuleDossier } from './dossier-locales.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const CURRENT_FILE = fileURLToPath(import.meta.url);
@@ -322,7 +323,7 @@ export function createApp({
           if (finalizing.has(mission.code)) throw new ApiError(409, 'Finalization already in progress');
           finalizing.add(mission.code);
           try {
-            let dossier = buildDossier(mission);
+            let dossier = localizeRuleDossier(mission, buildDossier(mission), language);
             if (body.ai === true && aiAvailable) {
               try {
                 dossier = await modelRefiner({ mission, draft: dossier, language, apiKey: aiKey, model: aiModel });
