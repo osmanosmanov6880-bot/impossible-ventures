@@ -250,7 +250,7 @@ function buildTrainingDossier(mission) {
   const messages = mission.messages;
   const channel = { social: 'social sequence', video: 'short-form film', landing: 'interactive landing experience' }[guest.channel];
   const action = { awareness: 'Discover the story', leads: 'Request the briefing', launch: 'See what is new' }[host.objective];
-  return {
+  return window.DeadDropLocale.localizeRuleDossier(mission, {
     campaign: 'OPERATION / THE UNSENT SIGNAL',
     brand: host.brand,
     audience: guest.audience,
@@ -270,7 +270,7 @@ function buildTrainingDossier(mission) {
     },
     validation: 'Compare this concept with a direct-response control. Measure qualified actions and repeat engagement, not just clicks.',
     disclosure: 'Creative hypothesis only. Product evidence is user-supplied and has not been independently verified. No live AI model was used.'
-  };
+  }, state.locale);
 }
 
 function renderRoom() {
