@@ -250,7 +250,7 @@ function buildTrainingDossier(mission) {
     campaign: 'OPERATION / THE UNSENT SIGNAL',
     brand: host.brand,
     audience: guest.audience,
-    openingHook: 'What if the answer to ' + guest.friction + ' was closer than you thought?',
+    openingHook: 'THE STATUS QUO — ' + guest.friction.replace(/[.!?]+$/, '') + '. What would a better alternative look like?',
     concept: 'Turn a familiar tension for ' + guest.audience + ' into a mystery. The audience chooses whether to decode the message before discovering ' + host.product + ' from ' + host.brand + '.',
     execution: 'Build a ' + channel + ' in three beats: interruption, audience choice, and evidence-led reveal.',
     storyboard: [
@@ -295,7 +295,7 @@ function renderRoom() {
   }).join('') : '<p class="empty-state">No transmissions intercepted yet. Ask a focused question instead of sharing the whole brief.</p>';
 
   return '<div class="room-head"><div><div class="eyebrow">' +
-    (state.mode === 'training' ? 'TRAINING OPERATION / TWO ROLES' : 'SECURE ROOM / TWO AGENTS') +
+    (state.mode === 'training' ? 'TRAINING OPERATION / TWO ROLES' : 'PRIVATE ROLE ROOM / TWO AGENTS') +
     '</div><h1>' + safe(agentNames[mission.role]) + '<span class="accent">_</span></h1><p>' +
     safe(mission.brand) + ' · ' + safe(objectiveLabels[mission.objective]) +
     '<br>' + (mission.joined ? 'Both operatives are in position.' : 'Waiting for Agent Echo to join.') +
