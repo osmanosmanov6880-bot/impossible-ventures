@@ -8,6 +8,7 @@
   <title>Dead Drop Agency — The Classified Creative Studio</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="stylesheet" href="./style.css">
+  <script src="./i18n.js" defer></script>
   <script src="./app.js" defer></script>
 </head>
 <body>
@@ -19,6 +20,7 @@
     </a>
     <div class="topbar-center"><span class="pulse-dot" aria-hidden="true"></span> CLASSIFIED CREATIVE OPERATIONS</div>
     <div class="topbar-right">
+      <label class="language-control" for="languageSelect"><span class="sr-only">Interface language</span><select id="languageSelect" aria-label="Interface language"><option value="ru">Русский</option><option value="en">English</option><option value="zh">中文</option></select></label>
       <span id="serverState" class="connection-label">CHECKING CONNECTION</span>
       <button id="resetButton" class="header-button" type="button">NEW OPERATION <span aria-hidden="true">↗</span></button>
     </div>
