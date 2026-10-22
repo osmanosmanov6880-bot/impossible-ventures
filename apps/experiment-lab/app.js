@@ -335,6 +335,9 @@ els.start.addEventListener('click', async () => {
   } finally {
     state.busy = false;
     updateStart();
+    // The assignment was rendered while busy=true; re-enable the CTA
+    // after session creation so real visitors can finish the funnel.
+    renderScreen();
   }
 });
 

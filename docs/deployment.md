@@ -79,3 +79,18 @@ Static mode is intentionally training-only. GitHub Pages **cannot** run the Node
 - [ ] Privacy controller, legal basis and supplier transfer assessment completed for any real data
 
 A green staging demo is **not** enough to describe this as a production, GDPR-certified or commercially scaled platform.
+
+## Static demo delivery when GitHub Pages is not enabled
+
+The repository's main-branch workflow "Static preview package and optional Pages deployment" now always builds a static demo bundle and uploads the GitHub Actions artifact named **impossible-ventures-static-preview** (retained for 30 days), even if GitHub Pages has not been enabled. The static demo includes the portfolio, Dead Drop offline training, Appeal 2049, Pilot Studio calculator and Experiment Lab untracked story preview. It intentionally excludes the operator frontends and all server state/API.
+
+**This is not a live Node hosting deployment.** The static demo cannot accept pilot applications or record measured A/B sessions.
+
+To enable the public URL, a repository administrator must do the one-time GitHub UI setup:
+
+1. Repository **Settings → Pages**.
+2. Under **Build and deployment**, select **Source: GitHub Actions**.
+3. Run the "Static preview package and optional Pages deployment" workflow (or push a new main-branch commit).
+4. Verify the deployed address shown in the workflow's Deploy step. Do not assume any public URL is active until it is verified.
+
+GitHub's official configure-pages@v5 action requires extra credentials to enable a site automatically; the normal workflow GITHUB_TOKEN is insufficient for first-time enablement. This project deliberately does not create or expose a long-lived token to get around the manual setup.
