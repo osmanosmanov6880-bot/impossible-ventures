@@ -92,7 +92,7 @@ A standalone commercial validation workflow at `/pilot/`, with Russian / English
 This is **experimental code**, not a live advertising network or actual revenue. See [Pilot Studio implementation and security gaps](docs/pilot-studio.md). This extension does not replace the Dead Drop v0.5 optional AI and data-management functionality described below.
 
 
-Seven experimental creative-technology products. **Dead Drop Agency v0.5** is the flagship multiplayer alpha. **Appeal 2049** is a separate browser prototype. Five further concepts are documented but not commercially launched.
+Seven experimental creative-technology worlds have working prototype implementations in the premium studio routes listed above. Earlier browser-only demonstrations and Commercial Command retain their original paths. No prototype should be represented as a registered, commercially launched company.
 
 > These are not seven registered businesses. There is no confirmed product-market fit, production cloud deployment, licensed AI usage or payments.
 
