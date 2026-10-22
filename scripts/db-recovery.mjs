@@ -15,7 +15,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { createHash } from 'node:crypto';
 import {
   closeSync, constants, copyFileSync, existsSync, lstatSync, openSync,
-  readFileSync, chmodSync, statSync, unlinkSync
+  readSync, chmodSync, statSync, unlinkSync
 } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -77,7 +77,18 @@ export function inspectDatabase(dbPath) {
 }
 
 function hashFile(file) {
-  return createHash('sha256').update(readFileSync(file)).digest('hex');
+  const hash = createHash('sha256');
+  const fd = openSync(file, 'r');
+  const block = Buffer.allocUnsafe(1024 * 1024);
+  try {
+    let read;
+    while ((read = readSync(fd, block, 0, block.length, null)) > 0) {
+      hash.update(block.subarray(0, read));
+    }
+  } finally {
+    closeSync(fd);
+  }
+  return hash.digest('hex');
 }
 
 export function snapshotDatabase({ dbPath, outputPath, now = Date.now } = {}) {
