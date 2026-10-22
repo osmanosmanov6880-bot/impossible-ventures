@@ -81,6 +81,16 @@ No live hosted cooperative server, production security certification, LLM connec
 5. Improve model evaluations against factuality, creativity and conversion-oriented usefulness.
 
 
+## WAVE 11–15 — Launch Studio v1.2
+
+- WAVE 11: Owner-only first-party launch of immutable approved campaign, with activate/pause/resume/retire and public fail-closed gating.
+- WAVE 12: Seven distinct three-scene, RU/EN/ZH, mobile first-party interactive player narratives; participation without login.
+- WAVE 13: Explicit opt-in hashed session, idempotent single completion/CTA, event rate controls, rolling 7-day raw and 90-day aggregate retention.
+- WAVE 14: One-use cryptographic CTA receipt linked to a separately consented Pilot Studio form; atomic anti-replay and form deletion.
+- WAVE 15: Operator launch dashboard, publication states, real event and contact-form counts, charts, CSV, workspace export and deletion.
+- **Not implemented:** buying impressions across ad networks, real unique-user verification, enterprise-scale anti-fraud, actual payment collection, financial revenue recognition and legal compliance certification.
+
+Details: [Release guide](launch-studio-v12.md).
 ## Five new playable worlds v1.1 — source implementation
 
 - WAVE 6 AntiPersona: counter-audience lab with real four-stage choices and authored pitch.
