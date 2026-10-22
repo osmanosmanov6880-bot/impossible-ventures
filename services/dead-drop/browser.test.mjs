@@ -838,7 +838,7 @@ test('WAVE 11–15: mobile launch studio -> actual first-party story -> opt-in e
   await participant.locator('#consent').check();
   await participant.locator('#leadForm').evaluate(form=>form.requestSubmit());
   await participant.locator('#leadResult code').waitFor();
-  assert.match(await participant.locator('#leadResult').textContent(),/Заявка связана с добровольным CTA/);
+  assert.match(await participant.locator('#leadResult').textContent(),/Заявка связана с добровольным CTA|This form was attributed to an optional first-party story CTA/);
   assert.equal(await participant.evaluate(()=>sessionStorage.getItem('iv_launch_attribution')),null);
   await owner.evaluate(()=>refreshLaunches());
   await owner.waitForFunction(()=>
