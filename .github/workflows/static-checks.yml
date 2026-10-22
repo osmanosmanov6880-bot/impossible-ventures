@@ -56,6 +56,8 @@ jobs:
               'apps/ad-biome/index.html',
               'apps/museum-of-attention/index.html',
               'apps/attention-republic/index.html',
+              'apps/cinema/index.html',
+              'apps/cinema/prototype/index.html',
           ]
           for filename in files:
               path = Path(filename)
