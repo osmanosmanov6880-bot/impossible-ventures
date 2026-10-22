@@ -787,6 +787,7 @@ test('Appeal 2049 premium mobile tribunal reviews ideas, imports finalized Dead 
   await page.locator('#dossierFile').setInputFiles({
     name:'dead-drop-final.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))
   });
+  await page.waitForFunction(()=>document.getElementById('product').value==='Aurora research');
   assert.equal(await page.locator('#product').inputValue(),'Aurora research');
   assert.equal(await page.locator('#goal').inputValue(),'leads');
   assert.ok(!(await page.locator('#idea').inputValue()).includes('PRIVATE ROLE SIGNAL'));
@@ -1037,8 +1038,8 @@ test('Attention Republic operator publishes real question; two independently con
  await second.locator('#ballotResult').waitFor({state:'visible'});
  assert.match(await second.locator('#countMetrics').innerText(),/2/);
  await operator.locator('#refresh').click();
- await operator.getByText('Which form of consent-first advertising would you choose?').waitFor();
- assert.match(await operator.locator('#challengeList .card').innerText(),/2/);
+ await operator.waitForFunction(()=>/ЗАПИСАННЫХ ГОЛОСОВ: 2 \(A: 1 \/ B: 1\)/.test(document.getElementById('challengeList')?.innerText||''));
+ assert.match(await operator.locator('#challengeList .card').innerText(),/ЗАПИСАННЫХ ГОЛОСОВ: 2/);
  await operator.locator('#logout').click();
  assert.equal(await operator.locator('#operatorPanel').isHidden(),true);
  assert.deepEqual(errors,[]);
