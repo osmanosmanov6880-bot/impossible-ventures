@@ -20,6 +20,8 @@ jobs:
           node-version: '22'
       - name: Check syntax and execute integration tests
         run: npm run check
+      - name: Build portable static preview (no pilot backend)
+        run: python3 scripts/build_static_preview.py
       - name: Validate static entrypoints and metadata
         run: |
           python3 - <<'PY'
