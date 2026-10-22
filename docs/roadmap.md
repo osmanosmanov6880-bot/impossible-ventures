@@ -24,7 +24,7 @@ Updated 2026-10-22. **Statements of implementation are scoped to source files, n
 - Replace raw bearer-by-room identity with proper managed accounts (optional guest experience remains).
 - Migrate persistence to managed PostgreSQL with tenant isolation and least-privilege row policies.
 - Distributed rate limiting, monitoring, audit events, abuse controls, backups and disaster recovery.
-- Tenant-level data retention and deletion workflow. Assess EU/other regional privacy requirements.
+- Extend v0.5's single-room authenticated delete/export into account-level data lifecycle and tenant-wide retention and deletion workflow. Assess EU/other regional privacy requirements.
 - Serve with HTTPS and a real domain; deploy preview/staging and enable rollback.
 
 ## Gate 3 — AI assistance (optional)
