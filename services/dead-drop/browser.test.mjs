@@ -570,3 +570,49 @@ test('Appeal 2049 premium mobile tribunal reviews ideas, imports finalized Dead 
   assert.deepEqual(mutations,[],'Tribunal must not submit client content to an HTTP API');
   assert.deepEqual(errors,[]);
 });
+
+
+test('AntiPersona mobile adversarial debate challenges idea, scores rebuttal, exports private report and switches locale',async t=>{
+  const {context,base}=await setup(t,390,844);
+  const page=await context.newPage();
+  const errors=[];attachErrors(page,errors);
+  const mutations=[];
+  page.on('request',req=>{
+    if(!['GET','HEAD'].includes(req.method()))mutations.push(req.method());
+  });
+  await page.goto(base+'/apps/antipersona/');
+  await page.locator('#brand').fill('Aurora Studio');
+  await page.locator('#audience').fill('Independent agencies with busy project teams');
+  await page.locator('#idea').fill('Show a transparent side-by-side demo of two creative workflow tools and invite a small group of designers to request a trial.');
+  await page.locator('#persona').selectOption('finance');
+  await page.locator('#pressure').selectOption('intense');
+  await page.locator('#briefForm').evaluate(form=>form.requestSubmit());
+  await page.locator('#results').waitFor({state:'visible'});
+  assert.equal(await page.locator('#challengeList .card').count(),3);
+  assert.equal(await page.locator('#chosenChallenge option').count(),3);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+  mkdirSync('artifacts',{recursive:true});
+  await page.screenshot({path:'artifacts/antipersona-mobile-ru.png',fullPage:true});
+
+  await page.locator('#chosenChallenge').selectOption('roi');
+  await page.locator('#defense').fill('We will test the two versions on 40 consenting participants and publish the results in an accessible report.');
+  await page.locator('#defenseForm').evaluate(form=>form.requestSubmit());
+  await page.locator('#defenseResult').waitFor({state:'visible'});
+  assert.match(await page.locator('#responseRating').textContent(),/[0-3] \/ 3/);
+
+  const downloadPromise=page.waitForEvent('download');
+  await page.locator('#exportJSON').click();
+  const download=await downloadPromise;
+  assert.equal(download.suggestedFilename(),'antipersona-debate.json');
+  const report=JSON.parse(readFileSync(await download.path(),'utf8'));
+  assert.equal(report.kind,'antipersona-debate-report');
+  assert.equal(report.debate.disclosures.modelUsed,false);
+  assert.equal(report.defense.evidenceIndependentlyVerified,false);
+
+  await page.locator('#locale').selectOption('en');
+  assert.match(await page.locator('#results').innerText(),/Three questions without compromise/);
+  await page.locator('#locale').selectOption('zh');
+  assert.match(await page.locator('#results').innerText(),/三个不回避的问题/);
+  assert.deepEqual(mutations,[]);
+  assert.deepEqual(errors,[]);
+});
