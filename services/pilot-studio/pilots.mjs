@@ -65,6 +65,8 @@ function visibleLead(row) {
     budget: row.budget,
     locale: row.locale,
     status: row.status,
+    experimentId: row.experiment_id ?? null,
+    experimentArm: row.experiment_arm ?? null,
     consentVersion: row.consent_version,
     createdAt: row.created_at
   };
@@ -76,9 +78,15 @@ export function createPilotRouter({ db, now, operatorToken = '', ApiError, jsonB
     'id TEXT PRIMARY KEY, created_at INTEGER NOT NULL, company TEXT NOT NULL, ' +
     'contact TEXT NOT NULL, email TEXT NOT NULL, website TEXT NOT NULL, ' +
     'goal TEXT NOT NULL, budget TEXT NOT NULL, locale TEXT NOT NULL, ' +
-    'status TEXT NOT NULL, consent_version TEXT NOT NULL, delete_token_hash TEXT NOT NULL);' +
+    'status TEXT NOT NULL, consent_version TEXT NOT NULL, delete_token_hash TEXT NOT NULL, ' +
+    'experiment_id TEXT, experiment_arm TEXT);' +
     'CREATE INDEX IF NOT EXISTS pilot_leads_created ON pilot_leads(created_at);'
   );
+  // Existing pilot leads remain intact on upgraded databases.
+  const leadColumns = new Set(db.prepare('PRAGMA table_info(pilot_leads)').all().map(row => row.name));
+  if (!leadColumns.has('experiment_id')) db.exec('ALTER TABLE pilot_leads ADD COLUMN experiment_id TEXT');
+  if (!leadColumns.has('experiment_arm')) db.exec('ALTER TABLE pilot_leads ADD COLUMN experiment_arm TEXT');
+  db.exec('CREATE INDEX IF NOT EXISTS pilot_leads_experiment ON pilot_leads(experiment_id,experiment_arm);');
   const byAddress = new Map();
 
   function cleanup() {
@@ -134,12 +142,51 @@ export function createPilotRouter({ db, now, operatorToken = '', ApiError, jsonB
       cleanup();
       const id = randomBytes(12).toString('hex');
       const deleteToken = randomBytes(32).toString('base64url');
-      db.prepare(
-        'INSERT INTO pilot_leads (id,created_at,company,contact,email,website,goal,budget,locale,status,consent_version,delete_token_hash) ' +
-        'VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'
-      ).run(id, now(), company, contact, email, website, goal, budget, locale,
-        'new', CONSENT_VERSION, digest(deleteToken).toString('hex'));
-      sendJSON(response, 201, { received: true, requestId: id, deleteToken, retentionDays: RETENTION_DAYS });
+      let attributedSession = null;
+      const a = body.attribution;
+      if (a !== undefined && a !== null) {
+        if (!a || typeof a !== 'object' || Array.isArray(a) ||
+            !/^[a-f0-9]{32}$/.test(a.sessionId || '') ||
+            !/^iva_[A-Za-z0-9_-]{32}$/.test(a.receipt || '')) {
+          throw new ApiError(422, 'Invalid experiment attribution receipt');
+        }
+        attributedSession = db.prepare(
+          'SELECT id,experiment_id,arm,created_at,receipt_hash,cta_recorded,attributed_lead_id ' +
+          'FROM ab_sessions WHERE id = ?'
+        ).get(a.sessionId);
+        const age = attributedSession ? now() - attributedSession.created_at : -1;
+        if (!attributedSession || age < 0 || age > 7 * 86_400_000 ||
+            attributedSession.cta_recorded !== 1 || attributedSession.attributed_lead_id !== null ||
+            !attributedSession.receipt_hash ||
+            !safeEquals(digest(a.receipt).toString('hex'), attributedSession.receipt_hash)) {
+          throw new ApiError(422, 'Experiment attribution receipt is invalid, expired or already claimed');
+        }
+      }
+      db.exec('BEGIN IMMEDIATE');
+      try {
+        if (attributedSession) {
+          const claimed = db.prepare(
+            'UPDATE ab_sessions SET attributed_lead_id = ? WHERE id = ? ' +
+            'AND cta_recorded = 1 AND receipt_hash = ? AND attributed_lead_id IS NULL'
+          ).run(id, attributedSession.id, digest(a.receipt).toString('hex'));
+          if (!claimed.changes) throw new ApiError(409, 'Experiment attribution has already been claimed');
+        }
+        db.prepare(
+          'INSERT INTO pilot_leads (id,created_at,company,contact,email,website,goal,budget,locale,status,consent_version,delete_token_hash,experiment_id,experiment_arm) ' +
+          'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+        ).run(id, now(), company, contact, email, website, goal, budget, locale,
+          'new', CONSENT_VERSION, digest(deleteToken).toString('hex'),
+          attributedSession?.experiment_id ?? null, attributedSession?.arm ?? null);
+        db.exec('COMMIT');
+      } catch (error) {
+        db.exec('ROLLBACK');
+        throw error;
+      }
+      sendJSON(response, 201, {
+        received: true, requestId: id, deleteToken, retentionDays: RETENTION_DAYS,
+        attributed: Boolean(attributedSession),
+        note: 'Submission is not a qualified lead or verified paid customer.'
+      });
       return true;
     }
 
@@ -160,7 +207,7 @@ export function createPilotRouter({ db, now, operatorToken = '', ApiError, jsonB
       requireOperator(request);
       cleanup();
       const rows = db.prepare(
-        'SELECT id,created_at,company,contact,email,website,goal,budget,locale,status,consent_version ' +
+        'SELECT id,created_at,company,contact,email,website,goal,budget,locale,status,consent_version,experiment_id,experiment_arm ' +
         'FROM pilot_leads ORDER BY created_at DESC, id DESC LIMIT 100'
       ).all();
       const counts = { new: 0, contacted: 0, qualified: 0, won: 0, lost: 0 };
