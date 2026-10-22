@@ -150,7 +150,6 @@ export function createLaunches({db,now=Date.now,workspaces,campaigns,ApiError,js
   }
   function sendCSV(response,id){
     const data=metrics(id);
-    const byDate=new Map(data.daily.map(row=>[row.date,row]));
     // No personal identifiers in the CSV. Lead totals are included only in
     // the summary row, not assigned to the wrong event date.
     const rows=['utc_day,consented_session_starts,completion_signals,cta_signals'];
@@ -189,7 +188,7 @@ export function createLaunches({db,now=Date.now,workspaces,campaigns,ApiError,js
     if(list&&request.method==='GET'){
       workspaces.requireRole(request,list[1]);
       const items=db.prepare('SELECT * FROM commercial_launches WHERE workspace_id=? ORDER BY created_at DESC,id DESC LIMIT 100')
-        .all(list[1]).map(launchPublic);
+        .all(list[1]).map(row=>({...launchPublic(row),metrics:metrics(row.id)}));
       sendJSON(response,200,{items,summary:{
         draft:items.filter(x=>x.status==='draft').length,
         active:items.filter(x=>x.status==='active').length,
@@ -303,17 +302,22 @@ export function createLaunches({db,now=Date.now,workspaces,campaigns,ApiError,js
       if(kind==='cta'&&!session.completed)throw new ApiError(409,'Story completion signal required before CTA');
       const column=kind==='cta'?'cta_recorded':'completed',columnDaily=kind==='cta'?'cta':'completions';
       // Column identifiers are derived exclusively from the two fixed route names.
-      const changed=db.prepare('UPDATE launch_sessions SET '+column+'=1 WHERE id=? AND launch_id=? AND '+column+'=0')
-        .run(session.id,session.launch_id);
-      let receipt=null;
-      if(changed.changes){
-        if(kind==='cta'){
-          receipt=newReceipt();
-          db.prepare('UPDATE launch_sessions SET receipt_hash=? WHERE id=?').run(sha(receipt),session.id);
+      let changed,receipt=null;
+      db.exec('BEGIN IMMEDIATE');
+      try{
+        changed=db.prepare('UPDATE launch_sessions SET '+column+'=1 WHERE id=? AND launch_id=? AND '+column+'=0')
+          .run(session.id,session.launch_id);
+        if(changed.changes){
+          if(kind==='cta'){
+            receipt=newReceipt();
+            db.prepare('UPDATE launch_sessions SET receipt_hash=? WHERE id=?').run(sha(receipt),session.id);
+          }
+          const dayResult=db.prepare('UPDATE launch_daily SET '+columnDaily+'='+columnDaily+'+1 WHERE launch_id=? AND day=?')
+            .run(session.launch_id,session.day);
+          if(!dayResult.changes)throw new ApiError(500,'Daily event aggregate was not initialized');
         }
-        db.prepare('UPDATE launch_daily SET '+columnDaily+'='+columnDaily+'+1 WHERE launch_id=? AND day=?')
-          .run(session.launch_id,session.day);
-      }
+        db.exec('COMMIT');
+      }catch(error){db.exec('ROLLBACK');throw error}
       sendJSON(response,200,{
         event:kind==='cta'?'cta_clicked':'story_completed',
         recorded:Boolean(changed.changes),alreadyRecorded:!changed.changes,
