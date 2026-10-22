@@ -1,5 +1,7 @@
 # Impossible Ventures
 
+**Platform v0.8 — Operations & Recovery.** Dead Drop, Pilot Studio and Experiment Lab now share writable SQLite diagnostics, a backup/restore tool and a multilingual server status page. This is source-level staging readiness, **not a confirmed public deployment**.
+
 ## NEW — Experiment Lab v0.7 / First-party research
 
 The project now contains a **real opt-in A/B experiment engine**: a randomly assigned direct-control ad (A) versus an authored two-choice interactive story (B), with separate results, anonymous session tokens, durable daily SQLite aggregates, once-only CTA counting, 7-day session expiry and 90-day aggregate retention. The operator can create drafts, activate/pause/finish tests and export CSV of measured sessions and CTA clicks. No registration is needed for the public untracked story preview.
@@ -50,6 +52,10 @@ Other routes:
 - Health: http://localhost:3000/api/v1/health
 - Multilingual Dead Drop data notice: http://localhost:3000/privacy.html
 - Pilot Studio: http://localhost:3000/pilot/
+- Experiment Lab: http://localhost:3000/experiments/
+- Server diagnostics (RU/EN/ZH): http://localhost:3000/status/
+- Writable SQLite readiness: http://localhost:3000/api/v1/ready
+- Process liveness: http://localhost:3000/api/v1/live
 
 The server uses SQLite at `data/missions.sqlite` by default. This is a **single-instance demonstration**, not a distributed production cluster.
 
@@ -101,6 +107,21 @@ Open http://localhost:8000/apps/dead-drop/ for **single-browser training only**.
 
 The repository now contains a Docker entrypoint that adjusts mounted volume permissions and then drops root privileges, a Railway healthcheck configuration, and a Docker restart smoke workflow. See the [staging deployment playbook](docs/deployment.md). No public multiplayer server or Railway account is confirmed. Do not expose real customer data before completing security and privacy review.
 
+## Operations, backups and operator control (v0.8)
+
+- The public `/status/` screen shows real process and SQLite write-readiness (Russian, English, Chinese). It does not disclose personal information or guarantee global uptime.
+- The recovery CLI snapshots the **shared database containing all three products** via SQLite `VACUUM INTO`, validates integrity and table counts and restores only into a NEW file. Backups contain private mission and pilot data. Never upload them to GitHub.
+
+  ```bash
+  npm run db:inspect -- --db ./data/missions.sqlite
+  npm run db:backup -- --db ./data/missions.sqlite --out /secure/backup.sqlite
+  npm run db:restore -- --from /secure/backup.sqlite --out /secure/restored.sqlite
+  ```
+
+- Pilot Studio's operator console now has RU/EN/ZH controls, explicit logout and basic IP throttling. The same strong `OPERATOR_TOKEN` enables both Pilot and Experiment operator tools; this shared-token model is **not production SSO**.
+- A Docker CI job creates a consistent backup, boots a restored database on a second container, and checks file permissions.
+- Consult the [Operations & Recovery Runbook](docs/operations-runbook.md) before handling real data. Off-host encrypted backups, alerting, proper identity, privacy policies and production hosting still require operator setup.
+
 ## Test
 
 ```bash
@@ -114,6 +135,7 @@ GitHub Actions additionally runs Chromium end-to-end tests for two agents, langu
 | Product | Status |
 |---|---|
 | Dead Drop Agency | Two-agent cooperative alpha, training and optional model-assisted editing |
+| Experiment Lab | Anonymous opt-in A/B research alpha with local counters (not verified lift) |
 | Appeal 2049 | Deterministic browser critique demo |
 | AntiPersona | Concept |
 | Brief Theatre | Concept |
@@ -129,10 +151,11 @@ GitHub Actions additionally runs Chromium end-to-end tests for two agents, langu
 - [Portfolio thesis](docs/portfolio.md)
 - [Staging deployment guide](docs/deployment.md)
 - [Multilingual Dead Drop data handling notice](privacy.html)
+- [Operations & Recovery Runbook](docs/operations-runbook.md)
 
 ## Operational and legal limitations
 
-- No confirmed public multiplayer host, production user identity service, payments, formal backups, distributed deployment or legal company registrations.
+- No confirmed public multiplayer host, production identities, payments, configured off-host backups or alerting, distributed deployment or legal company registrations.
 - SQLite is local to one process. Rate limiting is basic and in-memory.
 - Dead Drop missions expire after seven days and are pruned on server startup, hourly, and when accessed. Pilot Studio uses its own separately implemented retention mechanism.
 - Live model use requires a server key, two agents' consent and a funded API account.
