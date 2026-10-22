@@ -251,6 +251,10 @@ const STATIC_FILES = new Map([
   ['/apps/creative-worlds/engine.mjs', 'apps/creative-worlds/engine.mjs'],
   ['/apps/creative-worlds/runner.mjs', 'apps/creative-worlds/runner.mjs'],
   ['/apps/creative-worlds/bridge.mjs', 'apps/creative-worlds/bridge.mjs'],
+  ['/apps/creative-worlds/studio-bridge.mjs', 'apps/creative-worlds/studio-bridge.mjs'],
+  ['/apps/pipeline/', 'apps/pipeline/index.html'],
+  ['/apps/pipeline/index.html', 'apps/pipeline/index.html'],
+  ['/apps/pipeline/app.js', 'apps/pipeline/app.js'],
   ['/apps/anti-persona/', 'apps/anti-persona/index.html'],
   ['/apps/anti-persona/index.html', 'apps/anti-persona/index.html'],
   ['/apps/brief-theatre/', 'apps/brief-theatre/index.html'],
@@ -285,7 +289,7 @@ function sendStatic(response, pathname) {
     '.mjs': 'text/javascript; charset=utf-8',
     '.svg': 'image/svg+xml'
   }[extname(path)] || 'application/octet-stream';
-  if (pathname === '/' || pathname === '/site.css' || pathname === '/site.js' || pathname.startsWith('/apps/shared/') || pathname.startsWith('/apps/appeal-2049-studio/') || pathname.startsWith('/apps/antipersona/') || pathname.startsWith('/apps/brief-theatre-studio/') || pathname.startsWith('/apps/adbiome/') || pathname.startsWith('/apps/museum-of-attention-studio/') || pathname.startsWith('/apps/attention-republic-live/') || pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/status/') || pathname.startsWith('/commercial/') || pathname.startsWith('/showcase/') || pathname.startsWith('/proposal/') ||
+  if (pathname === '/' || pathname === '/site.css' || pathname === '/site.js' || pathname.startsWith('/apps/shared/') || pathname.startsWith('/apps/pipeline/') || pathname.startsWith('/apps/appeal-2049-studio/') || pathname.startsWith('/apps/antipersona/') || pathname.startsWith('/apps/brief-theatre-studio/') || pathname.startsWith('/apps/adbiome/') || pathname.startsWith('/apps/museum-of-attention-studio/') || pathname.startsWith('/apps/attention-republic-live/') || pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/status/') || pathname.startsWith('/commercial/') || pathname.startsWith('/showcase/') || pathname.startsWith('/proposal/') ||
       pathname.startsWith('/apps/creative-worlds/') ||
       ['anti-persona','brief-theatre','ad-biome','museum-of-attention','attention-republic']
         .some(id => pathname.startsWith('/apps/' + id + '/'))) {
