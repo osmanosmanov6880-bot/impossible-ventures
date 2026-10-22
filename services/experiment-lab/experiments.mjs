@@ -107,13 +107,18 @@ export function createExperimentRouter({ db, now = Date.now, operatorToken = '',
     'cta_label TEXT NOT NULL, status TEXT NOT NULL);' +
     'CREATE TABLE IF NOT EXISTS ab_sessions (' +
     'id TEXT PRIMARY KEY, experiment_id TEXT NOT NULL, arm TEXT NOT NULL, token_hash TEXT NOT NULL, ' +
-    'created_at INTEGER NOT NULL, cohort_day INTEGER NOT NULL, cta_recorded INTEGER NOT NULL DEFAULT 0);' +
+    'created_at INTEGER NOT NULL, cohort_day INTEGER NOT NULL, cta_recorded INTEGER NOT NULL DEFAULT 0, ' +
+    'receipt_hash TEXT, attributed_lead_id TEXT);' +
     'CREATE INDEX IF NOT EXISTS ab_sessions_experiment_created ON ab_sessions(experiment_id, created_at);' +
     'CREATE TABLE IF NOT EXISTS ab_daily (' +
     'experiment_id TEXT NOT NULL, cohort_day INTEGER NOT NULL, arm TEXT NOT NULL, ' +
     'exposures INTEGER NOT NULL DEFAULT 0, cta INTEGER NOT NULL DEFAULT 0, ' +
     'PRIMARY KEY (experiment_id, cohort_day, arm));'
   );
+  // Safe upgrades for existing v0.7 SQLite databases.
+  const sessionColumns = new Set(db.prepare('PRAGMA table_info(ab_sessions)').all().map(row => row.name));
+  if (!sessionColumns.has('receipt_hash')) db.exec('ALTER TABLE ab_sessions ADD COLUMN receipt_hash TEXT');
+  if (!sessionColumns.has('attributed_lead_id')) db.exec('ALTER TABLE ab_sessions ADD COLUMN attributed_lead_id TEXT');
   const requestWindows = new Map();
   const createSession = db.prepare(
     'INSERT INTO ab_sessions (id, experiment_id, arm, token_hash, created_at, cohort_day, cta_recorded) VALUES (?, ?, ?, ?, ?, ?, 0)'
@@ -171,7 +176,26 @@ export function createExperimentRouter({ db, now = Date.now, operatorToken = '',
       'SELECT arm, SUM(exposures) AS exposures, SUM(cta) AS cta ' +
       'FROM ab_daily WHERE experiment_id = ? GROUP BY arm'
     ).all(id);
-    return numbers(rows);
+    const base = numbers(rows);
+    const attributed = {
+      A: { submittedForms: 0, operatorQualified: 0 },
+      B: { submittedForms: 0, operatorQualified: 0 }
+    };
+    const leadRows = db.prepare(
+      'SELECT experiment_arm AS arm, COUNT(*) AS submitted, ' +
+      'SUM(CASE WHEN status IN (\'qualified\',\'won\') THEN 1 ELSE 0 END) AS qualified ' +
+      'FROM pilot_leads WHERE experiment_id = ? GROUP BY experiment_arm'
+    ).all(id);
+    for (const row of leadRows) {
+      if (Object.hasOwn(attributed, row.arm)) {
+        attributed[row.arm].submittedForms = Number(row.submitted);
+        attributed[row.arm].operatorQualified = Number(row.qualified);
+      }
+    }
+    return {
+      ...base, attributed,
+      attributionNote: 'Form submissions use server-verified, opt-in CTA receipts. Operator-qualified is a manually assigned status, not paid revenue or independently verified customers.'
+    };
   }
 
   async function handle(request, response, pathname) {
@@ -304,12 +328,15 @@ export function createExperimentRouter({ db, now = Date.now, operatorToken = '',
       if (now() - session.created_at > SESSION_TTL_DAYS * DAY_MS) throw new ApiError(410, 'Session expired');
       if (!digestMatches(token, session.token_hash)) throw new ApiError(403, 'Session token invalid');
       db.exec('BEGIN IMMEDIATE');
-      let recorded = false;
+      let recorded = false, receipt = null;
       try {
         const changed = db.prepare(
           'UPDATE ab_sessions SET cta_recorded = 1 WHERE id = ? AND experiment_id = ? AND cta_recorded = 0'
         ).run(session.id, session.experiment_id);
         if (changed.changes) {
+          receipt = 'iva_' + randomBytes(24).toString('base64url');
+          db.prepare('UPDATE ab_sessions SET receipt_hash = ? WHERE id = ?')
+            .run(hash(receipt).toString('hex'), session.id);
           addCTA.run(session.experiment_id, session.cohort_day, session.arm);
           recorded = true;
         }
@@ -320,6 +347,7 @@ export function createExperimentRouter({ db, now = Date.now, operatorToken = '',
       }
       sendJSON(response, 200, {
         recorded, alreadyRecorded: !recorded,
+        attribution: recorded ? { sessionId: session.id, receipt, experimentId: session.experiment_id } : null,
         event: 'cta_clicked',
         note: 'A recorded CTA is not a lead, purchase or verified business outcome.'
       });
