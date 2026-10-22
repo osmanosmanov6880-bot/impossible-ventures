@@ -1,5 +1,7 @@
 # Impossible Ventures
 
+**FIVE DEVELOPMENT WAVES / v1.5.0 — SEVEN WORKING EXPERIMENTAL CREATIVE WORLDS.** Open the premium international portal at http://localhost:3000/ and explore all seven branded app routes. This is an experimental source release, not seven registered companies, a worldwide advertising network or proven business. Full implementation record: [Five-wave report](docs/five-waves-release.md).
+
 **Platform v0.8 — Operations & Recovery.** Dead Drop, Pilot Studio and Experiment Lab now share writable SQLite diagnostics, a backup/restore tool and a multilingual server status page. This is source-level staging readiness, **not a confirmed public deployment**.
 
 ## Static preview distribution
@@ -24,7 +26,7 @@ A standalone commercial validation workflow at `/pilot/`, with Russian / English
 This is **experimental code**, not a live advertising network or actual revenue. See [Pilot Studio implementation and security gaps](docs/pilot-studio.md). This extension does not replace the Dead Drop v0.5 optional AI and data-management functionality described below.
 
 
-Seven experimental creative-technology products. **Dead Drop Agency v0.5** is the flagship multiplayer alpha. **Appeal 2049** is a separate browser prototype. Five further concepts are documented but not commercially launched.
+Seven experimental creative-technology products are now individually navigable **working prototypes**: Dead Drop Agency, Appeal 2049, AntiPersona, Brief Theatre, AdBiome, Museum of Attention and Attention Republic. This is source-level product development, not evidence of seven registered companies or commercial traction.
 
 > These are not seven registered businesses. There is no confirmed product-market fit, production cloud deployment, licensed AI usage or payments.
 
@@ -38,6 +40,21 @@ Seven experimental creative-technology products. **Dead Drop Agency v0.5** is th
 6. Each role may export its authorized data view or delete the entire shared room after entering the exact confirmation code.
 
 **No sign-up is necessary for this experimental alpha.** A local training mode works without a running backend. The interactive workspace is translated into **Russian, English, and Simplified Chinese**; deterministic dossier copy supports the same languages.
+
+## Seven branded prototype entrypoints
+
+| World | Local URL | Real mechanic |
+|---|---|---|
+| Dead Drop Agency | http://localhost:3000/apps/dead-drop/ | Two agents, rule-based or mutual-consent AI dossier |
+| Appeal 2049 | http://localhost:3000/apps/appeal-2049/ | Five-signal editorial tribunal |
+| AntiPersona | http://localhost:3000/apps/antipersona/ | Four perspective challenges and rebuttal |
+| Brief Theatre | http://localhost:3000/apps/brief-theatre/ | Three authored acts and director choices |
+| AdBiome | http://localhost:3000/apps/adbiome/ | Five creative genes, mutation and crossover |
+| Museum of Attention | http://localhost:3000/apps/museum-of-attention/ | Four openly fictional exhibits, visitor placard |
+| Attention Republic | http://localhost:3000/apps/attention-republic/ | Real moderated anonymous consented session ballots |
+| Republic Operator | http://localhost:3000/apps/attention-republic/operator/ | Authenticated challenge creation and lifecycle |
+
+The local creativity engines work without a model or registration. **Attention Republic live voting** requires the Node/SQLite server and a manually published operator question. Its static version runs an untracked demonstration only. Operators must set a strong OPERATOR_TOKEN through the host environment; do not commit secrets.
 
 ## Launch locally (Node.js 22+)
 
@@ -140,12 +157,12 @@ GitHub Actions additionally runs Chromium end-to-end tests for two agents, langu
 |---|---|
 | Dead Drop Agency | Two-agent cooperative alpha, training and optional model-assisted editing |
 | Experiment Lab | Anonymous opt-in A/B research alpha with local counters (not verified lift) |
-| Appeal 2049 | Deterministic browser critique demo |
-| AntiPersona | Concept |
-| Brief Theatre | Concept |
-| AdBiome | Concept |
-| Museum of Attention | Concept |
-| Attention Republic | Concept |
+| Appeal 2049 | Working 5-criterion creative review, privacy-first Dead Drop import, 3 languages |
+| AntiPersona | Four-opponent rebuttal trainer with structured local export |
+| Brief Theatre | User-authored 3-act branching creative scripts |
+| AdBiome | Five-gene creative variants, mutation, crossover and provenance |
+| Museum of Attention | Four fictional future exhibit rooms and visitor artifacts |
+| Attention Republic | Real moderated consented anonymous SQLite ballots, plus untracked static demo |
 
 ## Documentation
 
@@ -156,6 +173,7 @@ GitHub Actions additionally runs Chromium end-to-end tests for two agents, langu
 - [Staging deployment guide](docs/deployment.md)
 - [Multilingual Dead Drop data handling notice](privacy.html)
 - [Operations & Recovery Runbook](docs/operations-runbook.md)
+- [Five full development waves / source release](docs/five-waves-release.md)
 
 ## Operational and legal limitations
 
