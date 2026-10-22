@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080d16">
+<meta name="description" content="Impossible Ventures Pilot Studio — plan and evaluate an interactive campaign, then request a real commercial pilot.">
+<title>IMPOSSIBLE VENTURES — Pilot Studio</title>
+<link rel="stylesheet" href="/pilot/style.css">
+<script src="/pilot/app.js" defer></script>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"></div>
+<header class="nav wrap">
+  <a class="brand" href="/" aria-label="Impossible Ventures portfolio"><span class="brandmark">I<span>V</span></span><span>IMPOSSIBLE <em>VENTURES</em><small>CREATIVE COMMERCE OPERATING SYSTEM</small></span></a>
+  <div class="nav-right"><span class="live"><span class="orb"></span> RESEARCH ALPHA / PILOT v0.4</span><label class="lang-label" for="language">Language</label><select id="language" aria-label="Language"><option value="en">EN</option><option value="ru">РУ</option><option value="zh">中文</option></select></div>
+</header>
+<main>
+  <section class="hero wrap">
+    <div class="hero-copy">
+      <div class="eyebrow"><span class="line"></span><span data-i18n="topline">THE NEW ADVERTISING EXPERIENCE</span></div>
+      <h1><span data-i18n="headline1">Ads worth</span><br><span class="gradient" data-i18n="headline2">interacting with.</span></h1>
+      <p data-i18n="intro">Design an interactive campaign as an experiment: define your audience, model your economics, generate a test plan, and request a real pilot. No account needed.</p>
+      <div class="actions"><a class="primary" href="#planner" data-i18n="build">BUILD PILOT PLAN ↗</a><a class="secondary" href="/apps/dead-drop/" data-i18n="demo">TRY DEAD DROP DEMO →</a></div>
+      <div class="proof"><div><strong>07</strong><span data-i18n="worlds">creative worlds proposed</span></div><div><strong>02</strong><span data-i18n="demos">browser demos in source</span></div><div><strong>01</strong><span data-i18n="pilot">pilot workflow in alpha</span></div></div>
+    </div>
+    <div class="scene" aria-hidden="true">
+      <div class="scene-grid"></div>
+      <div class="aura"></div>
+      <div class="sphere"><div class="sphere-cut"></div><div class="sphere-core"></div></div>
+      <div class="float-card fc-top"><small>CREATIVE SIGNAL</small><strong>STORY → DECISION</strong><span>Interactive experience</span></div>
+      <div class="float-card fc-bottom"><small>COMMERCIAL SIGNAL</small><strong>HYPOTHESIS → TEST</strong><span>Qualified outcomes</span></div>
+      <div class="hud"><span>EXP / 001</span><span>NO FABRICATED METRICS</span></div>
+    </div>
+  </section>
+  <section class="section wrap" id="planner">
+    <div class="section-head"><div><div class="eyebrow"><span class="line"></span><span data-i18n="studio">STRATEGY STUDIO / 01</span></div><h2 data-i18n="design">Design your first pilot.</h2><p data-i18n="designNote">Every number is your assumption, not a promise. Adjust and see how the economics change.</p></div><span class="section-index">01—03</span></div>
+    <div class="studio">
+      <form id="planForm" class="inputs">
+        <div class="subhead"><span class="step">01</span><strong data-i18n="parameters">CAMPAIGN PARAMETERS</strong></div>
+        <label><span data-i18n="goal">Primary goal</span><select id="goal" name="goal"><option value="leads" data-i18n="leadGoal">Qualified leads</option><option value="sales" data-i18n="salesGoal">Purchases</option><option value="awareness" data-i18n="awarenessGoal">Brand awareness</option><option value="validation" data-i18n="validationGoal">Message validation</option></select></label>
+        <label><span data-i18n="spend">Total test media spend (USD)</span><input name="spend" type="number" id="spend" min="100" max="10000000" step="100" value="2000" required></label>
+        <label><span data-i18n="cpm">Estimated cost per thousand impressions (USD)</span><input name="cpm" type="number" id="cpm" min="1" max="500" step="0.5" value="12" required></label>
+        <label><span data-i18n="ctr">Assumed click-through rate (%)</span><input name="ctr" type="number" id="ctr" min="0.01" max="20" step="0.1" value="1.5" required></label>
+        <label><span data-i18n="cvr">Assumed conversion from visit (%)</span><input name="cvr" type="number" id="cvr" min="0.01" max="100" step="0.5" value="5" required></label>
+        <label><span data-i18n="value">Gross value per conversion (USD)</span><input name="value" type="number" id="value" min="0" max="1000000" step="1" value="120" required></label>
+        <p class="fine" data-i18n="modelCaveat">Model excludes creative production, fees, returns, taxes and attribution uncertainty. This is not an ROI or sales forecast.</p>
+      </form>
+      <div class="output">
+        <div class="subhead"><span class="step">02</span><strong data-i18n="hypothesis">MODELLED OUTCOMES / NOT ACTUAL</strong></div>
+        <div class="result-grid">
+          <div class="metric"><span data-i18n="impressions">Impressions</span><strong id="impressions">—</strong><small data-i18n="estimate">ESTIMATE</small></div>
+          <div class="metric"><span data-i18n="clicks">Clicks</span><strong id="clicks">—</strong><small data-i18n="estimate">ESTIMATE</small></div>
+          <div class="metric"><span data-i18n="conversions">Conversions</span><strong id="conversions">—</strong><small data-i18n="estimate">ESTIMATE</small></div>
+          <div class="metric"><span data-i18n="cpa">Cost / conversion</span><strong id="cpa">—</strong><small data-i18n="estimate">ESTIMATE</small></div>
+        </div>
+        <div class="comparison"><div class="comparison-head"><span data-i18n="experiment">EXPERIMENT STRUCTURE</span><span data-i18n="split">50 / 50 TRAFFIC SPLIT</span></div><div class="test-group"><span>A</span><div><strong data-i18n="control">CONTROL / EXISTING CREATIVE</strong><small data-i18n="controlDesc">Direct message, same offer and audience</small></div></div><div class="test-group b"><span>B</span><div><strong data-i18n="variant">VARIANT / INTERACTIVE STORY</strong><small data-i18n="variantDesc">Narrative choice, same offer and audience</small></div></div><div class="disclosure" data-i18n="abNote">This is a test design only. No uplift is assumed. Randomize assignment, keep measurement consistent, and evaluate qualified outcomes before selecting a winner.</div></div>
+        <button class="download" type="button" id="downloadPlan" data-i18n="export">EXPORT EXPERIMENT PLAN ↓</button>
+      </div>
+    </div>
+  </section>
+  <section class="section wrap" id="request">
+    <div class="section-head"><div><div class="eyebrow"><span class="line"></span><span data-i18n="commercial">COMMERCIAL PILOT / 02</span></div><h2 data-i18n="letsTest">Ready to test with real people?</h2><p data-i18n="contactNote">Submit a request. No payment is collected, and a submission is not a confirmed contract.</p></div><span class="section-index">02—03</span></div>
+    <div class="contact-layout">
+      <div class="contact-note"><span class="seal">IV<br>◈</span><h3 data-i18n="pilotTitle">From concept to measurable evidence.</h3><p data-i18n="pilotExplain">We propose a controlled creative pilot with baseline measurements, consent-aware data collection and a clear go/no-go decision.</p><div class="contact-points"><div><b>01</b><span data-i18n="contact1">Agree on one outcome metric</span></div><div><b>02</b><span data-i18n="contact2">Prepare two comparable creatives</span></div><div><b>03</b><span data-i18n="contact3">Run a controlled, limited campaign</span></div><div><b>04</b><span data-i18n="contact4">Review genuine results together</span></div></div><p class="fine" data-i18n="privacyNote">Please do not send confidential client information. Submitted contact details are stored on this server for up to 90 days and are accessible to an authorized operator. Keep your deletion token.</p></div>
+      <form id="leadForm" class="lead-form">
+        <label><span data-i18n="company">COMPANY *</span><input name="company" id="company" minlength="2" maxlength="120" required autocomplete="organization" placeholder="Your company"></label>
+        <label><span data-i18n="contact">CONTACT PERSON *</span><input name="contact" id="contact" minlength="2" maxlength="100" required autocomplete="name" placeholder="Your name"></label>
+        <label><span data-i18n="email">WORK EMAIL *</span><input name="email" id="email" type="email" maxlength="160" required autocomplete="email" placeholder="you@company.com"></label>
+        <label><span data-i18n="website">WEBSITE (OPTIONAL, HTTPS)</span><input name="website" id="website" type="url" maxlength="220" placeholder="https://company.com"></label>
+        <label class="trap" aria-hidden="true">Website confirmation<input name="website_confirm" autocomplete="off" tabindex="-1"></label>
+        <div class="pair"><label><span data-i18n="pilotGoal">GOAL</span><select id="leadGoal" name="goal"><option value="leads" data-i18n="leadGoal">Qualified leads</option><option value="sales" data-i18n="salesGoal">Purchases</option><option value="awareness" data-i18n="awarenessGoal">Brand awareness</option><option value="validation" data-i18n="validationGoal">Message validation</option></select></label><label><span data-i18n="budget">POTENTIAL MEDIA BUDGET</span><select name="budget"><option value="unsure" data-i18n="unsure">Not decided</option><option value="under-1k">Under $1,000</option><option value="1k-5k">$1,000 – $5,000</option><option value="5k-25k">$5,000 – $25,000</option><option value="25k-plus">$25,000+</option></select></label></div>
+        <label class="consent"><input id="consent" name="consent" type="checkbox" required><span data-i18n="consent">I agree to be contacted about this pilot, and to storage of the submitted details for up to 90 days. I understand I can delete the request using its deletion token.</span></label>
+        <button id="submitLead" class="primary full" type="submit" data-i18n="request">REQUEST PRIVATE PILOT ↗</button>
+        <div id="leadResult" class="feedback" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </section>
+  <section class="closing wrap"><div><div class="eyebrow"><span class="line"></span><span data-i18n="next">CONTINUE THE EXPERIENCE</span></div><h2 data-i18n="worldHeadline">Seven worlds. One measurable foundation.</h2></div><a href="/apps/appeal-2049/" class="secondary" data-i18n="appeal">TRY APPEAL 2049 →</a></section>
+</main>
+<footer class="footer wrap"><span>© 2026 IMPOSSIBLE VENTURES / EXPERIMENTAL ALPHA</span><span data-i18n="footer">No payments, live AI, verified results or worldwide launch are claimed.</span></footer>
+</body>
+</html>

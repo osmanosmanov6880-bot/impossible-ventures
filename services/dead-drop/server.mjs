@@ -4,6 +4,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { createReadStream, existsSync, mkdirSync, statSync } from 'node:fs';
 import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createPilotRouter } from '../pilot-studio/pilots.mjs';
 import { refineDossier } from './creative-engine.mjs';
 import { localizeRuleDossier } from './dossier-locales.mjs';
 
@@ -178,7 +179,14 @@ const STATIC_FILES = new Map([
   ['/apps/dead-drop/style.css', 'apps/dead-drop/style.css'],
   ['/apps/dead-drop/favicon.svg', 'apps/dead-drop/favicon.svg'],
   ['/apps/appeal-2049/', 'apps/appeal-2049/index.html'],
-  ['/apps/appeal-2049/index.html', 'apps/appeal-2049/index.html']
+  ['/apps/appeal-2049/index.html', 'apps/appeal-2049/index.html'],
+  ['/pilot/', 'apps/pilot-studio/index.html'],
+  ['/pilot/index.html', 'apps/pilot-studio/index.html'],
+  ['/pilot/app.js', 'apps/pilot-studio/app.js'],
+  ['/pilot/style.css', 'apps/pilot-studio/style.css'],
+  ['/pilot/operator/', 'apps/pilot-studio/operator.html'],
+  ['/pilot/operator.html', 'apps/pilot-studio/operator.html'],
+  ['/pilot/operator.js', 'apps/pilot-studio/operator.js']
 ]);
 
 function sendJSON(response, status, payload) {
@@ -202,7 +210,7 @@ function sendStatic(response, pathname) {
     '.js': 'text/javascript; charset=utf-8',
     '.svg': 'image/svg+xml'
   }[extname(path)] || 'application/octet-stream';
-  if (pathname.startsWith('/apps/dead-drop/')) {
+  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/')) {
     response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
   }
   response.writeHead(200, {
@@ -239,6 +247,7 @@ export function createApp({
   const db = new DatabaseSync(dbPath);
   db.exec('PRAGMA journal_mode = WAL; CREATE TABLE IF NOT EXISTS missions (code TEXT PRIMARY KEY, created_at INTEGER NOT NULL, payload TEXT NOT NULL);');
   const requestsByIP = new Map();
+  const handlePilots = createPilotRouter({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
   const aiAvailable = Boolean(aiKey && aiModel);
   const finalizing = new Set();
   const server = createServer(async (request, response) => {
@@ -253,7 +262,8 @@ export function createApp({
         return sendJSON(response, 200, { ok: true, service: 'dead-drop', mode: 'cooperative', persistent: dbPath !== ':memory:', aiAvailable });
       }
       if (pathname.startsWith('/api/')) {
-        if (request.method === 'POST') throttle(requestsByIP, request, now);
+        if (request.method === 'POST' || request.method === 'DELETE') throttle(requestsByIP, request, now);
+        if (await handlePilots(request, response, pathname)) return;
         if (pathname === '/api/v1/missions' && request.method === 'POST') {
           const body = await jsonBody(request);
           const host = {
