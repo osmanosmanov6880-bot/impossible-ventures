@@ -157,12 +157,13 @@ function render(){
   ui.viewport.dataset.scene=scene.id;
   ui.viewport.dataset.camera=scene.camera;
   ui.actLabel.textContent=scene.kicker;
-  ui.sceneNumber.textContent='SCENE '+String(scene.number+1).padStart(2,'0')+' / '+String(film.storyLength).padStart(2,'0');
+  const chapterNumber=film.scenes.findIndex(item=>item.id===scene.id)+1;
+  ui.sceneNumber.textContent='SCENE '+String(chapterNumber).padStart(2,'0')+' / '+String(film.storyLength).padStart(2,'0');
   ui.sceneMeta.textContent='IMPOSSIBLE VENTURES / '+(edition==='prototype'?'THREE-SCENE PROTOTYPE':'INTERACTIVE FILM');
   ui.sceneTitle.textContent=scene.title;
   ui.sceneCaption.textContent=narration(state);
   ui.sceneDuration.textContent='СЦЕНА · ~'+scene.seconds+' СЕК · УПРАВЛЯЕТ ЗРИТЕЛЬ';
-  ui.progressFill.style.width=Math.round((scene.number+1)/15*100)+'%';
+  ui.progressFill.style.width=Math.round(chapterNumber/film.storyLength*100)+'%';
   ui.discoveriesCount.textContent=fragments(state).length+' / 3 ФРАГМЕНТА';
   ui.goBack.disabled=state.history.length===0;
   ui.skipIntro.hidden=scene.id!=='s00';
