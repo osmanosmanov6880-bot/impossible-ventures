@@ -8,6 +8,7 @@ services:
       DB_PATH: /data/missions.sqlite
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_MODEL: ${OPENAI_MODEL:-}
+      OPERATOR_TOKEN: ${OPERATOR_TOKEN:-}
     volumes:
       - mission-data:/data
     restart: unless-stopped
