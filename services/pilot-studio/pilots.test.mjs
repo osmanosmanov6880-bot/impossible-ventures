@@ -116,3 +116,24 @@ test('pilot submission rate limit prevents bursts',async t=>{
   }
   assert.equal((await call(base,'/api/v1/pilots',{method:'POST',body:company})).status,429);
 });
+
+
+test('operator endpoint limits repeated unauthorized requests from one address', async t => {
+  const previous = process.env.OPERATOR_TOKEN;
+  process.env.OPERATOR_TOKEN = 'test-operator-token-at-least-thirty-two-characters-long';
+  t.after(() => {
+    if (previous === undefined) delete process.env.OPERATOR_TOKEN;
+    else process.env.OPERATOR_TOKEN = previous;
+  });
+  const base = await openFixture(t);
+  for (let i = 0; i < 30; i++) {
+    const attempt = await call(base, '/api/v1/operator/pilots', { token: 'wrong-key' });
+    assert.equal(attempt.status, 403, 'One of thirty bad requests must not bypass auth');
+  }
+  const limited = await call(base, '/api/v1/operator/pilots', { token: 'wrong-key' });
+  assert.equal(limited.status, 429);
+  const stillLimited = await call(base, '/api/v1/operator/pilots', {
+    token: process.env.OPERATOR_TOKEN
+  });
+  assert.equal(stillLimited.status, 429, 'Staging IP throttle protects before authentication');
+});

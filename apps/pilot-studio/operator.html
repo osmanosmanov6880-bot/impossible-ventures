@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
@@ -8,22 +8,22 @@
 <script src="/pilot/operator.js" defer></script>
 </head>
 <body>
-<header class="nav wrap"><a class="brand" href="/pilot/"><span class="brandmark">I<span>V</span></span><span>IMPOSSIBLE <em>VENTURES</em><small>OPERATOR / LOCAL ACCESS TOKEN</small></span></a><span class="live">ACCESS CONTROLLED / NO SSO</span></header>
-<main class="wrap operator-main"><nav class="operator-mini" aria-label="Operator tools"><a href="../../experiments/operator/" class="secondary">EXPERIMENT COMMAND →</a></nav>
+<header class="nav wrap"><a class="brand" href="/pilot/"><span class="brandmark">I<span>V</span></span><span>IMPOSSIBLE <em>VENTURES</em><small data-i18n="operatorLabel">ОПЕРАТОР / ЛОКАЛЬНЫЙ КЛЮЧ</small></span></a><div class="operator-toolbar"><label for="operatorLocale" class="operator-locale-label" data-i18n="language">Язык</label><select id="operatorLocale" aria-label="Язык / Language / 语言"><option value="ru">Русский</option><option value="en">English</option><option value="zh">中文</option></select><span class="live" data-i18n="access">ДОСТУП ОГРАНИЧЕН / БЕЗ SSO</span></div></header>
+<main class="wrap operator-main"><nav class="operator-mini" aria-label="Operator tools"><a href="../../experiments/operator/" class="secondary" data-i18n="experimentNav">ЭКСПЕРИМЕНТЫ ↗</a></nav>
 <section class="section">
-<div class="eyebrow"><span class="line"></span> PIPELINE OPERATIONS / ALPHA</div>
-<h1 class="operator-heading">Pilot <span class="gradient">Command.</span></h1>
-<p class="operator-explainer">Review genuine requests stored in this specific server. No fictional leads, payments or revenue. Use a strong OPERATOR_TOKEN environment variable; this browser does not persist your token.</p>
+<div class="eyebrow"><span class="line"></span><span data-i18n="eyebrow">ЗАЯВКИ / АЛЬФА</span></div>
+<h1 class="operator-heading"><span data-i18n="pilot">Pilot</span> <span class="gradient" data-i18n="command">Контроль.</span></h1>
+<p class="operator-explainer" data-i18n="explanation">Просматривайте реальные заявки, сохранённые на этом сервере. Никаких вымышленных клиентов и доходов. Установите сильный OPERATOR_TOKEN: браузер не сохраняет ключ в постоянном хранилище.</p>
 <form id="operatorLogin" class="operator-login">
-<label for="operatorToken">OPERATOR ACCESS TOKEN</label>
-<input id="operatorToken" type="password" minlength="32" autocomplete="off" required placeholder="Enter your server-side operator token">
-<button class="primary" type="submit">OPEN PIPELINE ↗</button>
+<label for="operatorToken" data-i18n="tokenLabel">КЛЮЧ ДОСТУПА ОПЕРАТОРА</label>
+<input id="operatorToken" type="password" minlength="32" autocomplete="off" required placeholder="Введите серверный ключ оператора" data-i18n-placeholder="tokenPlaceholder">
+<button class="primary" type="submit" data-i18n="openPipeline">ОТКРЫТЬ ЗАЯВКИ ↗</button>
 </form>
 <p id="operatorState" role="status" aria-live="polite"></p>
 <div class="operator-stats" id="operatorStats" aria-label="Real pipeline counts"></div>
 <div class="operator-list" id="operatorList" aria-label="Submitted pilot requests"></div>
-<button type="button" class="secondary" id="refreshOperator" disabled>REFRESH DATA ↻</button>
+<div class="operator-session-actions"><button type="button" class="secondary" id="refreshOperator" data-i18n="refresh" disabled>ОБНОВИТЬ ↻</button><button type="button" class="secondary" id="logoutOperator" data-i18n="logout" disabled>ВЫЙТИ ↗</button></div>
 </section>
 </main>
-<footer class="footer wrap"><span>IMPOSSIBLE VENTURES / OPERATOR ALPHA</span><span>DO NOT USE FOR HIGHLY SENSITIVE CUSTOMER DATA</span></footer>
+<footer class="footer wrap"><span>IMPOSSIBLE VENTURES / OPERATOR ALPHA</span><span data-i18n="footerWarning">НЕ ИСПОЛЬЗУЙТЕ ДЛЯ КОНФИДЕНЦИАЛЬНЫХ ДАННЫХ КЛИЕНТОВ</span></footer>
 </body></html>

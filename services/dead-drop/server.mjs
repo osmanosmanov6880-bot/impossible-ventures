@@ -176,6 +176,10 @@ async function jsonBody(request) {
 const STATIC_FILES = new Map([
   ['/', 'index.html'],
   ['/privacy.html', 'privacy.html'],
+  ['/status/', 'apps/status/index.html'],
+  ['/status/index.html', 'apps/status/index.html'],
+  ['/status/style.css', 'apps/status/style.css'],
+  ['/status/app.js', 'apps/status/app.js'],
   ['/apps/dead-drop/', 'apps/dead-drop/index.html'],
   ['/apps/dead-drop/index.html', 'apps/dead-drop/index.html'],
   ['/apps/dead-drop/app.js', 'apps/dead-drop/app.js'],
@@ -221,7 +225,7 @@ function sendStatic(response, pathname) {
     '.js': 'text/javascript; charset=utf-8',
     '.svg': 'image/svg+xml'
   }[extname(path)] || 'application/octet-stream';
-  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/')) {
+  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/status/')) {
     response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
   }
   response.writeHead(200, {
@@ -256,7 +260,22 @@ export function createApp({
 } = {}) {
   if (dbPath !== ':memory:') mkdirSync(dirname(resolve(dbPath)), { recursive: true });
   const db = new DatabaseSync(dbPath);
-  db.exec('PRAGMA journal_mode = WAL; PRAGMA secure_delete = ON; CREATE TABLE IF NOT EXISTS missions (code TEXT PRIMARY KEY, created_at INTEGER NOT NULL, payload TEXT NOT NULL); CREATE INDEX IF NOT EXISTS missions_created_at_idx ON missions (created_at);');
+  db.exec('PRAGMA journal_mode = WAL; PRAGMA secure_delete = ON; CREATE TABLE IF NOT EXISTS missions (code TEXT PRIMARY KEY, created_at INTEGER NOT NULL, payload TEXT NOT NULL); CREATE INDEX IF NOT EXISTS missions_created_at_idx ON missions (created_at); CREATE TABLE IF NOT EXISTS runtime_healthcheck (id INTEGER PRIMARY KEY, touched_at INTEGER NOT NULL);');
+  function storageReady() {
+    let started = false;
+    try {
+      db.exec('SAVEPOINT readiness_probe');
+      started = true;
+      db.prepare('INSERT INTO runtime_healthcheck (id, touched_at) VALUES (1, ?) ON CONFLICT(id) DO UPDATE SET touched_at = excluded.touched_at').run(now());
+      db.exec('ROLLBACK TO SAVEPOINT readiness_probe; RELEASE SAVEPOINT readiness_probe');
+      return true;
+    } catch {
+      if (started) {
+        try { db.exec('ROLLBACK TO SAVEPOINT readiness_probe; RELEASE SAVEPOINT readiness_probe'); } catch {}
+      }
+      return false;
+    }
+  }
   // Mission-specific cleanup. Pilot Studio has its own retention mechanism.
   function checkpointAfterDeletion() {
     if (dbPath !== ':memory:') db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
@@ -282,8 +301,21 @@ export function createApp({
     try {
       const url = new URL(request.url || '/', 'http://localhost');
       const pathname = url.pathname;
-      if (request.method === 'GET' && pathname === '/api/v1/health') {
-        return sendJSON(response, 200, { ok: true, service: 'dead-drop', mode: 'cooperative', persistent: dbPath !== ':memory:', aiAvailable });
+      if (request.method === 'GET' && pathname === '/api/v1/live') {
+        return sendJSON(response, 200, { ok: true, service: 'impossible-ventures', check: 'process' });
+      }
+      if (request.method === 'GET' && (pathname === '/api/v1/ready' || pathname === '/api/v1/health')) {
+        const ready = storageReady();
+        return sendJSON(response, ready ? 200 : 503, {
+          ok: ready,
+          service: 'dead-drop',
+          mode: 'cooperative',
+          persistent: dbPath !== ':memory:',
+          aiAvailable,
+          version: '0.8.0',
+          check: 'sqlite-transaction',
+          storage: ready ? 'writable' : 'unavailable'
+        });
       }
       if (pathname.startsWith('/api/')) {
         if (request.method === 'POST' || request.method === 'DELETE') throttle(requestsByIP, request, now);

@@ -55,3 +55,13 @@ Production gates: threat model, authorization review, automated accessibility/br
 - Aggregates count technical session starts and CTA clicks only; they do not prove human reach, sales, ad performance or lift.
 - Content is inserted with DOM textContent, not interpolated into raw HTML. Exported spreadsheet values are neutralized against formula execution.
 - Remaining work includes stronger identity and MFA, granular operator roles, abuse/bot mitigation, distributed rate limits, TLS and legal analysis, monitoring and backup deletion enforcement. These are deployment blockers, not optional polish.
+
+## v0.8 operational controls (source)
+
+- Operator-access GET requests are now throttled per IP in memory (30 requests per rolling minute) before checking the operator key. This is only a **single-instance alpha** safeguard, not distributed brute-force protection.
+- Pilot Studio operator console now supports Russian, English and Chinese and offers an explicit logout that erases its bearer key and visible lead data from the current browser page. **No user identity provider or server-side individual login sessions exist.**
+- The server's `GET /api/v1/ready` performs a SQLite write in a rolled-back savepoint, so a storage-write failure returns HTTP 503 instead of a misleading green status. The page `/status/` shows only process and storage health, never stored PII.
+- `scripts/db-recovery.mjs` performs WAL-safe SQLite snapshots via `VACUUM INTO`, validates expected tables and integrity, emits a SHA-256 checksum, and restores only to new destinations without overwriting an existing database.
+- Backup files are mode `0600` and are **not** served over HTTP or uploaded to GitHub by these scripts. The entire database **still contains private mission fields, agent token hashes and Pilot Studio contact data**.
+- A deleted live mission/lead is **not** automatically erased from existing backups, disk snapshots or off-host storage. Operators must implement backup expiry, encryption, access controls and tested erasure procedures.
+- The current readiness page is not global uptime monitoring, and no external alerting or off-host backup scheduler has been configured.

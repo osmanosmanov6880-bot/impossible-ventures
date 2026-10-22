@@ -1,4 +1,4 @@
-# Deployment playbook — Dead Drop cooperative alpha (v0.5)
+# Deployment playbook — Impossible Ventures staged deployment (v0.8)
 
 **Status:** deployment source/configuration is prepared, but **no public Node server, Railway project, verified domain, or paid model connection is claimed**. Use a controlled staging environment with synthetic test data only. Never put API secrets in Git.
 
@@ -17,7 +17,8 @@ A valid HTTPS staging domain, signed off data handling, distributed rate limits,
 
 ```bash
 docker compose up --build -d
-curl -fsS http://localhost:3000/api/v1/health
+curl -fsS http://localhost:3000/api/v1/ready
+curl -fsS http://localhost:3000/api/v1/live
 docker compose logs -f
 ```
 
@@ -37,20 +38,22 @@ The `Dockerfile` installs `su-exec`. Its minimal entrypoint starts as root to ma
 
 1. Open [Railway](https://railway.com/) and create a new project.
 2. Connect the **GitHub repository** `osmanosmanov6880-bot/impossible-ventures` as the service source.
-3. Railway should detect the root `Dockerfile` automatically. The committed `railway.json` defines the health endpoint `/api/v1/health`.
+3. Railway should detect the root `Dockerfile` automatically. The committed `railway.json` defines the writable-SQLite readiness endpoint `/api/v1/ready`.
 4. Attach a **persistent Railway Volume** to the service with mount path **`/data`**. This is essential. The SQLite database must not live solely in ephemeral container storage.
 5. Under service variables, set `DB_PATH=/data/missions.sqlite`. Set `RAILWAY_RUN_UID=0` if required by Railway's root-owned volume mount. The Docker entrypoint then drops privileges to `node` before launching the app. `PORT` can be supplied by Railway.
 6. **Do not enable `OPENAI_API_KEY` initially.** Keep the deterministic game functional while testing the hosting setup. If/when you add optional AI, set `OPENAI_API_KEY` and `OPENAI_MODEL` as Railway **secrets**, not source files, and enforce a provider spend limit. Both agents still must opt in.
 7. Keep **one replica**. Never scale this SQLite container horizontally or deploy into multiple regions without first migrating persistence to a shared managed database with safe transactions.
 8. In the service Networking settings, **Generate Domain** (or attach your verified domain) and confirm HTTPS is active. Copy the actual assigned URL only after deployment succeeds; do not guess it.
-9. Confirm both endpoints work:
+9. Confirm process and writable database checks:
 
    ```bash
-   curl -fsS "https://YOUR-ASSIGNED-DOMAIN/api/v1/health"
+   curl -fsS "https://YOUR-ASSIGNED-DOMAIN/api/v1/live"
+   curl -fsS "https://YOUR-ASSIGNED-DOMAIN/api/v1/ready"
    ```
 
-   Open `https://YOUR-ASSIGNED-DOMAIN/apps/dead-drop/` in two browsers, check room joining, role isolation, finalization and JSON export. Test deletion and confirm both roles are revoked.
-10. Configure disk backups, monitoring, service access, domain ownership, incident response and resource budgets in the hosting account before any customer pilot. Logs must not capture private campaign payloads or bearer tokens.
+   Open `https://YOUR-ASSIGNED-DOMAIN/status/` to check RU/EN/ZH diagnostics, then open `https://YOUR-ASSIGNED-DOMAIN/apps/dead-drop/` in two browsers, check room joining, role isolation, finalization and JSON export. Test deletion and confirm both roles are revoked.
+10. Supply `OPERATOR_TOKEN` as a strong cryptographically generated **secret** for the Pilot Studio and Experiment Lab operator tools. Use a verified account system rather than a shared token for production.
+11. Configure encrypted *off-host* backups, tested restoration, monitoring, service access, domain ownership, incident response and resource budgets in the hosting account before any customer pilot. Logs must not capture private campaign payloads or bearer tokens.
 
 Official Railway documentation:
 - [Dockerfile detection](https://docs.railway.com/builds/dockerfiles)
@@ -75,10 +78,16 @@ Static mode is intentionally training-only. GitHub Pages **cannot** run the Node
 - [ ] JSON export, confirmation-based deletion, restart and expiry tested
 - [ ] AI disabled by default; provider keys not in repo/logs
 - [ ] Login/abuse/bot controls, rate-limits and audit requirements reviewed
+- [ ] SQLite WAL snapshot/restore drill passed for all three products and backups kept off-host under an enforceable retention policy
+- [ ] Readiness `/api/v1/ready` reflects a writable persistent volume
 - [ ] Restore backup and deletion/privacy impact documented
 - [ ] Privacy controller, legal basis and supplier transfer assessment completed for any real data
 
 A green staging demo is **not** enough to describe this as a production, GDPR-certified or commercially scaled platform.
+
+## Shared database recovery and status
+
+This project now uses one SQLite database for Dead Drop, Pilot Studio **and Experiment Lab**. The recovery CLI protects all three products, including anonymous experiment sessions and aggregated counters. See [Operations & Recovery Runbook](operations-runbook.md) for `VACUUM INTO` snapshot, checksum validation, **non-overwriting** restoration and the implications of backup retention for user-requested deletion. No actual off-host backup scheduler or live cloud deployment is created by these source files.
 
 ## Static demo delivery when GitHub Pages is not enabled
 
