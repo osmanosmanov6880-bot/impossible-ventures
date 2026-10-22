@@ -212,7 +212,16 @@ function renderTemplates(selected = elements.venture.value) {
       el('span','venture-tag',tpl.audience)
     );
     card.addEventListener('click',()=>applyTemplate(tpl));
-    elements.ventureGrid.appendChild(card);
+    const wrapper=el('div','venture-shell');
+    wrapper.appendChild(card);
+    // Separate interactive action: template remains selectable by its button,
+    // while the link opens an actual standalone world without credentials.
+    const playWords={ru:'ИГРАТЬ БЕЗ РЕГИСТРАЦИИ ↗',en:'PLAY THE INTERACTIVE WORLD ↗',zh:'无需注册即可体验 ↗'};
+    const worldLink=el('a','venture-play',playWords[elements.lang.value]||playWords.ru);
+    worldLink.href='../apps/'+tpl.id+'/';
+    worldLink.setAttribute('aria-label',tpl.name+' — '+worldLink.textContent);
+    wrapper.appendChild(worldLink);
+    elements.ventureGrid.appendChild(wrapper);
   }
 }
 function setPermission() {
