@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1212">
+  <meta name="description" content="Проверка доступности сервера Impossible Ventures: Dead Drop Agency и Pilot Studio. Без регистрации.">
+  <meta name="robots" content="noindex,follow">
+  <title>Состояние сервера — Impossible Ventures</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a href="../" class="brand" aria-label="Impossible Ventures — главная">
+      <span class="brand-emblem" aria-hidden="true">IV<span>·</span></span>
+      <span class="brand-words">IMPOSSIBLE <strong>VENTURES</strong><small>SYSTEM OPERATIONS / ALPHA</small></span>
+    </a>
+    <div class="header-actions">
+      <label class="language-label" for="statusLocale" data-i18n="language">Язык</label>
+      <select id="statusLocale" aria-label="Язык / Language / 语言">
+        <option value="ru">Русский</option>
+        <option value="en">English</option>
+        <option value="zh">中文</option>
+      </select>
+      <a class="back-link" href="../" data-i18n="home">На главную ↗</a>
+    </div>
+  </header>
+  <main class="page">
+    <div class="eyebrow"><span class="led" aria-hidden="true"></span> <span data-i18n="system">ДИАГНОСТИКА / LIVE</span></div>
+    <section class="hero" aria-labelledby="heroHeading">
+      <div>
+        <h1 id="heroHeading"><span data-i18n="heroFirst">Всё под</span><br><em data-i18n="heroSecond">контролем.</em></h1>
+        <p class="intro" data-i18n="intro">Проверяем не красивую анимацию, а реальную доступность этого экземпляра сервера и возможность записи в базу данных.</p>
+      </div>
+      <div class="status-plate" id="statusPlate" data-state="pending" role="status" aria-live="polite">
+        <div class="plate-icon" aria-hidden="true"><span class="pulse-core"></span><span class="orbit orbit-one"></span><span class="orbit orbit-two"></span></div>
+        <div class="plate-label" data-i18n="overall">ОБЩЕЕ СОСТОЯНИЕ</div>
+        <strong id="overallStatus" data-i18n="checking">Проверка...</strong>
+        <small id="overallDetail" data-i18n="connecting">Подключаемся к API</small>
+      </div>
+    </section>
+    <div class="section-caption">
+      <span data-i18n="checks">ДВЕ НЕЗАВИСИМЫЕ ПРОВЕРКИ</span>
+      <span class="rule" aria-hidden="true"></span>
+      <span>01 / 02</span>
+    </div>
+    <section class="metrics" aria-label="Статус сервисов">
+      <article class="metric" id="processMetric" data-state="pending">
+        <div class="metric-meta"><span>01 / PROCESS</span><span class="metric-dot" aria-hidden="true"></span></div>
+        <h2 data-i18n="processTitle">Сервер приложения</h2>
+        <strong id="processStatus" data-i18n="checking">Проверка...</strong>
+        <p data-i18n="processDesc">Проверяем, отвечает ли запущенный Node.js-процесс на запрос.</p>
+        <span class="metric-path">GET /api/v1/live</span>
+      </article>
+      <article class="metric" id="storageMetric" data-state="pending">
+        <div class="metric-meta"><span>02 / STORAGE</span><span class="metric-dot" aria-hidden="true"></span></div>
+        <h2 data-i18n="storageTitle">База данных</h2>
+        <strong id="storageStatus" data-i18n="checking">Проверка...</strong>
+        <p data-i18n="storageDesc">Проверяем запись в SQLite с откатом пробной транзакции. Данные клиентов не изменяются.</p>
+        <span class="metric-path">GET /api/v1/ready</span>
+      </article>
+    </section>
+    <section class="foot-panel" aria-labelledby="detailsTitle">
+      <div class="foot-head">
+        <div>
+          <span class="eyebrow" data-i18n="detailEyebrow">ДЕТАЛИ НАБЛЮДЕНИЯ</span>
+          <h2 id="detailsTitle" data-i18n="detailsTitle">Проверка без секретов.</h2>
+        </div>
+        <button id="refreshStatus" type="button" class="action"><span data-i18n="refresh">Проверить снова</span> <span aria-hidden="true">↗</span></button>
+      </div>
+      <div class="details">
+        <div><span data-i18n="lastChecked">Последняя проверка</span><strong id="lastChecked" data-i18n="notYet">Ещё не проводилась</strong></div>
+        <div><span data-i18n="modeTitle">Режим</span><strong id="modeValue" data-i18n="unknown">Не определён</strong></div>
+        <div><span data-i18n="credentialsTitle">Данные пользователей</span><strong data-i18n="notShown">Не отображаются</strong></div>
+      </div>
+      <p class="disclaimer" data-i18n="disclaimer">Это техническая проверка одного экземпляра сервера, а не гарантия непрерывной работы во всём мире. На статическом GitHub Pages API недоступен — это нормально для демоверсии.</p>
+    </section>
+    <nav class="destinations" aria-label="Продукты">
+      <a href="../apps/dead-drop/"><span>DEAD DROP AGENCY</span><span data-i18n="visitGame">Открыть игру ↗</span></a>
+      <a href="../pilot/"><span>PILOT STUDIO</span><span data-i18n="visitPilot">Открыть кабинет ↗</span></a>
+    </nav>
+  </main>
+  <footer class="site-footer"><span>IMPOSSIBLE VENTURES / OPERATIONAL ALPHA</span><a href="../privacy.html" data-i18n="privacy">Обработка данных ↗</a></footer>
+</body>
+</html>
