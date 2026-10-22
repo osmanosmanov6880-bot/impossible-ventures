@@ -20,8 +20,24 @@ def build() -> None:
 
     for name in ("index.html", "privacy.html"):
         copy2(ROOT / name, DIST / name)
-    for name in ("dead-drop", "appeal-2049", "antipersona", "shared"):
+    for name in ("dead-drop", "appeal-2049", "antipersona", "brief-theatre", "adbiome", "museum-of-attention", "shared"):
         copytree(ROOT / "apps" / name, DIST / "apps" / name)
+    republic = DIST / "apps" / "attention-republic"
+    republic.mkdir()
+    for asset in ("index.html", "app.js"):
+        copy2(ROOT / "apps" / "attention-republic" / asset, republic / asset)
+    source_page = republic / "index.html"
+    republic_html = source_page.read_text(encoding="utf-8")
+    if "<body" not in republic_html:
+        raise RuntimeError("Republic static source has no body element")
+    republic_html = republic_html.replace(
+        '<body data-universe="republic">',
+        '<body data-universe="republic" data-static-preview="true">',
+        1,
+    )
+    source_page.write_text(republic_html, encoding="utf-8")
+    if not (republic / "index.html").is_file() or (republic / "operator.html").exists():
+        raise RuntimeError("Republic static bundle must contain only the untracked public preview")
     copytree(ROOT / "apps" / "status", DIST / "status")
     status_html = DIST / "status" / "index.html"
     status_content = status_html.read_text(encoding="utf-8")
@@ -130,6 +146,17 @@ def build() -> None:
         "apps/dead-drop/i18n.js",
         "apps/appeal-2049/index.html",
         "apps/antipersona/index.html",
+        "apps/brief-theatre/index.html",
+        "apps/brief-theatre/app.js",
+        "apps/brief-theatre/engine.mjs",
+        "apps/adbiome/index.html",
+        "apps/adbiome/app.js",
+        "apps/adbiome/engine.mjs",
+        "apps/museum-of-attention/index.html",
+        "apps/museum-of-attention/app.js",
+        "apps/museum-of-attention/engine.mjs",
+        "apps/attention-republic/index.html",
+        "apps/attention-republic/app.js",
         "apps/antipersona/app.js",
         "apps/antipersona/engine.mjs",
         "apps/shared/studio.css",
@@ -144,6 +171,10 @@ def build() -> None:
     if "disabled aria-disabled" not in (DIST / "pilot/index.html").read_text(encoding="utf-8"):
         raise RuntimeError("Static Pilot Studio application button must be disabled")
 
+    if (DIST / "apps" / "attention-republic" / "operator.html").exists():
+        raise RuntimeError("Republic operator UI must not be in static preview")
+    if 'data-static-preview="true"' not in (DIST / "apps/attention-republic/index.html").read_text(encoding="utf-8"):
+        raise RuntimeError("Republic static-only preview must be clearly marked")
     if (DIST / "experiments" / "operator").exists():
         raise RuntimeError("Operator console must not be in public static preview")
     if 'data-static-preview="true"' not in (DIST / "experiments/index.html").read_text(encoding="utf-8"):
