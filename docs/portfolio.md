@@ -14,6 +14,14 @@ Build seven distinct brands with separate value propositions and customer experi
 | Museum of Attention | Brands, schools | Interactive exhibits | Sponsorship, licenses | Concept |
 | Attention Republic | Creative communities | Challenges and peer collaboration | Sponsored challenges | Concept |
 
+## Five-wave alpha: status clarification
+
+The seven venture names above are distinct creative concepts in a server-provided **template gallery**, available in Commercial Command as editable starter ideas. Dead Drop is an interactive cooperative browser prototype; Appeal 2049 is a separate browser critique demo. The other five are not yet independent deployed products or companies.
+
+Commercial Command v1.0 beta implements organization-scoped campaign drafts, approved-only creative previews, expiring capability credentials, opt-in A/B-to-pilot-form attribution, private customer proposal review, and data export/deletion. Payment collection, advertising delivery, identity verification, audited GDPR compliance, multi-instance tenant isolation and real sales are still unimplemented.
+
+See [five-wave release evidence](five-wave-release.md).
+
 ## Proposed production stack (not implemented)
 
 - Next.js / TypeScript frontends, PostgreSQL with tenant boundaries.
