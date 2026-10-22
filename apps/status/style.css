@@ -209,7 +209,7 @@ h1 em {
 .details span { color: var(--muted); font-size: 13px; }
 .details strong { font-size: 16px; line-height:1.5; }
 .disclaimer { max-width:950px; font-size: 14px; color: var(--muted); line-height:1.8; padding-top:12px; margin-bottom:0; border-top:1px solid #334e4157; }
-.destinations { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:17px; margin-top:23px; }
+.destinations { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:17px; margin-top:23px; }
 .destinations a { display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; padding:23px 27px; background:#172622; border:1px solid var(--line); border-radius:12px; font-size:14px; }
 .destinations a span:first-child { font-weight:800; letter-spacing:.035em; }
 .destinations a span:last-child { color:var(--signal); }
