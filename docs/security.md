@@ -42,3 +42,14 @@ Production gates: threat model, authorization review, automated accessibility/br
 - Consent flags are scoped to ephemeral bearer tokens, not verified legal identities.
 - No model hallucination-free guarantee. Human fact-checking of all campaign materials is mandatory.
 - No public server/TLS/monitoring has been confirmed. Do not represent the source as production-hardened.
+
+
+## v0.7 operational controls (source)
+
+- Operator-access GET requests are now throttled per IP in memory (30 requests per rolling minute) before checking the operator key. This is only a **single-instance alpha** safeguard, not distributed brute-force protection.
+- Pilot Studio operator console now supports Russian, English and Chinese and offers an explicit logout that erases its bearer key and visible lead data from the current browser page. **No user identity provider or server-side individual login sessions exist.**
+- The server's `GET /api/v1/ready` performs a SQLite write in a rolled-back savepoint, so a storage-write failure returns HTTP 503 instead of a misleading green status. The page `/status/` shows only process and storage health, never stored PII.
+- `scripts/db-recovery.mjs` performs WAL-safe SQLite snapshots via `VACUUM INTO`, validates expected tables and integrity, emits a SHA-256 checksum, and restores only to new destinations without overwriting an existing database.
+- Backup files are mode `0600` and are **not** served over HTTP or uploaded to GitHub by these scripts. The entire database **still contains private mission fields, agent token hashes and Pilot Studio contact data**.
+- A deleted live mission/lead is **not** automatically erased from existing backups, disk snapshots or off-host storage. Operators must implement backup expiry, encryption, access controls and tested erasure procedures.
+- The current readiness page is not global uptime monitoring, and no external alerting or off-host backup scheduler has been configured.
