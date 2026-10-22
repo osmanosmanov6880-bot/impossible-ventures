@@ -789,6 +789,7 @@ test('Appeal 2049 premium mobile tribunal reviews ideas, imports finalized Dead 
   });
   await page.waitForFunction(()=>document.getElementById('product').value==='Aurora research');
   assert.equal(await page.locator('#product').inputValue(),'Aurora research');
+  assert.equal(await page.locator('#reviewContent').isHidden(),true,'New dossier must invalidate the old editorial report');
   assert.equal(await page.locator('#goal').inputValue(),'leads');
   assert.ok(!(await page.locator('#idea').inputValue()).includes('PRIVATE ROLE SIGNAL'));
   await page.locator('#caseForm').evaluate(form=>form.requestSubmit());
@@ -822,6 +823,11 @@ test('AntiPersona mobile adversarial debate challenges idea, scores rebuttal, ex
   await page.locator('#pressure').selectOption('intense');
   await page.locator('#briefForm').evaluate(form=>form.requestSubmit());
   await page.locator('#results').waitFor({state:'visible'});
+ const stylesheet=await page.evaluate(()=>{
+   const sheet=Array.from(document.styleSheets).find(s=>s.href?.includes('/apps/shared/studio.css'));
+   return Boolean(sheet?.cssRules?.length) && getComputedStyle(document.body).backgroundColor!=='rgba(0, 0, 0, 0)';
+ });
+ assert.equal(stylesheet,true,'Premium shared CSS must actually load, not merely return HTML');
   assert.equal(await page.locator('#challengeList .card').count(),3);
   assert.equal(await page.locator('#chosenChallenge option').count(),3);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
