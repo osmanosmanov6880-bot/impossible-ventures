@@ -682,7 +682,7 @@ test('Creative World -> Commercial Command: local JSON import, no auto-save, rea
   const demo=await context.newPage();
   attachErrors(demo,errors);
   await demo.goto(base+'/commercial/');
-  await demo.locator('#ventureGrid .venture-card').first().waitFor();
+  await demo.locator('#ventureGrid .venture-card').first().waitFor({state:'attached'});
   await demo.locator('#viewDemo').click();
   await demo.locator('#worldImport').setInputFiles(file);
   await demo.getByText(/Творческий результат загружен в редактор/).first().waitFor();
@@ -694,7 +694,7 @@ test('Creative World -> Commercial Command: local JSON import, no auto-save, rea
   const owner=await context.newPage();
   attachErrors(owner,errors);
   await owner.goto(base+'/commercial/');
-  await owner.locator('#ventureGrid .venture-card').first().waitFor();
+  await owner.locator('#ventureGrid .venture-card').first().waitFor({state:'attached'});
   await owner.locator('#bootstrapForm input[name="name"]').fill('Aurora Verified Internal QA');
   await owner.locator('#bootstrapForm input[name="systemToken"]').fill(operatorToken);
   await owner.locator('#bootstrapForm').evaluate(form=>form.requestSubmit());
