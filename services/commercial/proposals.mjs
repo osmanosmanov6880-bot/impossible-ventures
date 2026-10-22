@@ -4,6 +4,8 @@ const makeId = () => randomBytes(12).toString('hex');
 const makeToken = () => 'ivp_' + randomBytes(32).toString('base64url');
 const hash = value => createHash('sha256').update(value).digest('hex');
 const CURRENCIES = ['USD','EUR'];
+export const PROPOSAL_RETENTION_DAYS = 180;
+const RETENTION_MS = PROPOSAL_RETENTION_DAYS * 86_400_000;
 const STATUS = ['draft','sent','accepted','declined','cancelled'];
 
 function textField(v,label,Err,{min=2,max=220}={}){
@@ -71,6 +73,12 @@ export function createProposals({db,now=Date.now,workspaces,campaigns,ApiError,j
     'updated_at INTEGER NOT NULL, decided_at INTEGER);'+
     'CREATE INDEX IF NOT EXISTS commercial_proposals_ws ON commercial_proposals(workspace_id,created_at);'
   );
+  function cleanup(){
+    db.prepare('DELETE FROM commercial_proposals WHERE created_at < ?').run(now() - RETENTION_MS);
+  }
+  cleanup();
+  const purgeTimer=setInterval(cleanup,3_600_000);
+  purgeTimer.unref();
   function find(workspace,id){
     const row=db.prepare('SELECT * FROM commercial_proposals WHERE workspace_id = ? AND id = ?').get(workspace,id);
     if(!row)throw new ApiError(404,'Proposal not found');
@@ -102,6 +110,7 @@ export function createProposals({db,now=Date.now,workspaces,campaigns,ApiError,j
     };
   }
   async function handle(request,response,path){
+    cleanup();
     const collection=/^\/api\/v1\/workspaces\/([a-f0-9]{24})\/proposals$/.exec(path);
     if(collection&&request.method==='GET'){
       workspaces.requireRole(request,collection[1]);
@@ -218,5 +227,5 @@ export function createProposals({db,now=Date.now,workspaces,campaigns,ApiError,j
     if(path.startsWith('/api/v1/proposals/'))throw new ApiError(404,'Proposal API route not found');
     return false;
   }
-  return {handle,summarize};
+  return {handle,summarize,stop:()=>clearInterval(purgeTimer),cleanup};
 }
