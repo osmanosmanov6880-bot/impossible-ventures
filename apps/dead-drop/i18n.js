@@ -194,6 +194,10 @@
     ["Deletion was not confirmed by the server","Сервер не подтвердил удаление","服务器未确认删除"],
     ["Deletion failed. Please retry.","Не удалось удалить. Попробуйте ещё раз.","删除失败，请重试。"]
   );
+  entries.push(
+    ["DATA & PRIVACY ↗","ДАННЫЕ И ПРИВАТНОСТЬ ↗","数据与隐私 ↗"],
+    ["READ THE DATA HANDLING NOTICE ↗","ПРОЧИТАТЬ ОБРАБОТКУ ДАННЫХ ↗","查看数据处理说明 ↗"]
+  );
   const maps = { ru: new Map(), zh: new Map() };
   const reverse = new Map();
   for (const [en, ru, zh] of entries) {
