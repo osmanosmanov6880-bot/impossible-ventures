@@ -77,6 +77,18 @@
 
     <section class="section shell" id="builder">
       <div class="section-heading"><div><div class="eyebrow"><span class="line"></span> 03 / CAMPAIGN BUILDER</div><h2 data-i18n="buildTitle">От идеи к рекламному макету.</h2><p data-i18n="buildExplain">Редактируйте материал, сохраните версию и отправьте на проверку владельцу. Одобрение публикует лишь предпросмотр, не запускает реальную рекламу.</p></div><span class="section-no">03 / 04</span></div>
+      <div class="creative-import" aria-label="Local creative report import">
+        <div class="creative-import-heading">
+          <span class="venture-no">CREATIVE WORLD → COMMERCIAL DRAFT</span>
+          <strong data-i18n="importTitle">Импортировать результат игры в рекламный черновик.</strong>
+          <p data-i18n="importDisclaimer">Загрузите локальный JSON из AntiPersona, Brief Theatre, AdBiome, Museum of Attention или Attention Republic. Файл обрабатывается в браузере. Ничего не отправляется на сервер до отдельного нажатия «Сохранить черновик».</p>
+        </div>
+        <div class="creative-import-control">
+          <label for="worldImport" data-i18n="importLabel">ВЫБРАТЬ JSON-ФАЙЛ</label>
+          <input type="file" id="worldImport" accept=".json,application/json" aria-describedby="worldImportState">
+          <p id="worldImportState" class="small" aria-live="polite" role="status"></p>
+        </div>
+      </div>
       <div class="builder-grid">
         <form id="campaignForm" class="surface">
           <div class="panel-bar"><span data-i18n="editorTitle">РЕДАКТОР КРЕАТИВА</span><span id="editingRevision">NEW / DRAFT</span></div>
