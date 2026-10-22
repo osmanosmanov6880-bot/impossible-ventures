@@ -423,6 +423,8 @@ test('Experiment Lab works in an actual mobile browser: untracked story, operato
   mkdirSync('artifacts', { recursive: true });
   await visitor.screenshot({ path: 'artifacts/experiment-lab-mobile-creative.png', fullPage: true });
 
+  await visitor.waitForFunction(() => { const c = document.querySelector('#cta'); return !!c && !c.hidden && !c.disabled; });
+  assert.equal(await visitor.locator('#cta').isEnabled(), true, 'Consent-based A/B assignment must re-enable the CTA');
   await visitor.locator('#cta').click();
   await visitor.waitForURL('**/pilot/#request');
   await operator.locator('#refresh').click();
