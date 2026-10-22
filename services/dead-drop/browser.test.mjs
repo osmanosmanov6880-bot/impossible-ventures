@@ -1086,3 +1086,91 @@ test('global seven-world portfolio routes, RU/EN/ZH translation and category fil
  await page.screenshot({path:'artifacts/impossible-ventures-seven-worlds-mobile.png',fullPage:true});
  assert.deepEqual(errors,[]);
 });
+
+
+test('Creative Pipeline accepts local Appeal draft and Commercial Command demo imports manually reviewed handoff with zero server writes',async t=>{
+ const {context,base}=await setup(t,390,844);
+ const page=await context.newPage(),errors=[],mutations=[];
+ attachErrors(page,errors);
+ page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))mutations.push(r.method()+' '+r.url());});
+ await page.goto(base+'/apps/pipeline/');
+ await page.locator('#importFile').setInputFiles({
+  name:'appeal-complete.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({
+   kind:'appeal-2049-editorial-report',
+   evaluation:{evidenceVerified:false,input:{
+    product:'Aurora Studio',
+    audience:'Small creative agencies with demanding review schedules',
+    idea:'Show a clear workflow demonstration and invite agency teams to request a transparent trial.',
+    evidence:'Documentation pending independent review',
+    goal:'leads'
+   }},
+   sensitiveToken:'PRIVATE-SECRET-NEVER-COPY'
+  }))
+ });
+ await page.locator('#editor').waitFor({state:'visible'});
+ assert.equal(await page.locator('#campaignTitle').inputValue(),'Aurora Studio / appeal-2049');
+ assert.ok(!(await page.locator('#campaignBody').inputValue()).includes('PRIVATE-SECRET'));
+ await page.locator('#campaignHeadline').fill('A verifiable Aurora campaign preview');
+ assert.match(await page.locator('#previewHeadline').innerText(),/verifiable Aurora/);
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+ mkdirSync('artifacts',{recursive:true});
+ await page.screenshot({path:'artifacts/creative-pipeline-mobile.png',fullPage:true});
+ const download=page.waitForEvent('download');
+ await page.locator('#download').click();
+ const handoff=JSON.parse(readFileSync(await(await download).path(),'utf8'));
+ assert.equal(handoff.kind,'iv-premium-campaign-handoff-v1');
+ assert.equal(handoff.draft.headline,'A verifiable Aurora campaign preview');
+ assert.equal(handoff.draft._bridge.factsVerified,false);
+ assert.equal(handoff.draft._bridge.persisted,false);
+ assert.ok(!JSON.stringify(handoff).includes('PRIVATE-SECRET'));
+
+ await page.goto(base+'/commercial/');
+ await page.locator('#viewDemo').click();
+ await page.locator('#worldImport').setInputFiles({
+  name:'reviewed-handoff.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(handoff))
+ });
+ await page.waitForFunction(()=>{
+  const c=document.querySelector('[name="headline"]');
+  return c && c.value==='A verifiable Aurora campaign preview';
+ });
+ assert.match(await page.locator('#worldImportState').innerText(),/загружен|imported|loaded/i);
+ assert.deepEqual(mutations,[]);
+ assert.deepEqual(errors,[]);
+});
+
+test('Economics Studio computes real formulas from explicit assumptions, exports structured CSV/JSON and localizes RU/EN/ZH',async t=>{
+ const {context,base}=await setup(t,390,844);
+ const page=await context.newPage(),errors=[],posts=[];
+ attachErrors(page,errors);
+ page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))posts.push(r.url());});
+ await page.goto(base+'/economics/');
+ await page.locator('#results').waitFor({state:'visible'});
+ for(const [field,value] of [
+  ['monthlyMediaBudget','1000'],['cpm','10'],['ctrPercent','2'],
+  ['purchaseConversionPercent','5'],['averageOrderValue','50'],
+  ['grossMarginPercent','50'],['monthlyOperatingCost','200']
+ ])await page.locator('#'+field).fill(value);
+ await page.locator('#modelForm').evaluate(form=>form.requestSubmit());
+ assert.equal(await page.locator('.scenario-card').count(),3);
+ assert.equal(await page.locator('.bar-row').count(),3);
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+ mkdirSync('artifacts',{recursive:true});
+ await page.screenshot({path:'artifacts/economics-mobile-3-scenarios.png',fullPage:true});
+ const jsonDownload=page.waitForEvent('download');
+ await page.locator('#jsonExport').click();
+ const file=JSON.parse(readFileSync(await(await jsonDownload).path(),'utf8'));
+ assert.equal(file.kind,'iv-financial-what-if-v1');
+ assert.equal(file.scenarios[1].modeledOrders,100);
+ assert.equal(file.scenarios[1].modeledNetContribution,1300);
+ assert.equal(file.verifiedRevenue,null);
+ const csvDownload=page.waitForEvent('download');
+ await page.locator('#csvExport').click();
+ const csv=readFileSync(await(await csvDownload).path(),'utf8');
+ assert.match(csv,/base,100000,2000,100,5000,1200,1300,12,5,48/);
+ await page.locator('#locale').selectOption('en');
+ assert.match(await page.locator('#results').innerText(),/Three possible modeled cases/);
+ await page.locator('#locale').selectOption('zh');
+ assert.match(await page.locator('#results').innerText(),/三种可能/);
+ assert.deepEqual(posts,[]);
+ assert.deepEqual(errors,[]);
+});
