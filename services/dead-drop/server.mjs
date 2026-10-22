@@ -176,6 +176,8 @@ async function jsonBody(request) {
 
 const STATIC_FILES = new Map([
   ['/', 'index.html'],
+  ['/site.css', 'site.css'],
+  ['/site.js', 'site.js'],
   ['/privacy.html', 'privacy.html'],
   ['/status/', 'apps/status/index.html'],
   ['/status/index.html', 'apps/status/index.html'],
@@ -253,7 +255,7 @@ function sendStatic(response, pathname) {
     '.mjs': 'text/javascript; charset=utf-8',
     '.svg': 'image/svg+xml'
   }[extname(path)] || 'application/octet-stream';
-  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/apps/appeal-2049/') || pathname.startsWith('/apps/antipersona/') || pathname.startsWith('/apps/brief-theatre/') || pathname.startsWith('/apps/adbiome/') || pathname.startsWith('/apps/museum-of-attention/') || pathname.startsWith('/apps/attention-republic/') || pathname.startsWith('/apps/shared/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/status/')) {
+  if (pathname === '/' || pathname === '/site.css' || pathname === '/site.js' || pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/apps/appeal-2049/') || pathname.startsWith('/apps/antipersona/') || pathname.startsWith('/apps/brief-theatre/') || pathname.startsWith('/apps/adbiome/') || pathname.startsWith('/apps/museum-of-attention/') || pathname.startsWith('/apps/attention-republic/') || pathname.startsWith('/apps/shared/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/status/')) {
     response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
   }
   response.writeHead(200, {
