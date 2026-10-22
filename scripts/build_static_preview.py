@@ -167,6 +167,7 @@ def build() -> None:
         "apps/dead-drop/i18n.js",
         "apps/appeal-2049/index.html",
         "apps/creative-worlds/runner.mjs",
+        "apps/creative-worlds/bridge.mjs",
         "apps/creative-worlds/engine.mjs",
         "apps/creative-worlds/worlds.mjs",
         "apps/creative-worlds/style.css",
