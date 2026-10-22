@@ -22,6 +22,7 @@ import { fileURLToPath } from 'node:url';
 
 const REQUIRED_TABLES = ['missions', 'pilot_leads'];
 const EXPERIMENT_TABLES = ['ab_experiments', 'ab_sessions', 'ab_daily'];
+const REPUBLIC_TABLES = ['republic_challenges', 'republic_sessions', 'republic_daily'];
 
 function absolutePath(path, label) {
   if (typeof path !== 'string' || path.trim().length < 2) {
@@ -48,7 +49,7 @@ function integritySummary(db) {
   const integrity = db.prepare('PRAGMA quick_check').get();
   if (integrity?.quick_check !== 'ok') throw new Error('Database failed SQLite quick_check');
   const tables = db.prepare(
-    "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('missions','pilot_leads','ab_experiments','ab_sessions','ab_daily')"
+    "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('missions','pilot_leads','ab_experiments','ab_sessions','ab_daily','republic_challenges','republic_sessions','republic_daily')"
   ).all();
   const found = new Set(tables.map(row => row.name));
   for (const required of REQUIRED_TABLES) {
@@ -59,6 +60,11 @@ function integritySummary(db) {
     throw new Error('Incomplete Experiment Lab schema in database');
   }
   const hasExperimentLab = experimentTablesFound.length === EXPERIMENT_TABLES.length;
+  const republicTablesFound = REPUBLIC_TABLES.filter(name => found.has(name));
+  if (republicTablesFound.length > 0 && republicTablesFound.length !== REPUBLIC_TABLES.length) {
+    throw new Error('Incomplete Attention Republic schema in database');
+  }
+  const hasRepublic = republicTablesFound.length === REPUBLIC_TABLES.length;
   return {
     integrity: 'ok',
     missions: Number(db.prepare('SELECT COUNT(*) AS n FROM missions').get().n),
@@ -66,7 +72,11 @@ function integritySummary(db) {
     experimentCampaigns: hasExperimentLab ? Number(db.prepare('SELECT COUNT(*) AS n FROM ab_experiments').get().n) : 0,
     experimentSessions: hasExperimentLab ? Number(db.prepare('SELECT COUNT(*) AS n FROM ab_sessions').get().n) : 0,
     experimentDailyRows: hasExperimentLab ? Number(db.prepare('SELECT COUNT(*) AS n FROM ab_daily').get().n) : 0,
-    experimentLabPresent: hasExperimentLab
+    experimentLabPresent: hasExperimentLab,
+    republicPresent: hasRepublic,
+    republicChallenges: hasRepublic ? Number(db.prepare('SELECT COUNT(*) AS n FROM republic_challenges').get().n) : 0,
+    republicSessions: hasRepublic ? Number(db.prepare('SELECT COUNT(*) AS n FROM republic_sessions').get().n) : 0,
+    republicDailyRows: hasRepublic ? Number(db.prepare('SELECT COUNT(*) AS n FROM republic_daily').get().n) : 0
   };
 }
 
@@ -145,7 +155,11 @@ export function restoreDatabase({ backupPath, outputPath, now = Date.now } = {})
         restored.experimentCampaigns !== original.experimentCampaigns ||
         restored.experimentSessions !== original.experimentSessions ||
         restored.experimentDailyRows !== original.experimentDailyRows ||
-        restored.experimentLabPresent !== original.experimentLabPresent) {
+        restored.experimentLabPresent !== original.experimentLabPresent ||
+        restored.republicPresent !== original.republicPresent ||
+        restored.republicChallenges !== original.republicChallenges ||
+        restored.republicSessions !== original.republicSessions ||
+        restored.republicDailyRows !== original.republicDailyRows) {
       throw new Error('Restored database row counts do not match the backup');
     }
     if (hashFile(destination) !== hashFile(source)) {
