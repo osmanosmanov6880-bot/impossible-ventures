@@ -559,3 +559,90 @@ test('status dashboard verifies live SQLite writes, multilingual copy and degrad
   assert.equal(await page.locator('#overallStatus').textContent(), '服务响应正常');
   assert.deepEqual(exceptions, []);
 });
+
+
+test('FIVE PLAYABLE WORLDS: five distinct RU/EN/ZH experiences on Chromium mobile, decisions, undo and local artifact export', async t => {
+  const { context, base } = await setup(t, 390, 844);
+  const errors = [];
+  const worlds = [
+    ['anti-persona', 4, false],
+    ['brief-theatre', 4, true],
+    ['ad-biome', 4, false],
+    ['museum-of-attention', 4, false],
+    ['attention-republic', 5, false]
+  ];
+  mkdirSync('artifacts', { recursive: true });
+  for (const [id, chapters, requiredScript] of worlds) {
+    const page = await context.newPage();
+    attachErrors(page, errors);
+    await page.goto(base + '/apps/' + id + '/');
+    await page.waitForFunction(() =>
+      document.querySelector('#worldMode')?.textContent?.includes('OF 07')
+    );
+    assert.equal(await page.locator('html').getAttribute('lang'), 'ru');
+    assert.equal(await page.locator('#sessionPanel').isHidden(), true);
+    assert.equal(await page.locator('#finishPanel').isHidden(), true);
+    const width = await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2);
+    assert.equal(width, true, 'Initial creative-world screen must fit a 390px viewport: ' + id);
+
+    // The experience needs no registration, company account or server API.
+    await page.locator('#demoProject').click();
+    assert.ok((await page.locator('#product').inputValue()).length >= 3);
+    await page.locator('#projectForm').evaluate(form => form.requestSubmit());
+    await page.locator('#sessionPanel').waitFor({ state: 'visible' });
+    assert.equal(await page.locator('#choices button').count(), 3);
+
+    for (let chapter = 0; chapter < chapters; chapter++) {
+      assert.equal(await page.locator('#sessionPanel').isVisible(), true);
+      assert.equal(await page.locator('#choices button').count(), 3);
+      assert.equal(await page.locator('#continueButton').isDisabled(), true);
+      await page.locator('#choices button').first().click();
+      await page.locator('#selectedPreview').waitFor({ state: 'visible' });
+      assert.equal(await page.locator('#continueButton').isEnabled(), true);
+      if (requiredScript) {
+        assert.equal(await page.locator('#note').getAttribute('required'), '');
+        await page.locator('#note').fill('A meaningful authored line for chapter ' + chapter);
+      } else {
+        await page.locator('#note').fill('A design hypothesis for a truthful real-world pilot');
+      }
+
+      if (chapter === 0) {
+        await page.locator('#decisionForm').evaluate(form => form.requestSubmit());
+        await page.locator('#backButton').click();
+        assert.equal(await page.locator('#progress').evaluate(x => x.value), 0);
+        await page.locator('#choices button').nth(1).click();
+        if (requiredScript) await page.locator('#note').fill('Alternative cinematic opening written by the user');
+        await page.locator('#decisionForm').evaluate(form => form.requestSubmit());
+      } else {
+        await page.locator('#decisionForm').evaluate(form => form.requestSubmit());
+      }
+    }
+    await page.locator('#finishPanel').waitFor({ state: 'visible' });
+    assert.equal(await page.locator('#finishDecisions article').count(), chapters);
+    assert.equal(await page.locator('#finishMetrics .metric').count(), 3);
+    assert.equal(await page.locator('#sessionPanel').isHidden(), true);
+    const after = await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2);
+    assert.equal(after, true, 'Final creative report must fit 390px screen: ' + id);
+
+    await page.locator('#locale').selectOption('en');
+    assert.equal(await page.locator('html').getAttribute('lang'), 'en');
+    assert.equal(await page.locator('#finishDecisions article').count(), chapters);
+    await page.locator('#locale').selectOption('zh');
+    assert.equal(await page.locator('html').getAttribute('lang'), 'zh-CN');
+    assert.equal(await page.locator('#finishDecisions article').count(), chapters);
+    await page.locator('#locale').selectOption('ru');
+
+    const download = page.waitForEvent('download');
+    await page.locator('#download').click();
+    const artifact = await download;
+    assert.equal(artifact.suggestedFilename(), 'iv-' + id + '-creative-brief.json');
+    await page.screenshot({
+      path: 'artifacts/creative-world-' + id + '-mobile-report.png', fullPage: true
+    });
+    await page.locator('#restart').click();
+    assert.equal(await page.locator('#setupPanel').isVisible(), true);
+    assert.equal(await page.locator('#finishPanel').isHidden(), true);
+    await page.close();
+  }
+  assert.deepEqual(errors, [], 'No uncaught browser exceptions, CSP violations or client-side code errors');
+});
