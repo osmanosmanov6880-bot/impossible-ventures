@@ -31,7 +31,7 @@ jobs:
             -e PORT=3000 \
             -e DB_PATH=/data/missions.sqlite \
             dead-drop-smoke
-          curl --retry 15 --retry-connrefused --retry-delay 2 -fsS \
+          curl --retry 30 --retry-all-errors --retry-delay 1 --connect-timeout 3 --max-time 5 -fsS \
             http://127.0.0.1:3017/api/v1/health
       - name: Verify app process dropped root privileges
         run: |
@@ -64,7 +64,7 @@ jobs:
             -e PORT=3000 \
             -e DB_PATH=/data/missions.sqlite \
             dead-drop-smoke
-          curl --retry 15 --retry-connrefused --retry-delay 2 -fsS \
+          curl --retry 30 --retry-all-errors --retry-delay 1 --connect-timeout 3 --max-time 5 -fsS \
             http://127.0.0.1:3017/api/v1/health
           node --input-type=module <<'JS'
           import { readFileSync } from 'node:fs';
