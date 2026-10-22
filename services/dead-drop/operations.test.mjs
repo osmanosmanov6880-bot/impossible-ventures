@@ -26,7 +26,7 @@ test('health and readiness verify a rolled-back database write; liveness is inde
   assert.equal(healthJSON.mode, 'cooperative'); // legacy consumer contract
   assert.equal(healthJSON.storage, 'writable');
   assert.equal(healthJSON.check, 'sqlite-transaction');
-  assert.equal(healthJSON.version, '1.2.0-beta.1');
+  assert.equal(healthJSON.version, '1.8.0-beta.1');
   assert.equal(health.headers.get('cache-control'), 'no-store');
   assert.deepEqual((await ready.json()).storage, 'writable');
   assert.equal(
