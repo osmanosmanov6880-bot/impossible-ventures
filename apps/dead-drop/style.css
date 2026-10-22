@@ -247,3 +247,6 @@ h1,h2,h3,p{margin-top:0}
   .privacy-actions .btn{width:100%}
   .delete-dialog .form-footer{display:grid;grid-template-columns:1fr;gap:10px}
 }
+
+.privacy-notice-link{display:inline-block;margin-top:21px;color:var(--signal);font-size:12px;text-underline-offset:4px}
+.legal-strip a{color:var(--signal);font-size:10px;white-space:nowrap}
