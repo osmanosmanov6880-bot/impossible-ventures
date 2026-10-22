@@ -81,6 +81,16 @@
       <div id="creative" class="creative-live" hidden>
         <span class="creative-kicker" id="offerLabel">CREATIVE / SIGNAL 001</span>
         <h3 id="creativeHeadline">—</h3><p id="creativeBody">—</p>
+        <div id="storyStep" class="story-step" hidden>
+          <div class="story-topline"><span>INTERACTIVE STORY / CHOICE</span><span>↘ ↙</span></div>
+          <h4 id="decisionPrompt">—</h4>
+          <div class="story-choices" role="group" aria-label="Narrative choices">
+            <button type="button" id="choiceOne" class="story-choice">01 / —</button>
+            <button type="button" id="choiceTwo" class="story-choice">02 / —</button>
+          </div>
+          <div id="choiceOutcome" class="story-outcome" role="status" aria-live="polite" hidden></div>
+          <p class="micro-text" data-i18n="choiceNotice">Выбор меняет только эту историю в памяти вкладки. Он не отправляется на сервер и не учитывается как конверсия.</p>
+        </div>
         <div class="creative-actions"><button type="button" id="cta" class="btn btn-primary" disabled>REQUEST A PILOT ↗</button><span class="micro-text" id="creativeNote"></span></div>
       </div>
       <div class="creative-footer"><span data-i18n="editorial">КОНЦЕПЦИЯ И РЕЗУЛЬТАТЫ НЕ ПРОВЕРЕНЫ НЕЗАВИСИМО</span><span class="mono">IV / ALPHA</span></div>
