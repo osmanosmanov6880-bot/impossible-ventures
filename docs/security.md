@@ -14,7 +14,7 @@
 - Room code is an invitation capability and can be used by whoever possesses it before the intended person joins.
 - Session tokens in sessionStorage can be compromised by XSS or malware; do not use for sensitive accounts.
 - No user login, MFA, token rotation/revocation, distributed rate limiter, WAF, audit events, or security monitoring.
-- SQLite remains on the server host; configure encrypted disks, backups, retention purge and incident response externally.
+- SQLite remains on the server host; v0.5 adds room erasure, secure_delete, WAL checkpoint and automatic expiry pruning. Configure encrypted disks, production backup and retention policies, monitoring and incident response separately.
 - No TLS termination is included. **Never expose directly to the Internet without HTTPS proxy and operational hardening**.
 - Do not enter personal or commercially sensitive information. This prototype has not undergone a privacy, legal or penetration assessment.
 - Users should verify factual claims before publishing a generated campaign.
