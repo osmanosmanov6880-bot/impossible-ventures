@@ -3,6 +3,13 @@ import assert from 'node:assert/strict';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 import { createApp } from './server.mjs';
+import {
+  createRun as createWorldRun,
+  nextStage as nextWorldStage,
+  choose as chooseWorld,
+  progress as worldProgress,
+  report as worldReport
+} from '../../apps/creative-worlds/engine.mjs';
 
 async function setup(t, width = 1400, height = 900, options = {}) {
   const app = createApp({ dbPath: ':memory:', ...options });
@@ -645,4 +652,78 @@ test('FIVE PLAYABLE WORLDS: five distinct RU/EN/ZH experiences on Chromium mobil
     await page.close();
   }
   assert.deepEqual(errors, [], 'No uncaught browser exceptions, CSP violations or client-side code errors');
+});
+
+
+test('Creative World -> Commercial Command: local JSON import, no auto-save, real authenticated draft and safe invalid-file handling',async t=>{
+  const previous=process.env.OPERATOR_TOKEN;
+  const operatorToken='playable-world-bridge-system-token-987654321abcdefghijklmnopqrstuvwxyz';
+  process.env.OPERATOR_TOKEN=operatorToken;
+  t.after(()=>previous===undefined?delete process.env.OPERATOR_TOKEN:process.env.OPERATOR_TOKEN=previous);
+  const {context,base}=await setup(t,390,844);
+  const errors=[];
+
+  let creative=createWorldRun('brief-theatre',{
+    brand:'Aurora Script Lab',
+    product:'Evidence based campaign workshop for marketing teams',
+    audience:'Marketing teams preparing an honest advertising pilot'
+  },'ru');
+  while(!worldProgress(creative).finished){
+    const chapter=nextWorldStage(creative);
+    creative=chooseWorld(creative,chapter.choices[0].id,'A meaningful original dialogue line');
+  }
+  const goodJson=JSON.stringify(worldReport(creative));
+  const file={
+    name:'creative-brief.json',mimeType:'application/json',
+    buffer:Buffer.from(goodJson,'utf8')
+  };
+
+  // Read-only no-registration demo: load local JSON, but cannot save.
+  const demo=await context.newPage();
+  attachErrors(demo,errors);
+  await demo.goto(base+'/commercial/');
+  await demo.locator('#ventureGrid .venture-card').first().waitFor();
+  await demo.locator('#viewDemo').click();
+  await demo.locator('#worldImport').setInputFiles(file);
+  await demo.getByText(/Творческий результат загружен в редактор/).first().waitFor();
+  assert.equal(await demo.locator('#venture').inputValue(),'brief-theatre');
+  assert.equal(await demo.locator('#saveCampaign').isDisabled(),true);
+  assert.match(await demo.locator('#previewHeadline').textContent(),/Evidence based campaign workshop/);
+
+  // Persist only after a real operator-provisioned workspace and explicit Save Draft.
+  const owner=await context.newPage();
+  attachErrors(owner,errors);
+  await owner.goto(base+'/commercial/');
+  await owner.locator('#ventureGrid .venture-card').first().waitFor();
+  await owner.locator('#bootstrapForm input[name="name"]').fill('Aurora Verified Internal QA');
+  await owner.locator('#bootstrapForm input[name="systemToken"]').fill(operatorToken);
+  await owner.locator('#bootstrapForm').evaluate(form=>form.requestSubmit());
+  await owner.locator('#workspaceApp').waitFor({state:'visible'});
+  const writes=[];
+  owner.on('request',req=>{
+    if(req.method()==='POST'&&/\/api\/v1\/workspaces\/[^/]+\/campaigns$/.test(new URL(req.url()).pathname)){
+      writes.push(req.url());
+    }
+  });
+  await owner.locator('#worldImport').setInputFiles(file);
+  await owner.getByText(/Творческий результат загружен в редактор/).first().waitFor();
+  assert.equal(writes.length,0,'Import must not create a campaign until Save Draft');
+  assert.equal(await owner.locator('#venture').inputValue(),'brief-theatre');
+  assert.equal(await owner.locator('#campaignForm input[name="title"]').inputValue(),'Brief Theatre / Aurora Script Lab');
+  assert.equal(await owner.locator('#saveCampaign').isEnabled(),true);
+  assert.match(await owner.locator('#previewBody').textContent(),/ТВОРЧЕСКАЯ ГИПОТЕЗА/);
+  const fits=await owner.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2);
+  assert.equal(fits,true,'Imported campaign editor must fit a 390px screen');
+
+  await owner.locator('#campaignForm').evaluate(form=>form.requestSubmit());
+  await owner.locator('.campaign-card').first().waitFor();
+  assert.equal(writes.length,1);
+  assert.equal(await owner.locator('#countTotal').textContent(),'1');
+  assert.match(await owner.locator('.campaign-card').first().textContent(),/Brief Theatre/);
+
+  const invalid={name:'bogus.json',mimeType:'application/json',buffer:Buffer.from('{"schema":"bad","project":{}}')};
+  await owner.locator('#worldImport').setInputFiles(invalid);
+  await owner.locator('#worldImportState.error').waitFor();
+  assert.equal(writes.length,1,'Invalid imports must not create any server records');
+  assert.deepEqual(errors,[]);
 });
