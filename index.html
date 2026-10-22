@@ -3,91 +3,156 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#080f1c">
-<meta name="description" content="Impossible Ventures — глобальная лаборатория интерактивной рекламы: семь творческих миров, настоящие A/B-эксперименты, рабочие пространства и коммерческие пилоты.">
-<title>IMPOSSIBLE VENTURES — Interactive Advertising Intelligence</title>
-<link rel="stylesheet" href="./commercial/style.css">
+<meta name="theme-color" content="#090e18">
+<meta name="description" content="Impossible Ventures — семь экспериментальных рекламных вселенных: интерактивная реклама, творческие трибуналы, A/B-тесты и исследовательские прототипы.">
+<title>Impossible Ventures — Seven Creative Worlds</title>
+<link rel="stylesheet" href="./site.css">
+<script src="./site.js" defer></script>
 </head>
 <body>
-<div class="ambient" aria-hidden="true"></div>
-<header class="nav-shell shell">
-  <a href="./" class="logo"><span class="logomark">I<span>V</span></span><span>IMPOSSIBLE <em>VENTURES</em><small>INTERACTIVE ADVERTISING INTELLIGENCE</small></span></a>
-  <nav class="top-nav">
-    <a href="./commercial/">COMMERCIAL OS</a>
-    <a href="./experiments/">EXPERIMENT LAB</a>
-    <a href="./pilot/">PILOT STUDIO</a>
-    <a href="./status/">SERVER STATUS ↗</a>
+<div class="sky" aria-hidden="true"></div>
+<header class="header">
+  <a class="logo" href="./" aria-label="Impossible Ventures">
+    <span class="logo-tile">I<span>V</span></span>
+    <span class="logo-text">IMPOSSIBLE <b>VENTURES</b><small>INDEPENDENT CREATIVE WORLDS</small></span>
+  </a>
+  <nav class="top-nav" aria-label="Навигация">
+    <a href="#worlds" data-t="navWorlds">Вселенная продуктов</a>
+    <a href="#infrastructure" data-t="navTools">Инструменты</a>
+    <a href="#roadmap" data-t="navMission">Миссия</a>
   </nav>
-  <div class="nav-right"><span class="online"><i></i> RESEARCH / ALPHA</span><a class="secondary home-nav-cta" href="./commercial/">ВОЙТИ ↗</a></div>
+  <div class="nav-actions">
+    <label for="language" class="sr-only">Language / Язык / 语言</label>
+    <select id="language" aria-label="Выберите язык / Choose language">
+      <option value="ru">РУ</option><option value="en">EN</option><option value="zh">中文</option>
+    </select>
+    <a class="header-cta" href="#worlds" data-t="explore">ИССЛЕДОВАТЬ ↗</a>
+  </div>
 </header>
 <main>
-  <section class="hero shell home-hero">
+<section class="hero outer-shell" aria-labelledby="heroTitle">
+  <div class="hero-content">
+    <div class="overline"><span class="overline-light" aria-hidden="true"></span><span data-t="overline">SEVEN WORLDS / ONE CREATIVE LAB</span></div>
+    <h1 id="heroTitle"><span data-t="heroA">Невозможное —</span><span class="shimmer" data-t="heroB">это направление.</span></h1>
+    <p data-t="heroText">Семь отдельных экспериментальных продуктов для новых рекламных идей: от игры двух креаторов до проверяемых гипотез, живых сценариев и добровольного внимания.</p>
+    <div class="hero-actions">
+      <a class="button button-primary" href="#worlds"><span data-t="enterWorlds">ОТКРЫТЬ 7 ВСЕЛЕННЫХ</span> <span aria-hidden="true">↗</span></a>
+      <a class="button button-secondary" href="./apps/dead-drop/"><span data-t="startGame">НАЧАТЬ С DEAD DROP</span> <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="hero-disclosure"><span class="check-icon" aria-hidden="true">✧</span><span data-t="disclaimer">Рабочие прототипы. Это не семь зарегистрированных компаний и не действующая международная рекламная сеть.</span></div>
+  </div>
+  <div class="globe" aria-hidden="true">
+    <div class="globe-halo"></div>
+    <div class="globe-ring orbit-one"></div>
+    <div class="globe-ring orbit-two"></div>
+    <div class="globe-ring orbit-three"></div>
+    <div class="globe-core">
+      <span class="globe-lat latitude-one"></span><span class="globe-lat latitude-two"></span><span class="globe-lat latitude-three"></span>
+      <span class="globe-long longitude-one"></span><span class="globe-long longitude-two"></span>
+      <div class="globe-center">IV<span>·</span></div>
+    </div>
+    <div class="globe-token token-one">CREATIVE / 01</div><div class="globe-token token-two">EXPERIENCE / 07</div>
+    <div class="globe-caption">IMPOSSIBLE / WORLD ARCHITECTURE</div>
+  </div>
+</section>
+<div class="ticker" aria-label="Портфель экспериментальных продуктов">
+  <div><span>IDEAS</span><span>✧</span><span>EXPERIENCES</span><span>✧</span><span>RESEARCH</span><span>✧</span><span>INTERACTION</span><span>✧</span><span>PROOF</span><span>✧</span><span>IMAGINATION</span></div>
+</div>
+<section class="outer-shell world-section" id="worlds">
+  <div class="section-intro">
     <div>
-      <div class="eyebrow"><span class="line"></span> THE FUTURE OF CREATIVE COMMERCE / 2026</div>
-      <h1>Реклама, которую <span class="gradient">хочется прожить.</span></h1>
-      <p>IMPOSSIBLE VENTURES объединяет интерактивные истории, инструменты создания рекламных кампаний и измеримые эксперименты. Не просто красивые идеи — рабочий путь от креатива до реальной заявки.</p>
-      <div class="actions">
-        <a class="primary" href="./commercial/" aria-label="Открыть демоверсию Commercial Command">ПОСМОТРЕТЬ ПЛАТФОРМУ БЕЗ РЕГИСТРАЦИИ ↗</a>
-        <a class="secondary" href="./experiments/">ИСПЫТАТЬ ИНТЕРАКТИВНУЮ РЕКЛАМУ →</a>
+      <div class="overline"><span data-t="worldsLabel">01 / КАТАЛОГ ПРОДУКТОВ</span></div>
+      <h2 data-t="worldsTitle">Семь разных миров.<br>Семь разных механик.</h2>
+      <p data-t="worldsSub">Каждая карточка ведёт в работающий интерактивный продукт. Интерфейсы доступны на русском, английском и китайском; доступность серверных функций зависит от размещения.</p>
+    </div>
+    <div class="portfolio-count" aria-label="Seven interactive prototypes"><strong>07<span> / 07</span></strong><small data-t="prototypeCount">ИНТЕРАКТИВНЫХ ПРОТОТИПОВ</small></div>
+  </div>
+  <div class="filter-row" role="group" aria-label="Категории продуктов">
+    <button type="button" class="filter active" data-filter="all" aria-pressed="true" data-t="all">ВСЕ ПРОДУКТЫ</button>
+    <button type="button" class="filter" data-filter="creative" aria-pressed="false" data-t="creative">КРЕАТИВ</button>
+    <button type="button" class="filter" data-filter="review" aria-pressed="false" data-t="review">ПРОВЕРКА</button>
+    <button type="button" class="filter" data-filter="community" aria-pressed="false" data-t="community">СООБЩЕСТВО</button>
+  </div>
+  <div class="world-grid" id="worldGrid">
+    <article class="world-card dead-drop featured" data-group="creative" aria-labelledby="deadTitle">
+      <div class="art"><div class="art-backdrop"></div><div class="brand-orb orb-green"><span>D<span>·</span></span></div><span class="card-num">01 / CLASSIFIED CREATIVE</span></div>
+      <div class="card-body"><div class="product-meta"><span>DEAD DROP AGENCY</span><span class="type-tag" data-t="typeCoop">ДВА АГЕНТА</span></div>
+        <h3 id="deadTitle" data-t="deadTitle">Рекламная операция на двоих.</h3>
+        <p data-t="deadDesc">Один агент знает продукт, другой — аудиторию. Обменяйтесь ограниченными сообщениями и создайте рекламное досье.</p>
+        <a href="./apps/dead-drop/" class="world-link"><span data-t="launch">ОТКРЫТЬ ПРОДУКТ</span> <span aria-hidden="true">↗</span></a>
       </div>
-      <div class="hero-foot">
-        <div><strong>07</strong><span>ТВОРЧЕСКИХ ВСЕЛЕННЫХ</span></div>
-        <div><strong>07</strong><span>ИНТЕРАКТИВНЫХ БРАУЗЕРНЫХ ПРОТОТИПОВ</span></div>
-        <div><strong>01</strong><span>ЕДИНЫЙ КОММЕРЧЕСКИЙ КОНТУР</span></div>
+    </article>
+    <article class="world-card appeal" data-group="review" aria-labelledby="appealTitle">
+      <div class="art"><div class="art-backdrop"></div><div class="brand-orb orb-rose"><span>2049</span></div><span class="card-num">02 / CREATIVE TRIBUNAL</span></div>
+      <div class="card-body"><div class="product-meta"><span>APPEAL 2049</span><span class="type-tag" data-t="typeReview">ПЯТЬ КРИТЕРИЕВ</span></div>
+        <h3 id="appealTitle" data-t="appealTitle">Отправьте рекламу на суд.</h3>
+        <p data-t="appealDesc">Проверьте обещание, аргументы и качество доказательств. Импортируйте готовое досье Dead Drop.</p>
+        <a href="./apps/appeal-2049-studio/" class="world-link"><span data-t="launch">ОТКРЫТЬ ПРОДУКТ</span> <span aria-hidden="true">↗</span></a>
       </div>
-    </div>
-    <div class="hero-visual" aria-hidden="true">
-      <div class="rings r1"></div><div class="rings r2"></div><div class="rings r3"></div>
-      <div class="prism"><div class="prism-core">IV</div></div>
-      <div class="hudcard hud1"><small>CREATIVE STRATEGY / 07</small><strong>SEVEN ORIGINAL WORLDS</strong><span>Explore the impossible</span></div>
-      <div class="hudcard hud2"><small>OPERATING SYSTEM / ALPHA</small><strong>IDEA → TEST → CUSTOMER</strong><span>Measured, not imagined</span></div>
-      <div class="visual-base">OBSIDIAN AURORA / PREMIUM LAB</div>
-    </div>
-  </section>
-
-  <div class="ticker"><span>INTERACTIVE STORYTELLING</span><b>✦</b><span>CREATIVE INTELLIGENCE</span><b>✦</b><span>FIRST-PARTY EXPERIMENTS</span><b>✦</b><span>COMMERCIAL VALIDATION</span></div>
-
-  <section class="section shell">
-    <div class="section-heading"><div><div class="eyebrow"><span class="line"></span> 01 / THE OPERATING PLATFORM</div><h2>Одна платформа. <span class="gradient">Понятный результат.</span></h2><p>Выберите задачу: создать креатив, сравнить два рекламных сценария или подготовить настоящий коммерческий пилот.</p></div><span class="section-no">01 / 03</span></div>
-    <div class="home-feature-grid">
-      <a class="home-feature premium" href="./commercial/">
-        <span class="feature-no">01 / CREATIVE COMMERCE</span><span class="feature-glyph">◈</span>
-        <h3>Commercial Command</h3><p>Семь интерактивных творческих направлений, конструктор кампаний, отдельные организации, права доступа и коммерческие предложения.</p>
-        <span class="feature-link">ОТКРЫТЬ ДЕМО ↗</span>
-      </a>
-      <a class="home-feature" href="./experiments/">
-        <span class="feature-no">02 / EVIDENCE LAB</span><span class="feature-glyph">◎</span>
-        <h3>Experiment Lab</h3><p>A/B-распределение, интерактивные сюжетные выборы и анонимный учёт реальных действий только с согласия человека.</p>
-        <span class="feature-link">ПРОВЕРИТЬ ИДЕЮ ↗</span>
-      </a>
-      <a class="home-feature" href="./pilot/">
-        <span class="feature-no">03 / BUSINESS TESTING</span><span class="feature-glyph">◇</span>
-        <h3>Pilot Studio</h3><p>План кампании, прозрачные расчётные гипотезы, A/B-методика и серверная форма заявки на пилот.</p>
-        <span class="feature-link">СПЛАНИРОВАТЬ ПИЛОТ ↗</span>
-      </a>
-    </div>
-  </section>
-
-  <section class="section shell">
-    <div class="section-heading"><div><div class="eyebrow"><span class="line"></span> 02 / SEVEN CREATIVE UNIVERSES</div><h2>Семь разных способов <span class="gradient">привлечь внимание.</span></h2><p>Теперь доступны семь разных браузерных творческих опытов: две оригинальные демонстрации и пять новых самостоятельных симуляций с решениями, результатами и экспортом. Это не семь рекламных сетей и не подтверждённые продажи.</p></div><span class="section-no">02 / 03</span></div>
-    <div class="home-world-grid">
-      <a class="home-world" href="./apps/dead-drop/" style="--world-color:#a4eff5"><span>01 / BROWSER MVP</span><strong>Dead Drop Agency</strong><p>Секретная миссия двух агентов: доказательства о продукте встречаются с пониманием аудитории.</p><small>ОТКРЫТЬ ИГРУ ↗</small></a>
-      <a class="home-world" href="./apps/appeal-2049/" style="--world-color:#c9b2ff"><span>02 / BROWSER PROTOTYPE</span><strong>Appeal 2049</strong><p>Суд рекламных обещаний будущего — найдите слабые места идеи до запуска.</p><small>ОТКРЫТЬ ПРОТОТИП ↗</small></a>
-      <a class="home-world" href="./apps/anti-persona/" style="--world-color:#ffb2a4"><span>03 / INTERACTIVE LAB</span><strong>AntiPersona</strong><p>Четыре выбора: разрушьте стереотип аудитории и составьте проверяемый креативный бриф.</p><small>ИГРАТЬ БЕЗ РЕГИСТРАЦИИ ↗</small></a>
-      <a class="home-world" href="./apps/brief-theatre/" style="--world-color:#ffe2ad"><span>04 / INTERACTIVE STUDIO</span><strong>Brief Theatre</strong><p>Напишите сценарий в четырёх актах: реплики, творческие препятствия и честный финал.</p><small>ИГРАТЬ БЕЗ РЕГИСТРАЦИИ ↗</small></a>
-      <a class="home-world" href="./apps/ad-biome/" style="--world-color:#aaffca"><span>05 / CREATIVE SIMULATOR</span><strong>AdBiome</strong><p>Четыре поколения изменений креатива и честный план будущего A/B-теста.</p><small>ИГРАТЬ БЕЗ РЕГИСТРАЦИИ ↗</small></a>
-      <a class="home-world" href="./apps/museum-of-attention/" style="--world-color:#f5b9f2"><span>06 / INTERACTIVE MUSEUM</span><strong>Museum of Attention</strong><p>Пройдите четыре интерактивных зала о внимании, выборе и этике рекламы.</p><small>ИГРАТЬ БЕЗ РЕГИСТРАЦИИ ↗</small></a>
-      <a class="home-world" href="./apps/attention-republic/" style="--world-color:#a5ccff"><span>07 / GOVERNANCE SIMULATOR</span><strong>Attention Republic</strong><p>Пять общественных решений изменяют доверие, участие и устойчивость игрового сообщества.</p><small>ИГРАТЬ БЕЗ РЕГИСТРАЦИИ ↗</small></a>
-    </div>
-  </section>
-
-  <section class="section shell home-end">
-    <div class="eyebrow"><span class="line"></span> 03 / FROM ALPHA TO COMMERCIAL SCALE</div>
-    <h2>Миллиардная цель начинается <span class="gradient">с настоящего клиента.</span></h2>
-    <p>Сегодня это проверяемый программный прототип, а не миллиардная компания. Первый коммерческий рубеж — реальные оплаченные пилоты и повторные договоры. Никаких выдуманных метрик, прибыли и аудиторий.</p>
-    <div class="actions"><a class="primary" href="./commercial/">ИССЛЕДОВАТЬ ПЛАТФОРМУ ↗</a><a class="secondary" href="./pilot/">ПОДГОТОВИТЬ КОММЕРЧЕСКИЙ ТЕСТ →</a></div>
-  </section>
+    </article>
+    <article class="world-card antipersona" data-group="review" aria-labelledby="antiTitle">
+      <div class="art"><div class="art-backdrop"></div><div class="brand-orb orb-purple"><span>≠</span></div><span class="card-num">03 / ADVERSARIAL CREATIVE</span></div>
+      <div class="card-body"><div class="product-meta"><span>ANTIPERSONA</span><span class="type-tag" data-t="typeCritic">ЧЕТЫРЕ ОППОНЕНТА</span></div>
+        <h3 id="antiTitle" data-t="antiTitle">Ваш самый полезный критик.</h3>
+        <p data-t="antiDesc">Поспорьте со скептиком, финансистом или занятым человеком. Сильная идея должна выдержать вопросы.</p>
+        <a href="./apps/antipersona/" class="world-link"><span data-t="launch">ОТКРЫТЬ ПРОДУКТ</span> <span aria-hidden="true">↗</span></a>
+      </div>
+    </article>
+    <article class="world-card theatre" data-group="creative" aria-labelledby="theatreTitle">
+      <div class="art"><div class="art-backdrop"></div><div class="brand-orb orb-amber"><span>III</span></div><span class="card-num">04 / THREE ACTS</span></div>
+      <div class="card-body"><div class="product-meta"><span>BRIEF THEATRE</span><span class="type-tag" data-t="typeStage">ТРИ АКТА</span></div>
+        <h3 id="theatreTitle" data-t="theatreTitle">Бриф превращается в сцену.</h3>
+        <p data-t="theatreDesc">Сыграйте три акта: интрига, доказательство и призыв. Ваши решения меняют следующую сцену.</p>
+        <a href="./apps/brief-theatre-studio/" class="world-link"><span data-t="launch">ОТКРЫТЬ ПРОДУКТ</span> <span aria-hidden="true">↗</span></a>
+      </div>
+    </article>
+    <article class="world-card biome" data-group="creative" aria-labelledby="biomeTitle">
+      <div class="art"><div class="art-backdrop"></div><div class="brand-orb orb-turquoise"><span>DNA</span></div><span class="card-num">05 / CREATIVE EVOLUTION</span></div>
+      <div class="card-body"><div class="product-meta"><span>ADBIOME</span><span class="type-tag" data-t="typeDna">ПЯТЬ ГЕНОВ</span></div>
+        <h3 id="biomeTitle" data-t="biomeTitle">Выращивайте идеи как ДНК.</h3>
+        <p data-t="biomeDesc">Меняйте тон, обещание или доказательство. Скрещивайте варианты и изучайте, что изменилось.</p>
+        <a href="./apps/adbiome/" class="world-link"><span data-t="launch">ОТКРЫТЬ ПРОДУКТ</span> <span aria-hidden="true">↗</span></a>
+      </div>
+    </article>
+    <article class="world-card museum" data-group="community" aria-labelledby="museumTitle">
+      <div class="art"><div class="art-backdrop"></div><div class="brand-orb orb-gold"><span>∞</span></div><span class="card-num">06 / SPECULATIVE FICTION</span></div>
+      <div class="card-body"><div class="product-meta"><span>MUSEUM OF ATTENTION</span><span class="type-tag" data-t="typeMuseum">МУЗЕЙ БУДУЩЕГО</span></div>
+        <h3 id="museumTitle" data-t="museumTitle">Археология того, чего не было.</h3>
+        <p data-t="museumDesc">Исследуйте четыре вымышленных артефакта рекламы будущего и создайте собственный экспонат.</p>
+        <a href="./apps/museum-of-attention-studio/" class="world-link"><span data-t="launch">ОТКРЫТЬ ПРОДУКТ</span> <span aria-hidden="true">↗</span></a>
+      </div>
+    </article>
+    <article class="world-card republic" data-group="community" aria-labelledby="republicTitle">
+      <div class="art"><div class="art-backdrop"></div><div class="brand-orb orb-blue"><span>R</span></div><span class="card-num">07 / ATTENTION COMMONS</span></div>
+      <div class="card-body"><div class="product-meta"><span>ATTENTION REPUBLIC</span><span class="type-tag" data-t="typeRepublic">ДОБРОВОЛЬНЫЙ ВЫБОР</span></div>
+        <h3 id="republicTitle" data-t="republicTitle">У внимания есть право голоса.</h3>
+        <p data-t="republicDesc">Участвуйте в вопросах, открытых модератором. Согласие обязательно; демонстрация не записывает голоса.</p>
+        <a href="./apps/attention-republic-live/" class="world-link"><span data-t="launch">ОТКРЫТЬ ПРОДУКТ</span> <span aria-hidden="true">↗</span></a>
+      </div>
+    </article>
+  </div>
+  <p class="catalog-note" data-t="catalogNote">Весь контент экспериментальный: оценки текстов не подтверждают продажи, а анонимные сессии не равны уникальным людям.</p>
+</section>
+<section class="outer-shell infrastructure" id="infrastructure">
+  <div class="section-intro"><div><div class="overline" data-t="infraLabel">02 / ОПЕРАЦИОННЫЕ ИНСТРУМЕНТЫ</div><h2 data-t="infraTitle">От идей — к доказательствам.</h2><p data-t="infraText">Отдельные инструменты помогают оценить гипотезы, запустить исследование и проверить состояние сервера.</p></div></div>
+  <div class="infra-grid">
+    <a class="infra-card" href="./pilot/"><span class="infra-number">01 / PLAN</span><strong>PILOT STUDIO</strong><p data-t="pilotDesc">Планирование бюджета, гипотез и реальные заявки на пилот при работающем сервере.</p><span class="infra-cta" data-t="openTool">ОТКРЫТЬ ИНСТРУМЕНТ ↗</span></a>
+    <a class="infra-card" href="./experiments/"><span class="infra-number">02 / MEASURE</span><strong>EXPERIMENT LAB</strong><p data-t="experimentDesc">Контролируемое A/B-исследование с согласием и настоящими счётчиками событий.</p><span class="infra-cta" data-t="openTool">ОТКРЫТЬ ИНСТРУМЕНТ ↗</span></a>
+    <a class="infra-card" href="./status/"><span class="infra-number">03 / OPERATE</span><strong>SYSTEM STATUS</strong><p data-t="statusDesc">Живая диагностика процесса и записи в SQLite. На статическом сайте — честный деморежим.</p><span class="infra-cta" data-t="openTool">ОТКРЫТЬ ИНСТРУМЕНТ ↗</span></a>
+    <a class="infra-card" href="./commercial/"><span class="infra-number">04 / COMMERCIAL</span><strong>COMMERCIAL COMMAND</strong><p data-t="commercialDesc">Кабинет коммерческих кампаний и договорённостей, действующий только при подключённом сервере.</p><span class="infra-cta" data-t="openTool">ОТКРЫТЬ ИНСТРУМЕНТ ↗</span></a>
+  </div>
+</section>
+<section class="outer-shell mission" id="roadmap">
+  <div class="mission-art" aria-hidden="true"><div class="mission-symbol">IV<span>·</span></div><div class="mission-curve curve-one"></div><div class="mission-curve curve-two"></div></div>
+  <div class="mission-copy"><div class="overline" data-t="missionLabel">03 / ЧЕСТНАЯ КАРТИНА</div><h2 data-t="missionTitle">Прототип — это начало. Не победа.</h2><p data-t="missionText">Мы строим портфель разных рекламных продуктов. Сейчас они доступны как исследовательские приложения; до мировой коммерческой платформы остаются реальные платящие клиенты, безопасный хостинг, авторизация, юридическая проверка и масштабирование.</p>
+    <a class="button button-primary" href="https://github.com/osmanosmanov6880-bot/impossible-ventures" target="_blank" rel="noopener noreferrer"><span data-t="source">ИЗУЧИТЬ ИСХОДНЫЙ КОД</span><span aria-hidden="true">↗</span></a>
+  </div>
+</section>
 </main>
-<footer class="footer shell"><span>© 2026 IMPOSSIBLE VENTURES / RESEARCH ALPHA</span><span>НЕ ПОДТВЕРЖДЕНЫ: ЗАКУПКА РЕКЛАМЫ, ПЛАТЕЖИ, КОММЕРЧЕСКАЯ ВЫРУЧКА</span><a href="./status/">STATUS ↗</a><a href="./privacy.html">DATA & PRIVACY ↗</a></footer>
+<footer class="footer">
+  <a class="logo-footer" href="./">IMPOSSIBLE <span>VENTURES</span></a>
+  <p data-t="footerText">Семь экспериментальных креативных продуктов. Без подтверждённой выручки и без вымышленных пользователей.</p>
+  <div><a href="./status/" data-t="footerStatus">Состояние</a><a href="./privacy.html" data-t="footerPrivacy">Приватность</a><a href="https://github.com/osmanosmanov6880-bot/impossible-ventures" target="_blank" rel="noopener noreferrer">GITHUB ↗</a></div>
+</footer>
 </body>
 </html>
