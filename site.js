@@ -1,6 +1,7 @@
 'use strict';
 const catalog={
   ru:{
+    navCinema:'ВЕБ-КИНО',watchCinema:'СМОТРЕТЬ THE SIGNAL',cinemaKicker:'НОВАЯ КИНОМЕХАНИКА / THE SIGNAL',cinemaTitle:'Не смотрите на историю. Войдите внутрь.',cinemaDescription:'Пятнадцать кинематографических сцен. Выборы с последствиями, скрытые записи и семь творческих миров. Звук — только по вашему согласию, просмотр — без регистрации.',cinemaPrototype:'ПРОТОТИП / 3 СЦЕНЫ →',cinemaTruth:'15 оригинальных SVG-кадров и программная камера. Это художественный веб-фильм, не 8K-видео и не реальная финансовая отчётность.',
     navWorlds:'Вселенная продуктов',navTools:'Инструменты',navMission:'Миссия',explore:'ИССЛЕДОВАТЬ ↗',
     overline:'СЕМЬ МИРОВ / ОДНА КРЕАТИВНАЯ ЛАБОРАТОРИЯ',
     heroA:'Невозможное —',heroB:'это направление.',
@@ -43,6 +44,7 @@ const catalog={
     footerStatus:'Состояние',footerPrivacy:'Приватность'
   },
   en:{
+    navCinema:'INTERACTIVE CINEMA',watchCinema:'WATCH THE SIGNAL',cinemaKicker:'NEW INTERACTIVE FILM / THE SIGNAL',cinemaTitle:'Do not just watch the story. Enter it.',cinemaDescription:'Fifteen cinematic scenes, real narrative choices, hidden records and seven creative worlds. Sound is opt-in; viewing requires no account.',cinemaPrototype:'3-SCENE PROTOTYPE →',cinemaTruth:'15 original SVG environments and code-driven camera work. An illustrative interactive film, not verified 8K footage or company revenue.',
     navWorlds:'Creative worlds',navTools:'Tools',navMission:'Mission',explore:'EXPLORE ↗',
     overline:'SEVEN WORLDS / ONE CREATIVE LAB',
     heroA:'Impossible',heroB:'is a direction.',
@@ -85,6 +87,7 @@ const catalog={
     footerStatus:'System status',footerPrivacy:'Privacy'
   },
   zh:{
+    navCinema:'互动电影',watchCinema:'体验 THE SIGNAL',cinemaKicker:'全新互动电影 / THE SIGNAL',cinemaTitle:'不要只是观看故事，走进故事。',cinemaDescription:'十五个电影场景，真实的分支选择、隐藏记录与七个创意世界。声音自愿开启，无需注册。',cinemaPrototype:'三场景原型 →',cinemaTruth:'15幅原创SVG场景和代码驱动的镜头，不是真实8K视频，也不代表公司收入。',
     navWorlds:'创意世界',navTools:'工具',navMission:'使命',explore:'探索 ↗',
     overline:'七个世界 / 一个创意实验室',
     heroA:'不可能，',heroB:'只是一个方向。',
