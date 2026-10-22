@@ -245,7 +245,7 @@ def build() -> None:
 
     if 'data-static-preview="true"' not in (DIST / "commercial/index.html").read_text(encoding="utf-8"):
         raise RuntimeError("Commercial local-only preview declaration missing")
-    if (DIST / "commercial" / "operator").exists() or (DIST / "proposal").exists():
+    if (DIST / "commercial" / "operator").exists() or (DIST / "proposal").exists() or (DIST / "play").exists():
         raise RuntimeError("Static preview must not include customer proposals or operator pages")
 
     # All five standalone worlds must use the relative module bundle so
