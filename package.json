@@ -1,17 +1,17 @@
 {
   "name": "impossible-ventures",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Impossible Ventures: Dead Drop, Pilot Studio, Experiment Lab and Appeal 2049 creative review studio",
+  "description": "Seven creative universes roadmap: working Dead Drop, Appeal 2049, AntiPersona, Pilot Studio and Experiment Lab",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "start": "node services/dead-drop/server.mjs",
     "dev": "node services/dead-drop/server.mjs",
-    "test": "node --test services/dead-drop/server.test.mjs services/dead-drop/creative-engine.test.mjs services/pilot-studio/pilots.test.mjs services/dead-drop/privacy.test.mjs services/experiment-lab/experiments.test.mjs services/dead-drop/operations.test.mjs scripts/db-recovery.test.mjs services/appeal-2049/tribunal.test.mjs",
-    "check": "node --check services/dead-drop/server.mjs && node --check services/dead-drop/creative-engine.mjs && node --check services/pilot-studio/pilots.mjs && node --check apps/dead-drop/app.js && node --check apps/pilot-studio/app.js && node --check apps/pilot-studio/operator.js && node --check services/dead-drop/dossier-locales.mjs && node --check apps/dead-drop/i18n.js && node --check services/experiment-lab/experiments.mjs && node --check apps/experiment-lab/app.js && node --check apps/experiment-lab/operator.js && node --check scripts/db-recovery.mjs && node --check apps/status/app.js && node --check apps/appeal-2049/app.js && node --check apps/appeal-2049/tribunal-engine.mjs && npm test",
+    "test": "node --test services/dead-drop/server.test.mjs services/dead-drop/creative-engine.test.mjs services/pilot-studio/pilots.test.mjs services/dead-drop/privacy.test.mjs services/experiment-lab/experiments.test.mjs services/dead-drop/operations.test.mjs scripts/db-recovery.test.mjs services/appeal-2049/tribunal.test.mjs services/antipersona/engine.test.mjs",
+    "check": "node --check services/dead-drop/server.mjs && node --check services/dead-drop/creative-engine.mjs && node --check services/pilot-studio/pilots.mjs && node --check apps/dead-drop/app.js && node --check apps/pilot-studio/app.js && node --check apps/pilot-studio/operator.js && node --check services/dead-drop/dossier-locales.mjs && node --check apps/dead-drop/i18n.js && node --check services/experiment-lab/experiments.mjs && node --check apps/experiment-lab/app.js && node --check apps/experiment-lab/operator.js && node --check scripts/db-recovery.mjs && node --check apps/status/app.js && node --check apps/appeal-2049/app.js && node --check apps/appeal-2049/tribunal-engine.mjs && node --check apps/antipersona/engine.mjs && node --check apps/antipersona/app.js && npm test",
     "start:ai": "node --env-file=.env services/dead-drop/server.mjs",
     "db:inspect": "node scripts/db-recovery.mjs inspect",
     "db:backup": "node scripts/db-recovery.mjs backup",
