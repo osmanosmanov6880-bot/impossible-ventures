@@ -59,7 +59,27 @@ def build() -> None:
         '</div>'
     )
     html = html.replace("<main>", notice + "\n<main>", 1)
+    if "<body>" not in html:
+        raise RuntimeError("Pilot Studio body tag missing")
+    html = html.replace("<body>", '<body data-static-preview="true">', 1)
     landing.write_text(html, encoding="utf-8")
+
+    app_file = pilot / "app.js"
+    app_code = app_file.read_text(encoding="utf-8")
+    submit_anchor = "leadForm.addEventListener('submit',async event=>{\\n  event.preventDefault();"
+    # Keep source unchanged; only the generated Pages copy suppresses server POSTs.
+    submit_anchor = submit_anchor.replace("\\\\n", "\\n")
+    if submit_anchor not in app_code:
+        raise RuntimeError("Pilot Studio submit handler changed; adjust static preview guard")
+    app_code = app_code.replace(
+        submit_anchor,
+        submit_anchor + "\\n  if (document.body.dataset.staticPreview === 'true') {"
+        + "\\n    showMessage(labels().unavailable, true);"
+        + "\\n    return;"
+        + "\\n  }",
+        1,
+    )
+    app_file.write_text(app_code, encoding="utf-8")
 
     (DIST / ".nojekyll").touch()
 
@@ -77,6 +97,8 @@ def build() -> None:
         if not (DIST / name).is_file():
             raise RuntimeError(f"Missing static output: {name}")
 
+    if 'data-static-preview="true"' not in (DIST / "pilot/index.html").read_text(encoding="utf-8"):
+        raise RuntimeError("Static Pilot Studio data mode not declared")
     if "disabled aria-disabled" not in (DIST / "pilot/index.html").read_text(encoding="utf-8"):
         raise RuntimeError("Static Pilot Studio application button must be disabled")
 
