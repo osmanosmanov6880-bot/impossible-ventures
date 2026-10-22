@@ -9,6 +9,7 @@ import { createExperimentRouter } from '../experiment-lab/experiments.mjs';
 import { createWorkspaces } from '../commercial/workspaces.mjs';
 import { createCampaigns } from '../commercial/campaigns.mjs';
 import { createProposals } from '../commercial/proposals.mjs';
+import { createLaunches } from '../commercial/launches.mjs';
 import { refineDossier } from './creative-engine.mjs';
 import { localizeRuleDossier } from './dossier-locales.mjs';
 
@@ -215,6 +216,11 @@ const STATIC_FILES = new Map([
   ['/proposal/', 'apps/commercial/proposal.html'],
   ['/proposal/index.html', 'apps/commercial/proposal.html'],
   ['/proposal/app.js', 'apps/commercial/proposal.js'],
+  ['/play/', 'apps/launch/index.html'],
+  ['/play/index.html', 'apps/launch/index.html'],
+  ['/play/style.css', 'apps/launch/style.css'],
+  ['/play/app.mjs', 'apps/launch/app.mjs'],
+  ['/play/story.mjs', 'apps/launch/story.mjs'],
   ['/apps/creative-worlds/style.css', 'apps/creative-worlds/style.css'],
   ['/apps/creative-worlds/worlds.mjs', 'apps/creative-worlds/worlds.mjs'],
   ['/apps/creative-worlds/engine.mjs', 'apps/creative-worlds/engine.mjs'],
@@ -254,7 +260,7 @@ function sendStatic(response, pathname) {
     '.mjs': 'text/javascript; charset=utf-8',
     '.svg': 'image/svg+xml'
   }[extname(path)] || 'application/octet-stream';
-  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/status/') || pathname.startsWith('/commercial/') || pathname.startsWith('/showcase/') || pathname.startsWith('/proposal/') ||
+  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/status/') || pathname.startsWith('/commercial/') || pathname.startsWith('/showcase/') || pathname.startsWith('/proposal/') || pathname.startsWith('/play/') ||
       pathname.startsWith('/apps/creative-worlds/') ||
       ['anti-persona','brief-theatre','ad-biome','museum-of-attention','attention-republic']
         .some(id => pathname.startsWith('/apps/' + id + '/'))) {
@@ -326,12 +332,19 @@ export function createApp({
   const commercial = createWorkspaces({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
   const campaigns = createCampaigns({ db, now, workspaces: commercial, ApiError, jsonBody, sendJSON });
   const proposals = createProposals({ db, now, workspaces: commercial, campaigns, ApiError, jsonBody, sendJSON });
+  const launches = createLaunches({ db, now, workspaces: commercial, campaigns, ApiError, jsonBody, sendJSON });
   const aiAvailable = Boolean(aiKey && aiModel);
   const finalizing = new Set();
   const server = createServer(async (request, response) => {
     response.setHeader('X-Content-Type-Options', 'nosniff');
     response.setHeader('Referrer-Policy', 'no-referrer');
-    response.setHeader('X-Frame-Options', 'DENY');
+    // Same-origin first-party iframe previews are permitted for /play/ only.
+    // All other routes, including operator and proposal pages, are non-frameable.
+    if (request.url?.startsWith('/play/')) {
+      response.setHeader('X-Frame-Options','SAMEORIGIN');
+    } else {
+      response.setHeader('X-Frame-Options', 'DENY');
+    }
     response.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     try {
       const url = new URL(request.url || '/', 'http://localhost');
@@ -347,7 +360,7 @@ export function createApp({
           mode: 'cooperative',
           persistent: dbPath !== ':memory:',
           aiAvailable,
-          version: '0.8.0',
+          version: '1.2.0-beta.1',
           check: 'sqlite-transaction',
           storage: ready ? 'writable' : 'unavailable'
         });
@@ -359,6 +372,7 @@ export function createApp({
         if (await commercial.handle(request, response, pathname)) return;
         if (await campaigns.handle(request, response, pathname)) return;
         if (await proposals.handle(request, response, pathname)) return;
+        if (await launches.handle(request, response, pathname)) return;
         if (pathname === '/api/v1/missions' && request.method === 'POST') {
           const body = await jsonBody(request);
           const host = {
@@ -503,6 +517,7 @@ export function createApp({
   server.on('close', handlePilots.stop);
   server.on('close', handleExperiments.stop);
   server.on('close', proposals.stop);
+  server.on('close', launches.stop);
   server.on('close', () => clearInterval(cleanupTimer));
   return { server, db, pruneExpired, close: () => { server.close(() => db.close()); } };
 }
