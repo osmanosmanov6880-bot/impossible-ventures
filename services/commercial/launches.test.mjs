@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../dead-drop/server.mjs';
 import { SESSION_RETENTION_DAYS, AGGREGATE_RETENTION_DAYS } from './launches.mjs';
+import { STORY, IDS, audit, local, LANGUAGE } from '../../apps/launch/story.mjs';
 
 const SYS='secure-test-operator-token-2026-launch-workflow-1234567890';
 const campaign={
@@ -313,4 +314,28 @@ test('WAVE 12/15: all first-party story resources use strict CSP, correct ES mod
   assert.equal(proposal.headers.get('x-frame-options'),'DENY');
   const forbidden=await fetch(base+'/play/source.private');
   assert.equal(forbidden.status,404);
+});
+
+
+test('WAVE 12: seven unique localized real public microstories have 3 playable scenes and no fake data claims',()=>{
+  const structure=audit();
+  assert.deepEqual(structure,{worlds:7,scenes:21,locales:3});
+  assert.equal(IDS.length,7);
+  assert.equal(new Set(IDS).size,7);
+  assert.equal(SESSION_RETENTION_DAYS,7);
+  assert.equal(AGGREGATE_RETENTION_DAYS,90);
+  for(const id of IDS){
+    const s=STORY[id];
+    assert.equal(s.scenes.length,3);
+    for(const locale of LANGUAGE){
+      assert.ok(local(s.intro,locale).length>=3);
+      for(const stage of s.scenes){
+        assert.ok(local(stage.title,locale).length>=3);
+        assert.equal(stage.options.length,2);
+        assert.notEqual(stage.options[0].id,stage.options[1].id);
+        assert.ok(local(stage.options[0].label,locale).length>=3);
+        assert.ok(local(stage.options[1].after,locale).length>=3);
+      }
+    }
+  }
 });
