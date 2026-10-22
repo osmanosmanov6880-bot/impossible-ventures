@@ -42,3 +42,16 @@ Production gates: threat model, authorization review, automated accessibility/br
 - Consent flags are scoped to ephemeral bearer tokens, not verified legal identities.
 - No model hallucination-free guarantee. Human fact-checking of all campaign materials is mandatory.
 - No public server/TLS/monitoring has been confirmed. Do not represent the source as production-hardened.
+
+## v0.7 Experiment Lab: measured research safeguards and remaining gaps
+
+- Operator-created campaigns are server-authenticated; drafts are invisible to public catalogs and can be activated explicitly.
+- Participants must explicitly opt in to create a measured A/B session. The non-measured demonstration does not write a session.
+- Each visit receives a random 256-bit bearer token and random session ID; only a SHA-256 token digest and anonymous assignment are stored in SQLite.
+- Only the first CTA per session is included in the aggregate, using a transaction for idempotency; choice branch stays in browser memory and is not transmitted.
+- Anonymous sessions expire after seven days; daily counters are kept for 90 days. Startup, scheduled hourly and operator reads trigger cleanup.
+- Single-instance memory-based IP throttling can still temporarily retain requester IPs; reverse-proxy logs may store IP and demand independent privacy controls.
+- The client does not use marketing cookies, browser storage or third-party trackers for the experiment.
+- Aggregates count technical session starts and CTA clicks only; they do not prove human reach, sales, ad performance or lift.
+- Content is inserted with DOM textContent, not interpolated into raw HTML. Exported spreadsheet values are neutralized against formula execution.
+- Remaining work includes stronger identity and MFA, granular operator roles, abuse/bot mitigation, distributed rate limits, TLS and legal analysis, monitoring and backup deletion enforcement. These are deployment blockers, not optional polish.
