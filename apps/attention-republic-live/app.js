@@ -28,7 +28,8 @@ ru:{
  liveLabel:'ИЗМЕРЯЕМАЯ СЕССИЯ',optionA:'ВАРИАНТ A',optionB:'ВАРИАНТ B',
  tallyA:'ЗАПИСАНО ЗА A',tallyB:'ЗАПИСАНО ЗА B',total:'ВСЕГО СЕССИЙ С ВЫБОРОМ',
  metricDisclaimer:'Это технические выборы анонимных сессий, не уникальные или проверенные люди.',
- done:'Сессия уже сделала выбор. Повторное голосование этим токеном невозможно.'
+ done:'Сессия уже сделала выбор. Повторное голосование этим токеном невозможно.',
+ cancelSession:'ОТМЕНИТЬ УЧАСТИЕ И УДАЛИТЬ СЕССИЮ ↗',revoked:'Согласие отозвано. Незавершённая сессия удалена без записи голоса.',revokeFailed:'Не удалось подтвердить удаление сессии. Повторите попытку.'
 },
 en:{
  alpha:'PUBLIC PILOT / NOT AN ELECTION',museumLink:'MUSEUM ↗',eyebrow:'WHO OWNS ATTENTION?',
@@ -59,7 +60,8 @@ en:{
  liveLabel:'MEASURED ANONYMOUS SESSION',optionA:'OPTION A',optionB:'OPTION B',
  tallyA:'RECORDED A',tallyB:'RECORDED B',total:'BALLOT SESSIONS',
  metricDisclaimer:'These are anonymous session ballots, not verified distinct humans.',
- done:'This session already cast its one ballot.'
+ done:'This session already cast its one ballot.',
+ cancelSession:'CANCEL AND DELETE UNVOTED SESSION ↗',revoked:'Consent withdrawn. The unvoted session was deleted without recording a ballot.',revokeFailed:'Session deletion was not confirmed. Try again.'
 },
 zh:{
  alpha:'公开试点 / 并非选举',museumLink:'MUSEUM ↗',eyebrow:'注意力属于谁？',
@@ -90,7 +92,8 @@ zh:{
  liveLabel:'匿名测量会话',optionA:'选项 A',optionB:'选项 B',
  tallyA:'已记录 A',tallyB:'已记录 B',total:'已投票会话总数',
  metricDisclaimer:'这些是匿名会话选票，不是经验证的独立真人。',
- done:'该会话已投过一次，无法重复投票。'
+ done:'该会话已投过一次，无法重复投票。',
+ cancelSession:'取消参与并删除未投票会话 ↗',revoked:'已撤回同意。未投票的会话已删除，没有记录选票。',revokeFailed:'无法确认删除会话，请重试。'
 }
 };
 let locale='ru',challenges=[],active=null,session=null,mode=null,voted=false,lastCounts=null,busy=false,choiceMade=null;
@@ -107,6 +110,7 @@ function translate(){
 }
 function updateControls(){
  el('startVote').disabled=busy||!el('consent').checked||!challenges.length||mode==='live';
+ el('demo').disabled=busy||(mode==='live'&&session!==null);
 }
 function updateCatalog(){
  const select=el('challenge');const selected=select.value;
@@ -158,6 +162,8 @@ function renderBallot(){
    btn.type='button';btn.dataset.ballotChoice=choice;btn.disabled=busy||voted;
    area.append(btn);
  }
+ el('cancelSession').hidden=!(mode==='live'&&session!==null&&!voted);
+ el('cancelSession').disabled=busy;
  const result=el('ballotResult');result.hidden=!voted;
  if(voted){
    el('outcomeHeading').textContent=mode==='demo'?t('demoLabel'):t('voteSuccess');
@@ -195,6 +201,22 @@ el('startVote').addEventListener('click',async()=>{
   mode='live';active=challenge;voted=false;lastCounts=null;choiceMade=null;
   setMessage('sessionOpened','startStatus');el('ballotStatus').textContent='';
  }catch{setMessage('loadError','startStatus');}
+ finally{busy=false;updateControls();if(mode)renderBallot();}
+});
+el('cancelSession').addEventListener('click',async()=>{
+ if(mode!=='live'||!active||!session||busy||voted)return;
+ busy=true;updateControls();renderBallot();
+ try{
+   const reply=await fetch('/api/v1/republic/challenges/'+active.id+'/sessions/'+session.id,{
+     method:'DELETE',headers:{Authorization:'Bearer '+session.token}
+   });
+   const data=await reply.json();
+   if(!reply.ok||data.revoked!==true||data.ballotRecorded!==false)throw Error('Not revoked');
+   session=null;mode=null;active=null;voted=false;lastCounts=null;choiceMade=null;
+   el('consent').checked=false;
+   el('ballot').hidden=true;el('empty').hidden=false;
+   setMessage('revoked','startStatus');
+ }catch{setMessage('revokeFailed','ballotStatus');}
  finally{busy=false;updateControls();if(mode)renderBallot();}
 });
 el('ballotOptions').addEventListener('click',async e=>{
