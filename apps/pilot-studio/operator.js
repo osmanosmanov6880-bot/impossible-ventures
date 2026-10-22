@@ -11,7 +11,7 @@ const languagePicker = document.getElementById('operatorLocale');
 
 const dictionary = {
   ru: {
-    operatorLabel: 'ОПЕРАТОР / ЛОКАЛЬНЫЙ КЛЮЧ', language: 'Язык',
+    operatorLabel: 'ОПЕРАТОР / ЛОКАЛЬНЫЙ КЛЮЧ', language: 'Язык', experimentNav: 'КАБИНЕТ ЭКСПЕРИМЕНТОВ ↗',
     access: 'ДОСТУП ОГРАНИЧЕН / БЕЗ SSO',
     eyebrow: 'ЗАЯВКИ / АЛЬФА', pilot: 'Pilot', command: 'Контроль.',
     explanation: 'Просматривайте реальные заявки, сохранённые на этом сервере. Никаких вымышленных клиентов и доходов. Установите сильный OPERATOR_TOKEN: браузер не сохраняет ключ в постоянном хранилище.',
@@ -31,7 +31,7 @@ const dictionary = {
     unexpectedError: 'Не удалось получить заявки.'
   },
   en: {
-    operatorLabel: 'OPERATOR / LOCAL ACCESS TOKEN', language: 'Language',
+    operatorLabel: 'OPERATOR / LOCAL ACCESS TOKEN', language: 'Language', experimentNav: 'EXPERIMENT COMMAND ↗',
     access: 'ACCESS CONTROLLED / NO SSO',
     eyebrow: 'PIPELINE OPERATIONS / ALPHA', pilot: 'Pilot', command: 'Command.',
     explanation: 'Review genuine requests stored on this server. No fictional leads, payments or revenue. Use a strong OPERATOR_TOKEN environment variable; the browser never stores the key persistently.',
@@ -50,7 +50,7 @@ const dictionary = {
     unexpectedError: 'Could not load the pilot requests.'
   },
   zh: {
-    operatorLabel: '运营人员 / 本地访问令牌', language: '语言',
+    operatorLabel: '运营人员 / 本地访问令牌', language: '语言', experimentNav: '实验管理 ↗',
     access: '受控访问 / 未启用单点登录',
     eyebrow: '潜在客户管理 / 测试版', pilot: 'Pilot', command: '控制台。',
     explanation: '仅查看保存在当前服务器上的真实申请，不展示虚构的客户、支付或收入。请设置强随机 OPERATOR_TOKEN；浏览器不会持久保存令牌。',
