@@ -6,6 +6,7 @@ import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createPilotRouter } from '../pilot-studio/pilots.mjs';
 import { createExperimentRouter } from '../experiment-lab/experiments.mjs';
+import { createWorkspaces } from '../commercial/workspaces.mjs';
 import { refineDossier } from './creative-engine.mjs';
 import { localizeRuleDossier } from './dossier-locales.mjs';
 
@@ -272,6 +273,7 @@ export function createApp({
   const requestsByIP = new Map();
   const handlePilots = createPilotRouter({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
   const handleExperiments = createExperimentRouter({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
+  const commercial = createWorkspaces({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
   const aiAvailable = Boolean(aiKey && aiModel);
   const finalizing = new Set();
   const server = createServer(async (request, response) => {
@@ -289,6 +291,7 @@ export function createApp({
         if (request.method === 'POST' || request.method === 'DELETE') throttle(requestsByIP, request, now);
         if (await handlePilots(request, response, pathname)) return;
         if (await handleExperiments(request, response, pathname)) return;
+        if (await commercial.handle(request, response, pathname)) return;
         if (pathname === '/api/v1/missions' && request.method === 'POST') {
           const body = await jsonBody(request);
           const host = {
