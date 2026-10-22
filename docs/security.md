@@ -55,3 +55,13 @@ Production gates: threat model, authorization review, automated accessibility/br
 - Aggregates count technical session starts and CTA clicks only; they do not prove human reach, sales, ad performance or lift.
 - Content is inserted with DOM textContent, not interpolated into raw HTML. Exported spreadsheet values are neutralized against formula execution.
 - Remaining work includes stronger identity and MFA, granular operator roles, abuse/bot mitigation, distributed rate limits, TLS and legal analysis, monitoring and backup deletion enforcement. These are deployment blockers, not optional polish.
+
+## Five-wave v1.0-beta security and customer-facing financial boundaries
+
+- Organizations and their content are isolated by workspace ID. Only a configured system OPERATOR_TOKEN may create a workspace. Workspace access is controlled by independent random capability tokens; only hashes are stored, not plaintext.
+- The owner may issue editor/viewer credentials (1–90 days), inspect audit metadata, revoke access and delete the workspace. Owner credentials expire after 180 days, with rotation under system operator control. The role system is **not** employee identity verification, MFA, password login, SSO or automatic onboarding.
+- Campaign editing uses an optimistic revision check. Only owners approve public previews or publish private proposal links. Published creatives reveal only public copy, not a private workspace ID or customer contact.
+- Proposals are tenant-scoped and do not expose client email to anonymous visitors. Private viewing requires a long bearer token in the request Authorization header. The browser reads the shared fragment token into ephemeral memory, removing it from history. Link decisions are **not validated human identity signatures** and no payments are processed.
+- A/B-to-Pilot Studio attribution is based on a cryptographically random, one-use server-verified CTA receipt held temporarily in sessionStorage, and a **separate contact form consent**. The API rejects reused, invalid or expired receipts and links only the actual submitted form to the recorded experiment arm.
+- Proposal contact records are purged after 180 days of alpha retention (startup/hourly/normal API read); other workspace content remains until owner-driven export/delete. Runtime deletion does not remove backups, proxy logs or screenshots.
+- Commercial Command is still a **single Node server and SQLite store**. Rate limits are process-local, shared system operator key is not least-privilege IAM, tenant isolation is application-enforced rather than PostgreSQL row-level policy. An independent security review, TLS, WAF, DPA and authorized data controller information are required before external production traffic.
