@@ -727,3 +727,346 @@ test('Creative World -> Commercial Command: local JSON import, no auto-save, rea
   assert.equal(writes.length,1,'Invalid imports must not create any server records');
   assert.deepEqual(errors,[]);
 });
+
+test('Appeal 2049 premium mobile tribunal reviews ideas, imports finalized Dead Drop JSON, exports safe reports in 3 languages',async t=>{
+  const { context, base }=await setup(t,390,844);
+  const page=await context.newPage();
+  const errors=[];
+  const mutations=[];
+  attachErrors(page,errors);
+  page.on('request',r=>{
+    if(r.method()!=='GET' && r.method()!=='HEAD') mutations.push(r.method()+' '+r.url());
+  });
+
+  await page.goto(base+'/apps/appeal-2049-studio/');
+  await page.getByRole('heading',{name:/Твоя реклама/}).waitFor();
+  await page.locator('#product').fill('Aurora studio');
+  await page.locator('#idea').fill('A research-driven campaign inviting independent designers to compare real team workflows and request a short onboarding consultation.');
+  await page.locator('#audience').fill('Independent designers who manage several client projects');
+  await page.locator('#evidence').fill('Product demo, internal experiment report with documented cases');
+  await page.locator('#goal').selectOption('leads');
+  await page.locator('#caseForm').evaluate(form=>form.requestSubmit());
+  await page.locator('#scorecards .score-item').first().waitFor();
+  assert.equal(await page.locator('#scorecards .score-item').count(),5);
+  assert.match(await page.locator('#reviewContent').innerText(),/ПРОВЕРИТЬ ПЕРЕД ПУБЛИКАЦИЕЙ/);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+  mkdirSync('artifacts',{recursive:true});
+  await page.screenshot({path:'artifacts/appeal-2049-ru-mobile.png',fullPage:true});
+
+  const downloadPromise=page.waitForEvent('download');
+  await page.locator('#downloadJSON').click();
+  const download=await downloadPromise;
+  assert.equal(download.suggestedFilename(),'appeal-2049-review.json');
+  const report=JSON.parse(readFileSync(await download.path(),'utf8'));
+  assert.equal(report.kind,'appeal-2049-editorial-report');
+  assert.equal(report.evaluation.evidenceVerified,false);
+  assert.equal(report.evaluation.humanVerificationRequired,true);
+  assert.ok(report.evaluation.total<=20);
+  assert.ok(!JSON.stringify(report).includes('Bearer '));
+
+  await page.locator('#locale').selectOption('en');
+  assert.match(await page.locator('#reviewContent').innerText(),/DRAFT READINESS SIGNALS/);
+  await page.locator('#locale').selectOption('zh');
+  assert.match(await page.locator('#reviewContent').innerText(),/草案准备程度指标/);
+
+  const dossier={
+    brand:'Aurora research',
+    audience:'Independent creative agencies who want verifiable experiments',
+    openingHook:'An evidence-led opening',
+    concept:'A precise demonstration of campaign testing that invites agencies to request a pilot appointment.',
+    callToAction:'Request a briefing',
+    evidenceToVerify:'Public sample methodology under review',
+    interceptedSignals:{productAgent:'PRIVATE ROLE SIGNAL'},
+    hostTokenHash:'PRIVATE-SHA'
+  };
+  const data={
+    kind:'dead-drop-agent-export',
+    mission:{status:'finalized',code:'ABCDEFGH',role:'product',token:'raw-private-token',
+      ownIntel:{product:'TOP SECRET NOTES'},dossier}
+  };
+  await page.locator('#dossierFile').setInputFiles({
+    name:'dead-drop-final.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))
+  });
+  assert.equal(await page.locator('#product').inputValue(),'Aurora research');
+  assert.equal(await page.locator('#goal').inputValue(),'leads');
+  assert.ok(!(await page.locator('#idea').inputValue()).includes('PRIVATE ROLE SIGNAL'));
+  await page.locator('#caseForm').evaluate(form=>form.requestSubmit());
+  await page.locator('#scorecards .score-item').first().waitFor();
+  const nextDownload=page.waitForEvent('download');
+  await page.locator('#downloadJSON').click();
+  const sanitized=JSON.parse(readFileSync(await(await nextDownload).path(),'utf8'));
+  const serialized=JSON.stringify(sanitized);
+  assert.ok(!serialized.includes('raw-private-token'));
+  assert.ok(!serialized.includes('TOP SECRET NOTES'));
+  assert.ok(!serialized.includes('PRIVATE-SHA'));
+  assert.ok(!serialized.includes('ABCDEFGH'));
+  assert.deepEqual(mutations,[],'Tribunal must not submit client content to an HTTP API');
+  assert.deepEqual(errors,[]);
+});
+
+
+test('AntiPersona mobile adversarial debate challenges idea, scores rebuttal, exports private report and switches locale',async t=>{
+  const {context,base}=await setup(t,390,844);
+  const page=await context.newPage();
+  const errors=[];attachErrors(page,errors);
+  const mutations=[];
+  page.on('request',req=>{
+    if(!['GET','HEAD'].includes(req.method()))mutations.push(req.method());
+  });
+  await page.goto(base+'/apps/antipersona/');
+  await page.locator('#brand').fill('Aurora Studio');
+  await page.locator('#audience').fill('Independent agencies with busy project teams');
+  await page.locator('#idea').fill('Show a transparent side-by-side demo of two creative workflow tools and invite a small group of designers to request a trial.');
+  await page.locator('#persona').selectOption('finance');
+  await page.locator('#pressure').selectOption('intense');
+  await page.locator('#briefForm').evaluate(form=>form.requestSubmit());
+  await page.locator('#results').waitFor({state:'visible'});
+  assert.equal(await page.locator('#challengeList .card').count(),3);
+  assert.equal(await page.locator('#chosenChallenge option').count(),3);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+  mkdirSync('artifacts',{recursive:true});
+  await page.screenshot({path:'artifacts/antipersona-mobile-ru.png',fullPage:true});
+
+  await page.locator('#chosenChallenge').selectOption('roi');
+  await page.locator('#defense').fill('We will test the two versions on 40 consenting participants and publish the results in an accessible report.');
+  await page.locator('#defenseForm').evaluate(form=>form.requestSubmit());
+  await page.locator('#defenseResult').waitFor({state:'visible'});
+  assert.match(await page.locator('#responseRating').textContent(),/[0-3] \/ 3/);
+
+  const downloadPromise=page.waitForEvent('download');
+  await page.locator('#exportJSON').click();
+  const download=await downloadPromise;
+  assert.equal(download.suggestedFilename(),'antipersona-debate.json');
+  const report=JSON.parse(readFileSync(await download.path(),'utf8'));
+  assert.equal(report.kind,'antipersona-debate-report');
+  assert.equal(report.debate.disclosures.modelUsed,false);
+  assert.equal(report.defense.evidenceIndependentlyVerified,false);
+
+  await page.locator('#locale').selectOption('en');
+  assert.match(await page.locator('#results').innerText(),/Three questions without compromise/);
+  await page.locator('#locale').selectOption('zh');
+  assert.match(await page.locator('#results').innerText(),/三个不回避的问题/);
+  assert.deepEqual(mutations,[]);
+  assert.deepEqual(errors,[]);
+});
+
+
+test('Brief Theatre three-act creative rehearsal changes direction, finishes a real script, exports JSON and changes languages',async t=>{
+  const {context,base}=await setup(t,390,844);
+  const page=await context.newPage();
+  const errors=[];attachErrors(page,errors);
+  const posts=[];page.on('request',req=>{if(!['GET','HEAD'].includes(req.method()))posts.push(req.method());});
+  await page.goto(base+'/apps/brief-theatre-studio/');
+  await page.locator('#brand').fill('Aurora Studio');
+  await page.locator('#audience').fill('Creative agency account managers');
+  await page.locator('#concept').fill('Reveal where creative feedback gets lost, then offer a demonstrable project handoff workflow.');
+  await page.locator('#channel').selectOption('video');
+  await page.locator('#playForm').evaluate(form=>form.requestSubmit());
+  await page.locator('#playArea').waitFor({state:'visible'});
+  assert.match(await page.locator('#actHeading').textContent(),/АКТ 1/);
+  await page.locator('#sceneDraft').fill('Show an overwhelmed designer and one moment where feedback gets lost; viewers recognize the problem immediately.');
+  await page.locator('#direction').selectOption('bold');
+  await page.locator('#sceneForm').evaluate(form=>form.requestSubmit());
+  assert.match(await page.locator('#directorPressure').textContent(),/смелую/);
+  assert.match(await page.locator('#actHeading').textContent(),/АКТ 2/);
+  await page.locator('#sceneDraft').fill('Show a documented before-and-after demo, including a small sample and a transparent explanation of what was measured.');
+  await page.locator('#direction').selectOption('careful');
+  await page.locator('#sceneForm').evaluate(form=>form.requestSubmit());
+  assert.match(await page.locator('#actHeading').textContent(),/АКТ 3/);
+  await page.locator('#sceneDraft').fill('Invite viewers to request a controlled pilot demonstration, showing exactly what they will receive and what is unverified.');
+  await page.locator('#sceneForm').evaluate(form=>form.requestSubmit());
+  await page.locator('#complete').waitFor({state:'visible'});
+  assert.equal(await page.locator('#history .record').count(),3);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+  mkdirSync('artifacts',{recursive:true});
+  await page.screenshot({path:'artifacts/brief-theatre-mobile-final.png',fullPage:true});
+  const downloadPromise=page.waitForEvent('download');
+  await page.locator('#exportJSON').click();
+  const download=await downloadPromise;
+  const exported=JSON.parse(readFileSync(await download.path(),'utf8'));
+  assert.equal(exported.kind,'brief-theatre-script');
+  assert.equal(exported.scenes.length,3);
+  assert.equal(exported.factualClaimsUnverified,true);
+  await page.locator('#locale').selectOption('en');
+  assert.match(await page.locator('#complete').innerText(),/THIRD ACT COMPLETE/);
+  await page.locator('#locale').selectOption('zh');
+  assert.match(await page.locator('#complete').innerText(),/第三幕完成/);
+  assert.deepEqual(posts,[]);
+  assert.deepEqual(errors,[]);
+});
+
+
+test('AdBiome real mobile DNA mutation and crossbreeding generate distinct ideas and private JSON export',async t=>{
+ const {context,base}=await setup(t,390,844);
+ const page=await context.newPage();const errors=[];attachErrors(page,errors);
+ const posts=[];page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))posts.push(r.method());});
+ await page.goto(base+'/apps/adbiome/');
+ await page.locator('#brand').fill('Aurora Studio');
+ await page.locator('#audience').fill('Independent designers using client approval tools');
+ await page.locator('#genomeForm').evaluate(form=>form.requestSubmit());
+ await page.locator('#workspace').waitFor({state:'visible'});
+ assert.equal(await page.locator('#variantCount').textContent(),'1');
+ await page.locator('#sourceGenome').selectOption('0');
+ await page.locator('#mutateGene').selectOption('promise');
+ await page.locator('#mutate').click();
+ assert.equal(await page.locator('#variantCount').textContent(),'2');
+ await page.locator('#sourceGenome').selectOption('0');
+ await page.locator('#mutateGene').selectOption('proof');
+ await page.locator('#mutate').click();
+ assert.equal(await page.locator('#variantCount').textContent(),'3');
+ await page.locator('#parentLeft').selectOption('1');
+ await page.locator('#parentRight').selectOption('2');
+ await page.locator('#crossbreed').click();
+ assert.equal(await page.locator('#variantCount').textContent(),'4');
+ assert.equal(await page.locator('#distanceCount').textContent(),'2/5');
+ assert.equal(await page.locator('#variantList .card').count(),4);
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+ mkdirSync('artifacts',{recursive:true});
+ await page.screenshot({path:'artifacts/adbiome-mobile-variants.png',fullPage:true});
+ const promise=page.waitForEvent('download');
+ await page.locator('#exportDNA').click();
+ const downloaded=await promise;
+ const report=JSON.parse(readFileSync(await downloaded.path(),'utf8'));
+ assert.equal(report.kind,'adbiome-local-library');
+ assert.equal(report.genomes.length,4);
+ assert.equal(report.claimsUnverified,true);
+ assert.equal(report.measuredBusinessOutcomes,false);
+ assert.equal(report.genomes[3].lineage[0].type,'crossbreed');
+ await page.locator('#locale').selectOption('en');
+ assert.match(await page.locator('#creativePreview').innerText(),/Humans must independently verify/);
+ await page.locator('#locale').selectOption('zh');
+ assert.match(await page.locator('#creativePreview').innerText(),/人工独立验证/);
+ assert.deepEqual(posts,[]);
+ assert.deepEqual(errors,[]);
+});
+
+
+test('Museum of Attention filters four fictional exhibits, reads narratives and exports local visitor placard on mobile',async t=>{
+ const {context,base}=await setup(t,390,844);
+ const page=await context.newPage(),errors=[],posts=[];
+ attachErrors(page,errors);
+ page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))posts.push(r.method());});
+ await page.goto(base+'/apps/museum-of-attention-studio/');
+ assert.equal(await page.locator('#gallery .record').count(),4);
+ await page.locator('#era').selectOption('2040s');
+ assert.equal(await page.locator('#gallery .record').count(),2);
+ await page.locator('#gallery [data-exhibit-id]').first().click();
+ await page.locator('#exhibit').waitFor({state:'visible'});
+ assert.match(await page.locator('#exhibit').innerText(),/ХУДОЖЕСТВЕННЫЙ ВЫМЫСЕЛ/);
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+ mkdirSync('artifacts',{recursive:true});
+ await page.screenshot({path:'artifacts/museum-attention-mobile.png',fullPage:true});
+ await page.locator('#placardTitle').fill('Капсула добровольного внимания');
+ await page.locator('#year').fill('2049');
+ await page.locator('#medium').selectOption('interactive');
+ await page.locator('#interpretation').fill('В воображаемом городе рекламное сообщение появляется лишь тогда, когда человек запрашивает его самостоятельно.');
+ await page.locator('#placardForm').evaluate(form=>form.requestSubmit());
+ await page.locator('#myPlacard').waitFor({state:'visible'});
+ const download=page.waitForEvent('download');
+ await page.locator('#exportPlacard').click();
+ const report=JSON.parse(readFileSync(await(await download).path(),'utf8'));
+ assert.equal(report.kind,'museum-attention-guest-placard');
+ assert.equal(report.fictional,true);
+ assert.equal(report.published,false);
+ assert.equal(report.year,2049);
+ await page.locator('#locale').selectOption('en');
+ assert.match(await page.locator('#exhibit').innerText(),/SPECULATIVE FICTION/);
+ await page.locator('#locale').selectOption('zh');
+ assert.match(await page.locator('#myPlacard').innerText(),/访客展品/);
+ assert.deepEqual(posts,[]);
+ assert.deepEqual(errors,[]);
+});
+
+test('Attention Republic operator publishes real question; two independently consented browser sessions vote exactly once; demo remains untracked',async t=>{
+ const previous=process.env.OPERATOR_TOKEN;
+ const secret='attention-republic-real-browser-test-secret-32-chars';
+ process.env.OPERATOR_TOKEN=secret;
+ t.after(()=>{if(previous===undefined)delete process.env.OPERATOR_TOKEN;else process.env.OPERATOR_TOKEN=previous;});
+ const {context,base}=await setup(t,390,844);
+ const operator=await context.newPage(),first=await context.newPage(),second=await context.newPage();
+ const errors=[];for(const page of [operator,first,second])attachErrors(page,errors);
+ await first.goto(base+'/apps/attention-republic-live/');
+ await first.locator('#connection').waitFor();
+ await first.locator('#demo').click();
+ await first.locator('#ballot').waitFor({state:'visible'});
+ await first.locator('[data-ballot-choice="a"]').click();
+ assert.match(await first.locator('#ballotResult').innerText(),/ЛОКАЛЬНАЯ ДЕМОНСТРАЦИЯ/);
+ assert.equal(await first.locator('#countMetrics .metric').count(),0,'Demo must never show invented tally');
+
+ await operator.goto(base+'/apps/attention-republic-live/operator/');
+ await operator.locator('#operatorToken').fill(secret);
+ await operator.locator('#operatorLogin').evaluate(form=>form.requestSubmit());
+ await operator.locator('#challengeForm').waitFor({state:'visible'});
+ await operator.locator('#challengeTitle').fill('Which form of consent-first advertising would you choose?');
+ await operator.locator('#question').fill('Would you prefer an ad you request or an ad that can always be dismissed?');
+ await operator.locator('#choiceA').fill('Only on request');
+ await operator.locator('#choiceB').fill('Always dismissible');
+ await operator.locator('#questionLocale').selectOption('en');
+ await operator.locator('#challengeForm').evaluate(form=>form.requestSubmit());
+ await operator.locator('#challengeList .card').first().waitFor();
+ assert.equal(await operator.locator('#challengeList .card').count(),1);
+ await operator.locator('#challengeList [data-status="active"]').click();
+ await operator.locator('#challengeList .card').first().waitFor();
+
+ await first.reload();
+ await first.locator('#challenge option').first().waitFor();
+ await first.locator('#consent').check();
+ await first.locator('#startVote').click();
+ await first.locator('#ballot').waitFor({state:'visible'});
+ await first.locator('[data-ballot-choice="a"]').click();
+ await first.locator('#ballotResult').waitFor({state:'visible'});
+ assert.match(await first.locator('#countMetrics').innerText(),/1/);
+ assert.equal(await first.locator('[data-ballot-choice="a"]').isDisabled(),true);
+ assert.equal(await first.locator('[data-ballot-choice="b"]').isDisabled(),true);
+ assert.equal(await first.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+ mkdirSync('artifacts',{recursive:true});
+ await first.screenshot({path:'artifacts/attention-republic-mobile-real-vote.png',fullPage:true});
+
+ await second.goto(base+'/apps/attention-republic-live/');
+ await second.locator('#challenge option').first().waitFor();
+ await second.locator('#consent').check();
+ await second.locator('#startVote').click();
+ await second.locator('#ballot').waitFor({state:'visible'});
+ await second.locator('[data-ballot-choice="b"]').click();
+ await second.locator('#ballotResult').waitFor({state:'visible'});
+ assert.match(await second.locator('#countMetrics').innerText(),/2/);
+ await operator.locator('#refresh').click();
+ await operator.getByText('Which form of consent-first advertising would you choose?').waitFor();
+ assert.match(await operator.locator('#challengeList .card').innerText(),/2/);
+ await operator.locator('#logout').click();
+ assert.equal(await operator.locator('#operatorPanel').isHidden(),true);
+ assert.deepEqual(errors,[]);
+});
+
+
+test('global seven-world portfolio routes, RU/EN/ZH translation and category filters work on mobile',async t=>{
+ const {context,base}=await setup(t,390,844);
+ const page=await context.newPage(),errors=[];attachErrors(page,errors);
+ await page.goto(base+'/');
+ await page.locator('#worldGrid .world-card').first().waitFor();
+ assert.equal(await page.locator('#worldGrid .world-card').count(),7);
+ assert.equal(await page.locator('#worldGrid .world-card:visible').count(),7);
+ for(const [filter,count] of [['creative',3],['review',2],['community',2],['all',7]]){
+   await page.locator('[data-filter="'+filter+'"]').click();
+   assert.equal(await page.locator('#worldGrid .world-card:visible').count(),count,filter);
+   assert.equal(await page.locator('[data-filter="'+filter+'"]').getAttribute('aria-pressed'),'true');
+ }
+ await page.locator('#language').selectOption('en');
+ assert.match(await page.locator('#heroTitle').innerText(),/Impossible/);
+ assert.match(await page.locator('#worlds').innerText(),/Seven creative worlds/);
+ await page.locator('#language').selectOption('zh');
+ assert.match(await page.locator('#heroTitle').innerText(),/不可能/);
+ await page.locator('#language').selectOption('ru');
+ assert.match(await page.locator('#heroTitle').innerText(),/Невозможное/);
+ const routes=await page.locator('#worldGrid .world-link').evaluateAll(items=>items.map(a=>a.getAttribute('href')));
+ assert.equal(new Set(routes).size,7);
+ for(const href of routes){
+   const response=await page.request.get(new URL(href,base).toString());
+   assert.equal(response.status(),200,href);
+   assert.match(response.headers()['content-security-policy']||'',/script-src 'self'/);
+ }
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+ mkdirSync('artifacts',{recursive:true});
+ await page.screenshot({path:'artifacts/impossible-ventures-seven-worlds-mobile.png',fullPage:true});
+ assert.deepEqual(errors,[]);
+});
