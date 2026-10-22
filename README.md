@@ -1,5 +1,33 @@
 # Impossible Ventures
 
+## Five-WAVE Commercial Command v1.0 beta — implemented in source
+
+This release adds a premium Russian-first global entry page; a no-registration seven-world local creative demonstration; real operator-provisioned organization workspaces with expiring owner/editor/viewer credentials and auditing; organization-scoped versioned creative campaigns and approved-only shareable previews; opt-in one-time attribution of measured A/B CTA to a separately consented Pilot Studio form; and real customer-viewable commercial proposals with exact monetary arithmetic, private tokens, decision tracking and 180-day proposal retention.
+
+The full five-wave release log, setup steps, API semantics, risk controls and verified boundaries are documented in **[docs/five-wave-release.md](docs/five-wave-release.md)**.
+
+**Working Node server pages**
+- [Main premium marketing site](/) — open locally at http://localhost:3000/
+- http://localhost:3000/commercial/ — seven-world interactive demo plus persisted workspaces and campaign/proposal editor.
+- http://localhost:3000/experiments/ — genuinely consent-gated experiment flow.
+- http://localhost:3000/pilot/ — campaign model and separately consented commercial pilot request.
+- http://localhost:3000/showcase/?id=CAMPAIGN_ID — published creative only, no advertising network delivery.
+- http://localhost:3000/proposal/?id=PROPOSAL_ID#token=PRIVATE_SECRET — private customer quote, not invoice or payment.
+
+Quick start (Node 22+):
+
+```powershell
+git clone https://github.com/osmanosmanov6880-bot/impossible-ventures.git
+cd impossible-ventures
+$env:OPERATOR_TOKEN = node -e "process.stdout.write(require('node:crypto').randomBytes(48).toString('base64url'))"
+npm start
+```
+
+Use npm run check for integrated server tests, or the published CI workflow for Playwright, Docker and static preview QA. The static bundle lets visitors explore the seven worlds and view mockups without registration; it cannot persist real data or accept customer decisions.
+
+**Commercial limitation:** accepted quotes, manual lead status and CTA activity **do not prove collected revenue, invoiced charges, unique human audience, actual ad delivery or independent sales**. No live third-party ad-platform connector, Stripe billing, MFA/SSO or externally verified commercial deployment is claimed. First deploy only to protected staging with synthetic data and review privacy/security before real customers.
+
+
 ## Static preview distribution
 
 The main-branch Pages workflow publishes only when GitHub Pages is configured. Even if it is not, a downloadable artifact named **impossible-ventures-static-preview** is produced by Actions. See [deployment instructions](docs/deployment.md). It includes untracked demos only; backend pilot applications and measured experiments need the Node server.
