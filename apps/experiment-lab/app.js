@@ -360,6 +360,18 @@ els.cta.addEventListener('click', async () => {
     if (!response.ok) throw new Error('Recording failed');
     const data = await response.json();
     if (data.event !== 'cta_clicked') throw new Error('Invalid acknowledgement');
+    // The participant opted in. Keep a short-lived, one-time attribution receipt
+    // only in this tab's sessionStorage; never put it in the URL or referrer.
+    if (data.recorded && data.attribution &&
+        data.attribution.sessionId === assigned.sessionId) {
+      try {
+        sessionStorage.setItem('iv_pilot_attribution', JSON.stringify({
+          sessionId: data.attribution.sessionId,
+          receipt: data.attribution.receipt,
+          createdAt: Date.now()
+        }));
+      } catch { /* If storage is blocked, pilot requests remain usable without attribution. */ }
+    }
     showStatus(t('clicked'));
     // The follow-up pilot request is not automatically attributed to this session.
     location.assign('../pilot/#request');
