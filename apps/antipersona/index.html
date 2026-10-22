@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#100b1d"><meta name="description" content="AntiPersona — творческий оппонент для проверки рекламных идей четырьмя независимыми типами критиков.">
+<title>AntiPersona — Creative Adversary Studio · Impossible Ventures</title>
+<link rel="stylesheet" href="../shared/studio.css"><script type="module" src="./app.js"></script></head>
+<body data-universe="antipersona">
+<header class="topbar">
+  <a class="wordmark" href="../../"><span class="mark">A<span>·</span></span><span>ANTI<b>PERSONA</b><small>CREATIVE ADVERSARY STUDIO</small></span></a>
+  <div class="toplinks"><span class="top-status" data-i18n="alpha">РУЧНОЙ СПОР / ИССЛЕДОВАТЕЛЬСКАЯ ВЕРСИЯ</span>
+    <a href="../appeal-2049/" data-i18n="appealLink">APPEAL 2049 ↗</a>
+    <label class="sr-only" for="locale">Язык</label><select id="locale" aria-label="Language"><option value="ru">Русский</option><option value="en">English</option><option value="zh">中文</option></select></div>
+</header>
+<main class="shell">
+  <section class="hero"><div class="hero-copy"><div class="eyebrow" data-i18n="kicker">НЕ СОГЛАШАТЬСЯ. ВОПРОШАТЬ. УСИЛИВАТЬ.</div>
+    <h1><span data-i18n="headFirst">Хорошие идеи</span><em data-i18n="headSecond">выдержат спор.</em></h1>
+    <p data-i18n="subtitle">Проверьте рекламную концепцию глазами скептика, финансового директора, занятого человека или сторонника доступности. Получите реальные вопросы, а не автоматическое одобрение.</p>
+    <div class="hero-tags"><span class="tag" data-i18n="tagA">04 ТИПА ОППОНЕНТОВ</span><span class="tag" data-i18n="tagB">03 ВОЗРАЖЕНИЯ</span><span class="tag" data-i18n="tagC">00 ВНЕШНИХ AI-ЗАПРОСОВ</span></div>
+  </div><div class="sculpture" aria-hidden="true"><div class="orbit"></div><div class="orbit alt"></div><div class="sculpture-core"><strong>≠</strong><small>QUESTION<br>EVERYTHING</small></div><div class="orbit-caption">IV / ADVERSARIAL THOUGHT</div></div></section>
+  <div class="section-divider"><span data-i18n="stage">01 / ОТКРОЙТЕ СПОР</span><i></i><span>PRODUCT / AUDIENCE / PRESSURE</span></div>
+  <div class="workbench">
+    <section class="panel" aria-labelledby="briefHeading">
+      <div class="eyebrow">YOUR IDEA / INPUT</div><h2 class="panel-title" id="briefHeading" data-i18n="briefHeading">Что будем оспаривать?</h2>
+      <p class="panel-description" data-i18n="briefHint">Введите настоящую рекламную гипотезу. ИИ здесь нет — вопросы формируются по прозрачным редакторским правилам.</p>
+      <form id="briefForm">
+        <label class="field"><span data-i18n="brand">Продукт или бренд</span><input id="brand" maxlength="130" minlength="3" required placeholder="Aurora Studio" data-placeholder="brandPlaceholder"></label>
+        <label class="field"><span data-i18n="audience">Целевая аудитория</span><input id="audience" maxlength="240" minlength="3" required placeholder="Независимые дизайнеры" data-placeholder="audiencePlaceholder"></label>
+        <label class="field"><span data-i18n="idea">Ваша рекламная идея</span><textarea id="idea" minlength="20" maxlength="1200" required placeholder="Наш сервис упрощает согласование макетов…" data-placeholder="ideaPlaceholder"></textarea></label>
+        <div class="field-grid">
+          <label class="field"><span data-i18n="opponent">Кто будет спорить?</span><select id="persona"><option value="skeptic" data-i18n="skeptic">Недоверчивый клиент</option><option value="finance" data-i18n="finance">Финансовый директор</option><option value="impatient" data-i18n="impatient">Человек без времени</option><option value="inclusion" data-i18n="inclusion">Защитник доступности</option></select></label>
+          <label class="field"><span data-i18n="pressure">Напряжение</span><select id="pressure"><option value="focused" data-i18n="focused">Конструктивно</option><option value="intense" data-i18n="intense">Максимум вопросов</option></select></label>
+        </div>
+        <div class="notice" data-i18n="privacy">Текст остаётся в памяти этой вкладки. Вы можете выгрузить результат вручную; сервер не получает вашу идею.</div>
+        <div class="form-footer"><small data-i18n="disclaimer">Это редакторский тренажёр, а не AI и не рыночный прогноз.</small><button type="submit" class="button" data-i18n="start">ОТКРЫТЬ ДЕБАТЫ ↗</button></div>
+        <p class="status-message" id="formStatus" role="alert"></p>
+      </form>
+    </section>
+    <section class="panel" aria-labelledby="resultsHeading">
+      <div class="eyebrow" data-i18n="resultHeader">ОППОНЕНТ / ОТКРЫТОЕ ЗАСЕДАНИЕ</div>
+      <div id="empty" class="is-empty"><div class="empty-symbol" aria-hidden="true">?</div><h2 id="resultsHeading" data-i18n="emptyHeading">Пока никто не спорит.</h2><p data-i18n="emptyBody">После отправки идеи появятся три неудобных вопроса и возможность ответить на один из них.</p></div>
+      <div id="results" hidden>
+        <h2 class="panel-title" data-i18n="resultsTitle">Три вопроса без компромиссов.</h2>
+        <div class="steps"><span class="step active">01 / ATTACK</span><span class="step">02 / DEFEND</span><span class="step">03 / REVISE</span></div>
+        <div id="challengeList" class="results"></div>
+        <form id="defenseForm" class="card after-cards">
+          <div class="card-top" data-i18n="defenseLabel">ВАША ОЧЕРЕДЬ / ОТВЕТИТЬ НА ОДИН ВОПРОС</div>
+          <label class="field"><span data-i18n="which">Какой вопрос выбираете?</span><select id="chosenChallenge"></select></label>
+          <label class="field"><span data-i18n="answer">Ваша защита идеи</span><textarea id="defense" minlength="12" maxlength="900" required placeholder="Какой конкретный факт или тест снимет сомнение?" data-placeholder="defensePlaceholder"></textarea></label>
+          <button class="button wide" type="submit" data-i18n="defend">ПРОВЕРИТЬ ЗАЩИТУ ↗</button>
+        </form>
+        <section id="defenseResult" class="card after-result" hidden aria-live="polite">
+          <div class="card-top" data-i18n="revision">РЕДАКТОРСКАЯ ОБРАТНАЯ СВЯЗЬ</div>
+          <div class="quote" id="responseRating"></div>
+          <p id="responseAdvice"></p><p class="notice" data-i18n="notProof">Даже сильная защита — это структура аргумента, а не независимое подтверждение.</p>
+        </section>
+        <div class="button-row"><button type="button" id="exportJSON" class="button small ghost" data-i18n="download">СКАЧАТЬ ДЕБАТЫ .JSON ↓</button><a href="../brief-theatre-studio/" class="button small ghost" data-i18n="theatreLink">BRIEF THEATRE ↗</a></div>
+        <p class="status-message" id="exportStatus" role="status"></p>
+      </div>
+    </section>
+  </div>
+  <section class="bottom"><article><span>01 / PRESSURE</span><h3 data-i18n="p1Heading">Оппонент с точкой зрения.</h3><p data-i18n="p1Text">У каждого персонажа — собственный набор возражений: вера, цена, время или доступность.</p></article><article><span>02 / PROOF</span><h3 data-i18n="p2Heading">Факты остаются вашей работой.</h3><p data-i18n="p2Text">Система не изображает реальных покупателей и не проверяет рекламные утверждения.</p></article><article><span>03 / EVOLVE</span><h3 data-i18n="p3Heading">Следующая версия сильнее.</h3><p data-i18n="p3Text">Используйте вопросы, чтобы улучшить черновик и проверить его на настоящей аудитории.</p></article></section>
+</main>
+<footer class="footer"><span>ANTIPERSONA · IMPOSSIBLE VENTURES · RULE-BASED ALPHA</span><span data-i18n="footerText">Нет регистрации, платного API и скрытого сохранения идей</span><a href="../../privacy.html" data-i18n="footerLink">Данные и приватность ↗</a></footer>
+</body></html>
