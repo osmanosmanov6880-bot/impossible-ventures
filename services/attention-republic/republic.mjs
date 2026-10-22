@@ -135,7 +135,7 @@ export function createRepublicRouter({db,now,operatorToken='',ApiError,jsonBody,
   // A participant may revoke consent and erase an UNVOTED session with
   // their own capability. Successful ballots remain aggregate only and cannot
   // be subtracted safely by a caller who no longer has an active session.
-  const revoke=/^\\/api\\/v1\\/republic\\/challenges\\/([a-f0-9]{24})\\/sessions\\/([a-f0-9]{32})$/u.exec(pathname);
+  const revoke=/^\/api\/v1\/republic\/challenges\/([a-f0-9]{24})\/sessions\/([a-f0-9]{32})$/u.exec(pathname);
   if(revoke&&method==='DELETE'){
    const token=bearer(request);
    if(!token)throw new ApiError(401,'Session token required');
