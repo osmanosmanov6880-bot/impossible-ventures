@@ -8,11 +8,16 @@ Build seven distinct brands with separate value propositions and customer experi
 |---|---|---|---|---|
 | Dead Drop Agency | Founders, marketers, agencies | Campaign brief through missions | Free tier, creator/team plans | Browser MVP |
 | Appeal 2049 | Marketing teams | Stress-test campaign assumptions | Credits, team plans | Concept |
-| AntiPersona | Creative professionals | Train non-obvious thinking | Subscription | Concept |
-| Brief Theatre | Creative agencies | Scripts under changing constraints | Per export, team plan | Concept |
-| AdBiome | Performance teams | Explore creative variants | SaaS by volume | Concept |
-| Museum of Attention | Brands, schools | Interactive exhibits | Sponsorship, licenses | Concept |
-| Attention Republic | Creative communities | Challenges and peer collaboration | Sponsored challenges | Concept |
+| AntiPersona | Creative professionals | Train non-obvious thinking | Subscription | Browser workshop |
+| Brief Theatre | Creative agencies | Scripts under changing constraints | Per export, team plan | Browser workshop |
+| AdBiome | Performance teams | Explore creative variants | SaaS by volume | Browser workshop |
+| Museum of Attention | Brands, schools | Interactive exhibits | Sponsorship, licenses | Browser workshop |
+| Attention Republic | Creative communities | Challenges and peer collaboration | Sponsored challenges | Browser workshop |
+
+
+## v1.1: five distinct playable creative worlds
+
+AntiPersona, Brief Theatre, AdBiome, Museum of Attention and Attention Republic have individual browser experiences with real decision mechanics, localized scripts and local export. The mechanics are authored deterministic games, **not verified commercial software products, actual audience measurements or ad distribution**. Dead Drop cooperative MVP and Appeal 2049 existing browser prototype remain separate. See [release and explicit status](five-playable-worlds-v11.md).
 
 ## Five-wave alpha: status clarification
 
