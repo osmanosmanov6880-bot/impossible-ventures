@@ -137,6 +137,47 @@ footer{font:12px Consolas,monospace;color:#839785;border-top:1px solid #314333;m
 <p>静态训练仅在浏览器中进行，不会将任务数据发送至多人协作 API。多人游戏数据存储在实际运行 Node 服务器的主机上。公开 HTTPS 部署、经验证的数据控制者、隐私评估和正式保留流程尚未确认。</p>
 <p>技术信息参见 <a href="https://github.com/osmanosmanov6880-bot/impossible-ventures">源代码仓库</a>。请勿在公开的 GitHub 问题中发布个人资料。</p>
 </section>
+<section class="lang-block" id="portfolio-data-en" lang="en">
+<div class="label">PORTFOLIO DATA / ENGLISH · OCTOBER 2026</div>
+<h2>Data handling for the other Impossible Ventures prototypes</h2>
+<h3>Local-only creative tools</h3>
+<p><strong>Appeal 2049, AntiPersona, Brief Theatre, AdBiome, and Museum of Attention</strong> run their creative engines in your browser without submitting your campaign input, local reports or visitor placards to the Node API. A report is written to your device only if you request a download. File imports such as Dead Drop dossiers are read locally by JavaScript. The browser may remember display-language preferences; do not upload client secrets into these experimental frontends. This description does not prevent hosting providers from retaining ordinary web request or network logs.</p>
+<h3>Attention Republic — optional real anonymous ballots</h3>
+<p>Static demo ballots are never sent to the API. On a running Node server, an operator first publishes a challenge. <strong>Only after explicit participation consent</strong> is a 7-day anonymous session created. The server stores a random session ID, a SHA-256 access-token digest, the associated question, time and at most one selected option. The original raw bearer token is kept in the browser tab's memory and discarded after a successful vote. A daily count of A/B ballots is stored up to 90 days. These are technical session ballots, not verified unique people, and no anti-sybil/identity guarantee is offered. Deleting or closing the question does not automatically erase historic aggregates. The prototype currently offers no way to target an individual anonymized ballot for deletion after submission.</p>
+<p>Rate-limit counters temporarily keep network source addresses in process memory; infrastructure proxies and host logs may have their own IP retention policies. Operator challenge controls use a shared server secret, not production-grade account authentication. Challenges expire after 14 days. Real backups may still contain old records even after live retention purges; no off-site backup retention process has been verified.</p>
+<h3>Pilot Studio and Experiment Lab</h3>
+<p>Pilot Studio stores self-submitted contact leads with consent for up to 90 days and supplies a deletion token for a specific lead. Experiment Lab stores anonymous consented A/B sessions for up to 7 days and daily aggregates for 90 days. These aggregates measure technical events only, not guaranteed human impressions, unique users or sales. Neither is a payment or advertising delivery network. Their server-side storage behavior differs from the local-only creative pages.</p>
+<h3>Legal and deployment caveat</h3>
+<p>This is an experimental implementation notice, not a published controller agreement, data processing addendum, legal opinion or proof of GDPR compliance. Operating organizations must establish lawful basis, privacy contacts, hosting regions, secure authentication, log policy, incident response, user rights processes and deletion across backups before processing real customer data.</p>
+</section>
+
+<section class="lang-block" id="portfolio-data-ru" lang="ru">
+<div class="label">ДАННЫЕ ЭКОСИСТЕМЫ / РУССКИЙ · ОКТЯБРЬ 2026</div>
+<h2>Обработка данных в остальных продуктах Impossible Ventures</h2>
+<h3>Локальные креативные инструменты</h3>
+<p><strong>Appeal 2049, AntiPersona, Brief Theatre, AdBiome и Museum of Attention</strong> обрабатывают введённые идеи в браузере и не отправляют текст кампаний, локальные отчёты и музейные таблички в Node API. Импорт JSON-досье читается локально, а скачивание происходит только после действия пользователя. Браузер может запоминать язык интерфейса. Это не исключает обычные сетевые журналы провайдера хостинга. Не вводите реальные секреты клиентов в исследовательские инструменты.</p>
+<h3>Attention Republic — добровольные анонимные голосования</h3>
+<p>Статическая демонстрация не записывает голоса на сервер. При наличии Node-сервера оператор сначала публикует вопрос, а <strong>только после отдельного согласия пользователя</strong> создаётся анонимная сессия сроком до 7 дней. Сервер сохраняет случайный идентификатор сессии, хеш SHA-256 токена доступа, вопрос, время и не более одного выбора. Исходный токен живёт только в памяти вкладки и удаляется после успешного голосования. Дневные агрегаты A/B хранятся до 90 дней. Один голос сессии не доказывает уникальность реального человека; защита от множественных новых сессий пока ограничена. В текущем прототипе нет возможности удалить конкретный анонимный голос после отправки. Закрытие вопроса не означает стирание уже записанных агрегатов.</p>
+<p>Счётчики ограничения запросов временно хранят сетевые IP-адреса в оперативной памяти. Обратный прокси и хостинг могут вести собственные журналы. Управление вопросами защищено общим секретом оператора, а не индивидуальными производственными аккаунтами. Вопросы ограничены 14 днями. Резервные копии могут хранить ранее удалённые данные; процедура их удаления вне сервера не подтверждена.</p>
+<h3>Pilot Studio и Experiment Lab</h3>
+<p>Pilot Studio хранит контактные заявки с согласием до 90 дней и выдаёт токен удаления конкретной заявки. Experiment Lab хранит анонимные сессии A/B-исследований до 7 дней и агрегированные счётчики до 90 дней. Эти значения описывают технические события, но не подтверждают реальные показы, уникальных покупателей или продажи. Никакой действующей рекламной сети или платёжной системы здесь нет.</p>
+<h3>Юридические ограничения</h3>
+<p>Это техническое описание альфа-версии, а не договор с оператором данных, юридическое заключение или сертификат GDPR. До обработки реальных клиентских данных необходимы законные основания, ответственное юридическое лицо, политика журналов и резервного копирования, обработка обращений субъектов данных, проверенная безопасность и управление инцидентами.</p>
+</section>
+
+<section class="lang-block" id="portfolio-data-zh" lang="zh-CN">
+<div class="label">产品组合数据 / 简体中文 · 2026 年 10 月</div>
+<h2>Impossible Ventures 其他实验性产品的数据处理</h2>
+<h3>仅在浏览器中运行的创意工具</h3>
+<p><strong>Appeal 2049、AntiPersona、Brief Theatre、AdBiome 和 Museum of Attention</strong> 在浏览器本地处理创意、报告和访客展品，不将这些内容发送到 Node API。用户选择的 JSON 档案在浏览器中导入；下载仅由用户主动发起。浏览器可能保存语言偏好，但网络托管服务仍可能保留普通访问日志。请勿输入真实客户机密。</p>
+<h3>Attention Republic — 明确同意的匿名投票</h3>
+<p>静态演示不会向服务器记录选票。运行 Node 服务器时，管理员先发布问题，用户<strong>明确同意后</strong>才能创建保留最多 7 天的匿名会话。服务器记录随机会话 ID、SHA-256 令牌摘要、问题、时间以及至多一个选择。原始访问令牌仅保留在浏览器内存中，成功提交后即被清除。每日 A/B 计数最多保留 90 天。匿名会话选票不是经验证的独立真人，系统不能防止同一人创建多个新会话。当前版本不支持提交后精确删除某一匿名选票；关闭问题也不会立即清除历史聚合计数。</p>
+<p>限速程序可能暂时将请求 IP 保存在进程内存中，代理及托管平台也可能记录日志。管理员使用共享服务器密钥，不是企业级身份验证。问题最多保留 14 天。备份可能仍保存已从在线数据库删除的数据，尚无经过验证的离线删除程序。</p>
+<h3>Pilot Studio 与 Experiment Lab</h3>
+<p>Pilot Studio 根据同意保存联系申请最多 90 天，并提供删除特定申请的令牌。Experiment Lab 保存明确同意的 A/B 匿名会话最多 7 天，汇总计数最多 90 天。技术事件计数不能证明真实广告展示、独立访客或实际销售。目前没有生产级广告投放和支付系统。</p>
+<h3>法律与部署限制</h3>
+<p>这是实验性技术说明，并非正式隐私合同、数据处理协议、法律意见或 GDPR 合规认证。处理真实客户数据前，必须确认数据控制者、合法依据、托管区域、身份验证、日志与备份政策、用户权利处理以及事故应对程序。</p>
+</section>
 </main>
 <footer>DEAD DROP AGENCY · EXPERIMENTAL ALPHA · OCTOBER 2026</footer>
 </body></html>
