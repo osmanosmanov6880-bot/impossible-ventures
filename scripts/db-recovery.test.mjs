@@ -66,6 +66,13 @@ test('live WAL snapshot includes both products and restores without loss', async
     'INSERT INTO ab_sessions (id,experiment_id,arm,token_hash,created_at,cohort_day,cta_recorded) VALUES (?,?,?,?,?,?,?)'
   ).run('ci-test-session', 'ci-test-experiment', 'A', 'synthetic-digest', Date.now(), 20261022, 1);
 
+  app.db.prepare(
+    'INSERT INTO republic_daily (challenge_id,cohort_day,a,b) VALUES (?,?,?,?)'
+  ).run('synthetic-republic-challenge', 20261022, 2, 1);
+  app.db.prepare(
+    'INSERT INTO republic_sessions (id,challenge_id,token_hash,created_at,voted) VALUES (?,?,?,?,?)'
+  ).run('synthetic-republic-session', 'synthetic-republic-challenge', 'synthetic-hash', Date.now(), 'a');
+
   const current = inspectDatabase(dbPath);
   assert.equal(current.integrity, 'ok');
   assert.equal(current.missions, 1);
@@ -73,6 +80,9 @@ test('live WAL snapshot includes both products and restores without loss', async
   assert.equal(current.experimentLabPresent, true);
   assert.equal(current.experimentDailyRows, 1);
   assert.equal(current.experimentSessions, 1);
+  assert.equal(current.republicPresent, true);
+  assert.equal(current.republicSessions, 1);
+  assert.equal(current.republicDailyRows, 1);
 
   const snapshot = snapshotDatabase({ dbPath, outputPath: backupPath });
   assert.equal(snapshot.action, 'snapshot');
@@ -81,6 +91,9 @@ test('live WAL snapshot includes both products and restores without loss', async
   assert.equal(snapshot.experimentLabPresent, true);
   assert.equal(snapshot.experimentDailyRows, 1);
   assert.equal(snapshot.experimentSessions, 1);
+  assert.equal(snapshot.republicPresent, true);
+  assert.equal(snapshot.republicSessions, 1);
+  assert.equal(snapshot.republicDailyRows, 1);
   assert.match(snapshot.sha256, /^[a-f0-9]{64}$/);
   assert.ok(snapshot.bytes > 0);
   assert.equal(lstatSync(backupPath).mode & 0o777, 0o600);
@@ -106,6 +119,9 @@ test('live WAL snapshot includes both products and restores without loss', async
   assert.equal(restored.pilotApplications, 1);
   assert.equal(restored.experimentDailyRows, 1);
   assert.equal(restored.experimentSessions, 1);
+  assert.equal(restored.republicPresent, true);
+  assert.equal(restored.republicSessions, 1);
+  assert.equal(restored.republicDailyRows, 1);
   assert.equal(lstatSync(restorePath).mode & 0o777, 0o600);
 
   // The restored database genuinely boots the server, not just SQLite.
@@ -156,6 +172,7 @@ test('recoverability checks refuse overwrites, corrupt files, unknown schemas an
   const original = snapshotDatabase({ dbPath: source, outputPath: backup });
   assert.equal(original.missions, 0);
   assert.equal(original.experimentLabPresent, false);
+  assert.equal(original.republicPresent, false);
   assert.throws(() => snapshotDatabase({ dbPath: source, outputPath: backup }), /already exists/);
   assert.throws(() => restoreDatabase({ backupPath: backup, outputPath: existing }), /already exists/);
   assert.throws(() => snapshotDatabase({ dbPath: source, outputPath: source }), /Source and destination/);
