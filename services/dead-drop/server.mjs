@@ -173,6 +173,7 @@ async function jsonBody(request) {
 
 const STATIC_FILES = new Map([
   ['/', 'index.html'],
+  ['/privacy.html', 'privacy.html'],
   ['/apps/dead-drop/', 'apps/dead-drop/index.html'],
   ['/apps/dead-drop/index.html', 'apps/dead-drop/index.html'],
   ['/apps/dead-drop/app.js', 'apps/dead-drop/app.js'],
