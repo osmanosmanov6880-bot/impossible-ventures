@@ -231,6 +231,7 @@ function setPermission() {
   elements.ownerTools.hidden=state.role!=='owner';
   for(const input of document.querySelectorAll('#proposalForm input,#proposalForm select,#proposalForm textarea'))input.disabled=!canEdit;
   document.getElementById('saveProposal').disabled=!canEdit || state.demo;
+  document.getElementById('worldImport').disabled=!canEdit;
   if(!canEdit && !state.demo)feedback(t('readOnly'));
 }
 function renderCampaigns() {
@@ -719,6 +720,71 @@ function openDemo(){
  elements.workspaceApp.scrollIntoView({behavior:'smooth'});
 }
 document.getElementById('viewDemo').addEventListener('click',openDemo);
+
+/* WAVE 10 — Private, explicit creative-world artifact bridge.
+ * The browser parses a local file. It never sends JSON to the backend until
+ * the user separately reviews and saves the imported campaign draft.
+ */
+Object.assign(dict.ru, {
+ importTitle:'Импортировать результат игры в рекламный черновик.',
+ importDisclaimer:'Локальный JSON из одного из пяти новых миров превратится в редактируемый черновик. Никаких сетевых запросов при импорте. Сохранение в организации — только по отдельному действию.',
+ importLabel:'ВЫБРАТЬ JSON-ФАЙЛ',
+ importSuccess:'Творческий результат загружен в редактор. Проверьте реальные утверждения, внесите исправления и сохраните черновик отдельно.',
+ importError:'Не удалось импортировать игровой отчёт. Файл должен быть создан одним из пяти миров и иметь корректную структуру.',
+ importReadOnly:'Только владелец, редактор или демонстрационный режим могут заполнять рекламный черновик.'
+});
+Object.assign(dict.en, {
+ importTitle:'Bring your creative world into a campaign draft.',
+ importDisclaimer:'Import a local JSON file from one of five worlds into an editable draft. No network request happens on import. Server saving always requires a separate action.',
+ importLabel:'CHOOSE A LOCAL JSON FILE',
+ importSuccess:'Creative report loaded into the editor. Verify all claims, refine the copy and save deliberately.',
+ importError:'Could not import this creative report. It must have a valid five-world format.',
+ importReadOnly:'Only owners, editors or local demo mode can prepare a campaign draft.'
+});
+Object.assign(dict.zh, {
+ importTitle:'将创意世界成果导入广告草稿。',
+ importDisclaimer:'从五个世界之一导入本地JSON文件，生成可编辑草稿。导入时不会发送网络请求；服务器保存必须另行确认。',
+ importLabel:'选择本地 JSON 文件',
+ importSuccess:'成果已导入编辑器。请核实所有主张，完善文案，然后再选择保存。',
+ importError:'无法导入该创意报告。必须是有效的五世界文件格式。',
+ importReadOnly:'只有所有者、编辑者或本地演示模式可以准备广告草稿。'
+});
+const worldImport=document.getElementById('worldImport');
+const worldImportState=document.getElementById('worldImportState');
+worldImport.addEventListener('change',async()=>{
+ const file=worldImport.files?.[0];
+ worldImportState.textContent='';
+ worldImportState.classList.remove('error');
+ if(!file)return;
+ if(!(['owner','editor'].includes(state.role) || state.demo)){
+   worldImportState.textContent=t('importReadOnly');
+   worldImportState.classList.add('error');
+   worldImport.value='';
+   return;
+ }
+ try{
+   if(file.size<20 || file.size>200_000 || !/\.json$/i.test(file.name))
+     throw Error('Choose a JSON file no larger than 200 KB');
+   const text=await file.text();
+   const source=JSON.parse(text);
+   const {toCampaignDraft}=await import('../apps/creative-worlds/bridge.mjs');
+   const draft=toCampaignDraft(source,elements.lang.value);
+   emptyForm();
+   for(const key of ['title','venture','goal','channel','audience','offer','headline','body','ctaLabel']){
+     if(elements.campaignForm.elements[key])elements.campaignForm.elements[key].value=draft[key];
+   }
+   renderTemplates(draft.venture);
+   renderPreview();
+   worldImportState.textContent=t('importSuccess');
+   feedback(t('importSuccess'));
+   elements.campaignForm.scrollIntoView({behavior:'smooth'});
+ }catch(error){
+   worldImportState.textContent=t('importError')+' '+(error.message||'');
+   worldImportState.classList.add('error');
+   feedback(t('importError'),true);
+ }finally{worldImport.value=''}
+});
+
 
 
 init();
