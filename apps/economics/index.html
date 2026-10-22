@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#081a1e">
+<meta name="description" content="Impossible Ventures Economics Studio — финансовые сценарии рекламных бюджетов: CPM, CTR, конверсия в покупку, валовая маржа и безубыточность. Только расчёты, не реальная выручка.">
+<title>Economics Studio — Campaign Financial Scenarios</title>
+<link rel="stylesheet" href="../shared/studio.css"><link rel="stylesheet" href="./style.css">
+<script type="module" src="./app.js"></script>
+</head><body data-universe="adbiome">
+<header class="topbar"><a href="../../" class="wordmark"><span class="mark">IV<span>·</span></span><span>ECONOMICS <b>STUDIO</b><small>CAMPAIGN SCENARIOS / REAL MATH</small></span></a>
+<div class="toplinks"><span class="top-status">IV / FINANCIAL MODEL</span><a href="../../commercial/" data-i18n="commercial">COMMERCIAL COMMAND ↗</a><label for="locale" class="sr-only">Language</label><select id="locale" aria-label="Language"><option value="ru">Русский</option><option value="en">English</option><option value="zh">中文</option></select></div>
+</header>
+<main class="shell">
+<section class="hero"><div class="hero-copy">
+<div class="eyebrow" data-i18n="overline">КОММЕРЧЕСКАЯ МАТЕМАТИКА БЕЗ ВЫДУМАННЫХ ДОХОДОВ.</div>
+<h1><span data-i18n="hero1">Идея — это мало.</span><em data-i18n="hero2">Нужна экономика.</em></h1>
+<p data-i18n="intro">Сколько стоит один покупатель при заданных CPM, CTR, конверсии и марже? Изменяйте допущения и сравнивайте три сценария. Система считает, но не придумывает продажи.</p>
+<div class="hero-tags"><span class="tag" data-i18n="tag1">03 СЦЕНАРИЯ</span><span class="tag" data-i18n="tag2">07 ПЕРЕМЕННЫХ</span><span class="tag" data-i18n="tag3">0 ПОДТВЕРЖДЁННЫХ ПЛАТЕЖЕЙ</span></div></div>
+<div class="sculpture" aria-hidden="true"><div class="orbit"></div><div class="orbit alt"></div><div class="sculpture-core"><strong>€</strong><small>UNIT<br>ECONOMICS</small></div><div class="orbit-caption">COST → CLICKS → PURCHASES / MODEL ONLY</div></div></section>
+<div class="section-divider"><span data-i18n="stage">01 / ЗАДАЙТЕ ДОПУЩЕНИЯ</span><i></i><span>INPUT → SCENARIOS → EXPORT</span></div>
+<div class="workbench">
+<section class="panel" aria-labelledby="modelTitle"><div class="eyebrow">FINANCIAL MODEL / INPUT</div>
+<h2 class="panel-title" id="modelTitle" data-i18n="inputsTitle">Параметры рекламной кампании.</h2>
+<p class="panel-description" data-i18n="inputsDesc">Введите числа из собственного плана. CTR и конверсия в оплату — предположения, если у вас ещё нет измеренных данных.</p>
+<form id="modelForm">
+<label class="field"><span data-i18n="currency">Валюта</span><select id="currency" required><option value="EUR">EUR (€)</option><option value="USD">USD ($)</option><option value="SEK">SEK (kr)</option><option value="CNY">CNY (¥)</option></select></label>
+<div class="field-grid">
+<label class="field"><span data-i18n="budget">Рекламный бюджет / месяц</span><input id="monthlyMediaBudget" type="number" min="1" max="10000000" step="0.01" value="5000" required></label>
+<label class="field"><span data-i18n="cpm">CPM — цена 1000 показов</span><input id="cpm" type="number" min="0.01" max="100000" step="0.01" value="12" required></label>
+<label class="field"><span data-i18n="ctr">CTR — доля кликов, %</span><input id="ctrPercent" type="number" min="0" max="100" step="0.01" value="1.5" required></label>
+<label class="field"><span data-i18n="conversion">Конверсия клика в покупку, %</span><input id="purchaseConversionPercent" type="number" min="0" max="100" step="0.01" value="2" required></label>
+<label class="field"><span data-i18n="aov">Средний оплаченный заказ</span><input id="averageOrderValue" type="number" min="0" max="10000000" step="0.01" value="250" required></label>
+<label class="field"><span data-i18n="margin">Валовая маржа, %</span><input id="grossMarginPercent" type="number" min="0" max="100" step="0.01" value="60" required></label>
+<label class="field"><span data-i18n="ops">Прочие расходы / месяц</span><input id="monthlyOperatingCost" type="number" min="0" max="10000000" step="0.01" value="1000" required></label>
+</div>
+<div class="notice" data-i18n="notice">Модель предполагает один оплаченный заказ на конверсию и постоянную стоимость тысячи показов. Не включает налоги, возвраты, задержки платежей и влияние атрибуции. Не используется для реального списания средств.</div>
+<button type="submit" class="button wide" data-i18n="calculate">ПОСЧИТАТЬ 3 СЦЕНАРИЯ ↗</button>
+<p id="inputStatus" class="status-message" role="alert"></p>
+</form></section>
+<section class="panel" aria-labelledby="resultsTitle"><div class="eyebrow" data-i18n="resultsLabel">MODEL / 100% ASSUMPTIONS</div>
+<div id="empty" class="is-empty"><div class="empty-symbol" aria-hidden="true">∑</div><h2 id="resultsTitle" data-i18n="emptyTitle">Пока нет расчёта.</h2><p data-i18n="emptyText">Нажмите «Посчитать», чтобы увидеть три сценария, условную стоимость покупателя и точку безубыточности.</p></div>
+<div id="results" hidden>
+<h2 class="panel-title" data-i18n="threeTitle">Три возможных сценария.</h2>
+<div class="notice" data-i18n="modelDisclaimer">Все числа ниже — результаты формул при ваших допущениях. Это не реальные показы, конверсии, продажи и прибыль.</div>
+<div id="scenarioCards" class="scenario-cards"></div>
+<div class="section-divider"><span data-i18n="breakEven">ТОЧКА БЕЗУБЫТОЧНОСТИ / BASE</span><i></i></div>
+<div id="breakEvenCard" class="card"></div>
+<div class="section-divider"><span data-i18n="distribution">СРАВНЕНИЕ СЦЕНАРИЕВ</span><i></i></div>
+<div id="scenarioBars" class="scenario-bars" aria-label="Scenario comparison"></div>
+<div id="warnings" class="notice"></div>
+<div class="button-row"><button id="jsonExport" type="button" class="button small ghost" data-i18n="exportJson">СКАЧАТЬ JSON ↓</button><button id="csvExport" type="button" class="button small ghost" data-i18n="exportCsv">СКАЧАТЬ CSV ↓</button></div>
+<p id="exportStatus" class="status-message" role="status"></p>
+</div>
+</section></div>
+<section class="bottom"><article><span>01 / TRANSPARENCY</span><h3 data-i18n="p1Title">Формула видна.</h3><p data-i18n="p1Text">Показы = бюджет / CPM × 1000. Покупки = клики × конверсия. Доход = покупки × чек.</p></article>
+<article><span>02 / SCENARIOS</span><h3 data-i18n="p2Title">Сценарий — не прогноз.</h3><p data-i18n="p2Text">Осторожный и оптимистичный варианты изменяют CTR и конверсию математическими множителями, а не реальными наблюдениями.</p></article>
+<article><span>03 / VERIFICATION</span><h3 data-i18n="p3Title">Проверяйте на пилотах.</h3><p data-i18n="p3Text">Используйте рассчитанные пороги в настоящем A/B-эксперименте с согласием. Не выдавайте модель за прибыль.</p><a href="../../experiments/" data-i18n="openLab">EXPERIMENT LAB ↗</a></article></section>
+</main><footer class="footer"><span>IMPOSSIBLE VENTURES · ECONOMICS STUDIO · SCENARIO MODEL ONLY</span><span data-i18n="footer">Никакой финансовый результат не подтверждается без документов и платежей</span><a href="../../privacy.html" data-i18n="privacy">Обработка данных ↗</a></footer>
+</body></html>
