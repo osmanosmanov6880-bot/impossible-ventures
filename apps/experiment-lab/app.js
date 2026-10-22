@@ -40,7 +40,11 @@ const i18n = {
     demoBBody:'Представьте, что вы меняете направление истории, а затем открываете продукт. Это только креативная гипотеза — её нужно проверить на аудитории.',
     demoOffer:'ОБРАЗЕЦ / НЕИЗМЕРЯЕМЫЙ ПРОСМОТР',demoCTA:'ПОСМОТРЕТЬ ПИЛОТ ↗',
     previewNote:'Демонстрация не засчитывает показы или клики.',activeNote:'Анонимный тест; клики не означают реальные заявки.',
-    sessionError:'Для измеряемой версии требуется активная кампания и согласие.'
+    sessionError:'Для измеряемой версии требуется активная кампания и согласие.',
+    choiceNotice:'Ваш выбор меняет только эту историю в памяти вкладки. Он не отправляется на сервер и не считается конверсией.',
+    previewPrompt:'Вы попали в рекламную историю. Какой сценарий ближе?',
+    previewChoiceOne:'Хочу сэкономить время',previewRevealOne:'Герой начинает день с ясным планом и успевает завершить важную задачу.',
+    previewChoiceTwo:'Хочу увидеть новый подход',previewRevealTwo:'Герой выбирает эксперимент вместо догадок и проверяет настоящий результат.'
   },
   en: {
     pilotLink:'PILOT STUDIO',gameLink:'DEAD DROP ↗',stage:'RESEARCH ALPHA / 0.7',
@@ -82,7 +86,11 @@ const i18n = {
     demoBBody:'Imagine guiding the story before revealing the offer. This is a creative hypothesis, not a proven advantage.',
     demoOffer:'SAMPLE / UNTRACKED PREVIEW',demoCTA:'EXPLORE PILOT ↗',
     previewNote:'Local demonstration does not count impressions or clicks.',activeNote:'Opt-in research. Clicks are not verified leads.',
-    sessionError:'A running campaign and consent are required.'
+    sessionError:'A running campaign and consent are required.',
+    choiceNotice:'Your choice changes this browser-only story. It is not uploaded or counted as a conversion.',
+    previewPrompt:'You entered a campaign story. Which path would you choose?',
+    previewChoiceOne:'I want to save time',previewRevealOne:'The protagonist starts their day with clarity and has time for important work.',
+    previewChoiceTwo:'I want a new approach',previewRevealTwo:'The protagonist chooses evidence over guessing and runs a real experiment.'
   },
   zh: {
     pilotLink:'试点工作室',gameLink:'DEAD DROP ↗',stage:'研究测试版 / 0.7',
@@ -123,7 +131,11 @@ const i18n = {
     demoBBody:'尝试在了解产品前参与故事选择。这只是需要验证的创意假设。',
     demoOffer:'样本 / 无追踪预览',demoCTA:'查看试点 ↗',
     previewNote:'演示不会统计任何展示或点击。',activeNote:'匿名研究：点击不等于真实线索。',
-    sessionError:'需要运行中的活动及明确同意。'
+    sessionError:'需要运行中的活动及明确同意。',
+    choiceNotice:'此选择仅改变浏览器中的故事，不会发送至服务器，也不会记为转化。',
+    previewPrompt:'您进入了广告故事。会选择哪条道路？',
+    previewChoiceOne:'我想节省时间',previewRevealOne:'主角更有计划地开始一天，有时间完成重要任务。',
+    previewChoiceTwo:'我想发现新方法',previewRevealTwo:'主角选择用真实实验代替猜测。'
   }
 };
 
@@ -142,10 +154,16 @@ const els = {
   headline: document.getElementById('creativeHeadline'),
   body: document.getElementById('creativeBody'),
   cta: document.getElementById('cta'),
+  storyStep: document.getElementById('storyStep'),
+  decisionPrompt: document.getElementById('decisionPrompt'),
+  choiceOne: document.getElementById('choiceOne'),
+  choiceTwo: document.getElementById('choiceTwo'),
+  choiceOutcome: document.getElementById('choiceOutcome'),
   note: document.getElementById('creativeNote')
 };
 const state = {
-  available: [], measured: null, busy: false, preview: null, screenMode: 'empty', apiAvailable: false
+  available: [], measured: null, busy: false, preview: null, choice: null,
+  screenMode: 'empty', apiAvailable: false
 };
 function t(key) { return (i18n[els.lang.value] || i18n.ru)[key] || key; }
 
@@ -166,6 +184,8 @@ function renderScreen() {
     els.placeholder.hidden = false;
     els.creative.hidden = true;
     els.label.textContent = '—';
+    els.storyStep.hidden = true;
+    els.cta.hidden = false;
     return;
   }
   els.placeholder.hidden = true;
@@ -186,6 +206,26 @@ function renderScreen() {
     els.cta.textContent = state.measured.creative.ctaLabel + ' ↗';
     els.note.textContent = t('activeNote');
   }
+  const story = state.screenMode === 'preview' && state.preview === 'B'
+    ? {
+        prompt: t('previewPrompt'),
+        choices: [
+          { label: t('previewChoiceOne'), reveal: t('previewRevealOne') },
+          { label: t('previewChoiceTwo'), reveal: t('previewRevealTwo') }
+        ]
+      }
+    : (state.screenMode === 'measured' ? state.measured?.creative?.interaction : null);
+  els.storyStep.hidden = !story;
+  if (story && Array.isArray(story.choices) && story.choices.length === 2) {
+    els.decisionPrompt.textContent = story.prompt;
+    els.choiceOne.textContent = '01 / ' + story.choices[0].label;
+    els.choiceTwo.textContent = '02 / ' + story.choices[1].label;
+    els.choiceOne.classList.toggle('selected', state.choice === 0);
+    els.choiceTwo.classList.toggle('selected', state.choice === 1);
+    els.choiceOutcome.hidden = state.choice === null;
+    els.choiceOutcome.textContent = state.choice === null ? '' : story.choices[state.choice]?.reveal || '';
+  }
+  els.cta.hidden = Boolean(story && state.choice === null);
   els.cta.disabled = state.busy;
 }
 function translate() {
@@ -247,10 +287,21 @@ els.preview.addEventListener('click', () => {
   }
   state.preview = state.preview === 'A' ? 'B' : 'A';
   state.screenMode = 'preview';
+  state.choice = null;
   renderScreen();
   showStatus(t('previewStatus'));
   els.creative.scrollIntoView({ behavior: 'smooth', block: 'center' });
 });
+
+function chooseStory(index) {
+  if (state.busy || state.screenMode === 'empty') return;
+  if (state.screenMode === 'preview' && state.preview !== 'B') return;
+  if (state.screenMode === 'measured' && !state.measured?.creative?.interaction) return;
+  state.choice = index;
+  renderScreen();
+}
+els.choiceOne.addEventListener('click', () => chooseStory(0));
+els.choiceTwo.addEventListener('click', () => chooseStory(1));
 
 els.start.addEventListener('click', async () => {
   const selected = state.available.find(item => item.id === els.campaign.value);
@@ -273,6 +324,7 @@ els.start.addEventListener('click', async () => {
     state.measured = { ...result, experimentId: selected.id };
     state.screenMode = 'measured';
     state.preview = null;
+    state.choice = null;
     els.preview.disabled = true;
     els.optin.disabled = true;
     showStatus(t('assigned'));
