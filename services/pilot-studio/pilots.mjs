@@ -187,7 +187,7 @@ export function createPilotRouter({ db, now, operatorToken = '', ApiError, jsonB
       return true;
     }
 
-    if (pathname.startsWith('/api/v1/pilots') || pathname.startsWith('/api/v1/operator/')) {
+    if (pathname.startsWith('/api/v1/pilots') || pathname.startsWith('/api/v1/operator/pilots')) {
       throw new ApiError(404, 'API route not found');
     }
     return false;
