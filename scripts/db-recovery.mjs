@@ -21,6 +21,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REQUIRED_TABLES = ['missions', 'pilot_leads'];
+const EXPERIMENT_TABLES = ['ab_experiments', 'ab_sessions', 'ab_daily'];
 
 function absolutePath(path, label) {
   if (typeof path !== 'string' || path.trim().length < 2) {
@@ -47,16 +48,25 @@ function integritySummary(db) {
   const integrity = db.prepare('PRAGMA quick_check').get();
   if (integrity?.quick_check !== 'ok') throw new Error('Database failed SQLite quick_check');
   const tables = db.prepare(
-    "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('missions','pilot_leads')"
+    "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('missions','pilot_leads','ab_experiments','ab_sessions','ab_daily')"
   ).all();
   const found = new Set(tables.map(row => row.name));
   for (const required of REQUIRED_TABLES) {
     if (!found.has(required)) throw new Error('Unrecognized database schema: missing ' + required);
   }
+  const experimentTablesFound = EXPERIMENT_TABLES.filter(name => found.has(name));
+  if (experimentTablesFound.length > 0 && experimentTablesFound.length !== EXPERIMENT_TABLES.length) {
+    throw new Error('Incomplete Experiment Lab schema in database');
+  }
+  const hasExperimentLab = experimentTablesFound.length === EXPERIMENT_TABLES.length;
   return {
     integrity: 'ok',
     missions: Number(db.prepare('SELECT COUNT(*) AS n FROM missions').get().n),
-    pilotApplications: Number(db.prepare('SELECT COUNT(*) AS n FROM pilot_leads').get().n)
+    pilotApplications: Number(db.prepare('SELECT COUNT(*) AS n FROM pilot_leads').get().n),
+    experimentCampaigns: hasExperimentLab ? Number(db.prepare('SELECT COUNT(*) AS n FROM ab_experiments').get().n) : 0,
+    experimentSessions: hasExperimentLab ? Number(db.prepare('SELECT COUNT(*) AS n FROM ab_sessions').get().n) : 0,
+    experimentDailyRows: hasExperimentLab ? Number(db.prepare('SELECT COUNT(*) AS n FROM ab_daily').get().n) : 0,
+    experimentLabPresent: hasExperimentLab
   };
 }
 
@@ -131,7 +141,11 @@ export function restoreDatabase({ backupPath, outputPath, now = Date.now } = {})
     chmodSync(destination, 0o600);
     const restored = inspectDatabase(destination);
     if (restored.missions !== original.missions ||
-        restored.pilotApplications !== original.pilotApplications) {
+        restored.pilotApplications !== original.pilotApplications ||
+        restored.experimentCampaigns !== original.experimentCampaigns ||
+        restored.experimentSessions !== original.experimentSessions ||
+        restored.experimentDailyRows !== original.experimentDailyRows ||
+        restored.experimentLabPresent !== original.experimentLabPresent) {
       throw new Error('Restored database row counts do not match the backup');
     }
     if (hashFile(destination) !== hashFile(source)) {
