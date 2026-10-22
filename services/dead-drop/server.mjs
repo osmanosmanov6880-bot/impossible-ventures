@@ -13,6 +13,7 @@ const CURRENT_FILE = fileURLToPath(import.meta.url);
 const ROOM_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const MAX_MESSAGES = 3;
 const MAX_ROOM_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+const CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
 
 class ApiError extends Error {
   constructor(status, message) {
@@ -89,6 +90,7 @@ function sessionView(mission, role) {
       partnerUsed: mission.messages.filter(m => m.role !== role).length
     },
     createdAt: mission.createdAt,
+    expiresAt: mission.createdAt + MAX_ROOM_AGE_MS,
     dossier: mission.status === 'finalized' ? mission.dossier : null
   };
 }
@@ -172,6 +174,7 @@ async function jsonBody(request) {
 
 const STATIC_FILES = new Map([
   ['/', 'index.html'],
+  ['/privacy.html', 'privacy.html'],
   ['/apps/dead-drop/', 'apps/dead-drop/index.html'],
   ['/apps/dead-drop/index.html', 'apps/dead-drop/index.html'],
   ['/apps/dead-drop/app.js', 'apps/dead-drop/app.js'],
@@ -245,7 +248,19 @@ export function createApp({
 } = {}) {
   if (dbPath !== ':memory:') mkdirSync(dirname(resolve(dbPath)), { recursive: true });
   const db = new DatabaseSync(dbPath);
-  db.exec('PRAGMA journal_mode = WAL; CREATE TABLE IF NOT EXISTS missions (code TEXT PRIMARY KEY, created_at INTEGER NOT NULL, payload TEXT NOT NULL);');
+  db.exec('PRAGMA journal_mode = WAL; PRAGMA secure_delete = ON; CREATE TABLE IF NOT EXISTS missions (code TEXT PRIMARY KEY, created_at INTEGER NOT NULL, payload TEXT NOT NULL); CREATE INDEX IF NOT EXISTS missions_created_at_idx ON missions (created_at);');
+  // Mission-specific cleanup. Pilot Studio has its own retention mechanism.
+  function checkpointAfterDeletion() {
+    if (dbPath !== ':memory:') db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
+  }
+  function pruneExpired() {
+    const result = db.prepare('DELETE FROM missions WHERE created_at < ?').run(now() - MAX_ROOM_AGE_MS);
+    if (result.changes > 0) checkpointAfterDeletion();
+    return Number(result.changes);
+  }
+  pruneExpired();
+  const cleanupTimer = setInterval(pruneExpired, CLEANUP_INTERVAL_MS);
+  cleanupTimer.unref();
   const requestsByIP = new Map();
   const handlePilots = createPilotRouter({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
   const aiAvailable = Boolean(aiKey && aiModel);
@@ -285,7 +300,7 @@ export function createApp({
           saveMission(db, mission);
           return sendJSON(response, 201, { code, token, mission: sessionView(mission, 'product') });
         }
-        const match = /^\/api\/v1\/missions\/([A-Z2-9]{8})(?:\/(join|messages|finalize|ai-consent))?$/.exec(pathname);
+        const match = /^\/api\/v1\/missions\/([A-Z2-9]{8})(?:\/(join|messages|finalize|ai-consent|export))?$/.exec(pathname);
         if (!match) throw new ApiError(404, 'API route not found');
         let mission = loadMission(db, match[1], now);
         const action = match[2];
@@ -310,6 +325,25 @@ export function createApp({
         const role = authorizedRole(request, mission);
         if (!action && request.method === 'GET') {
           return sendJSON(response, 200, { mission: sessionView(mission, role) });
+        }
+        if (action === 'export' && request.method === 'GET') {
+          return sendJSON(response, 200, {
+            kind: 'dead-drop-agent-export',
+            exportedAt: now(),
+            scope: 'current-agent-view',
+            mission: sessionView(mission, role)
+          });
+        }
+        if (!action && request.method === 'DELETE') {
+          const body = await jsonBody(request);
+          if (body.confirmCode !== match[1]) throw new ApiError(400, 'Enter the exact mission code to delete');
+          mission = loadMission(db, match[1], now);
+          authorizedRole(request, mission);
+          if (finalizing.has(mission.code)) throw new ApiError(409, 'Cannot delete while the dossier is being generated');
+          const result = db.prepare('DELETE FROM missions WHERE code = ?').run(mission.code);
+          if (result.changes !== 1) throw new ApiError(404, 'Mission not found');
+          checkpointAfterDeletion();
+          return sendJSON(response, 200, { deleted: true, code: mission.code });
         }
         if (action === 'ai-consent' && request.method === 'POST') {
           const body = await jsonBody(request);
@@ -387,7 +421,8 @@ export function createApp({
     }
   });
   server.on('close', handlePilots.stop);
-  return { server, db, close: () => { server.close(); db.close(); } };
+  server.on('close', () => clearInterval(cleanupTimer));
+  return { server, db, pruneExpired, close: () => { server.close(() => db.close()); } };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve(CURRENT_FILE)) {

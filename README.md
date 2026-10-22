@@ -4,10 +4,10 @@
 
 A standalone commercial validation workflow at `/pilot/`, with Russian / English / Chinese UI, modeled campaign economics, a controlled A/B test plan and a consent-based SQLite pilot application. Authorized operator console: `/pilot/operator/` (set `OPERATOR_TOKEN`, minimum 32 characters).
 
-This is **experimental code**, not a live advertising network or actual revenue. See [Pilot Studio implementation and security gaps](docs/pilot-studio.md). This extension does not replace the Dead Drop v0.4 optional AI functionality described below.
+This is **experimental code**, not a live advertising network or actual revenue. See [Pilot Studio implementation and security gaps](docs/pilot-studio.md). This extension does not replace the Dead Drop v0.5 optional AI and data-management functionality described below.
 
 
-Seven experimental creative-technology products. **Dead Drop Agency v0.4** is the flagship multiplayer alpha. **Appeal 2049** is a separate browser prototype. Five further concepts are documented but not commercially launched.
+Seven experimental creative-technology products. **Dead Drop Agency v0.5** is the flagship multiplayer alpha. **Appeal 2049** is a separate browser prototype. Five further concepts are documented but not commercially launched.
 
 > These are not seven registered businesses. There is no confirmed product-market fit, production cloud deployment, licensed AI usage or payments.
 
@@ -18,6 +18,7 @@ Seven experimental creative-technology products. **Dead Drop Agency v0.4** is th
 3. Each operative gets **three messages**. Their private fields are hidden from the other role until the dossier is completed.
 4. Both must send at least one message; the dossier combines the two perspectives.
 5. The dossier is downloadable and identifies unverified claims as user-supplied.
+6. Each role may export its authorized data view or delete the entire shared room after entering the exact confirmation code.
 
 **No sign-up is necessary for this experimental alpha.** A local training mode works without a running backend. The interactive workspace is translated into **Russian, English, and Simplified Chinese**; deterministic dossier copy supports the same languages.
 
@@ -36,8 +37,18 @@ Other routes:
 - Portfolio: http://localhost:3000/
 - Appeal 2049: http://localhost:3000/apps/appeal-2049/
 - Health: http://localhost:3000/api/v1/health
+- Multilingual Dead Drop data notice: http://localhost:3000/privacy.html
+- Pilot Studio: http://localhost:3000/pilot/
 
 The server uses SQLite at `data/missions.sqlite` by default. This is a **single-instance demonstration**, not a distributed production cluster.
+
+## Mission privacy, export and retention
+
+- The **Your Data** panel shows the mission expiration time, provides JSON export of the currently authorized role and allows deletion of the shared room.
+- Either agent can delete the room, after entering the exact eight-character code. This immediately revokes both agent tokens. Merely leaving the session does **not** delete the server room.
+- Expired missions are pruned at startup, hourly and on access. The deadline is seven days after creation; cleanup may be delayed by one hour while the server runs, or until restart if it is offline.
+- SQLite secure-delete and WAL truncation cannot erase external backups, snapshots or physical media; production deletion/legal procedures need independent review.
+- See the [data handling notice (EN/RU/ZH)](privacy.html) for exact limitations. These **Dead Drop mission controls are separate** from Pilot Studio application deletion tokens and the Pilot Studio retention policy.
 
 ## Optional real AI editing (mutual opt-in only)
 
@@ -75,6 +86,10 @@ python3 -m http.server 8000
 
 Open http://localhost:8000/apps/dead-drop/ for **single-browser training only**. GitHub Pages can host the static preview, but **cannot** run the multiplayer Node API or optional AI.
 
+## Staging deployment
+
+The repository now contains a Docker entrypoint that adjusts mounted volume permissions and then drops root privileges, a Railway healthcheck configuration, and a Docker restart smoke workflow. See the [staging deployment playbook](docs/deployment.md). No public multiplayer server or Railway account is confirmed. Do not expose real customer data before completing security and privacy review.
+
 ## Test
 
 ```bash
@@ -101,12 +116,14 @@ GitHub Actions additionally runs Chromium end-to-end tests for two agents, langu
 - [Security and privacy gaps](docs/security.md)
 - [Product and commercial roadmap](docs/roadmap.md)
 - [Portfolio thesis](docs/portfolio.md)
+- [Staging deployment guide](docs/deployment.md)
+- [Multilingual Dead Drop data handling notice](privacy.html)
 
 ## Operational and legal limitations
 
 - No confirmed public multiplayer host, production user identity service, payments, formal backups, distributed deployment or legal company registrations.
 - SQLite is local to one process. Rate limiting is basic and in-memory.
-- Missions expire after seven days upon access, without a scheduled privacy purge.
+- Dead Drop missions expire after seven days and are pruned on server startup, hourly, and when accessed. Pilot Studio uses its own separately implemented retention mechanism.
 - Live model use requires a server key, two agents' consent and a funded API account.
 - Never commit secrets or customer data. `.env` and the local mission database are ignored by Git.
 - Brand names/domains are unverified. Commercial pricing and revenue are hypotheses.

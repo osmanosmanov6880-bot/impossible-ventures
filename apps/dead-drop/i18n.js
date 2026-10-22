@@ -166,6 +166,38 @@
     ["OFF","НЕТ","未同意"],
     ["Interface language","Язык интерфейса","界面语言"]
   );
+  // v0.5: room lifecycle, role-scoped export and deletion confirmations.
+  entries.push(
+    ["YOUR DATA / TRAINING","ВАШИ ДАННЫЕ / ТРЕНИРОВКА","您的数据 / 训练"],
+    ["Training data stays in this browser session.","Данные тренировки остаются только в этом сеансе браузера.","训练数据仅保留在当前浏览器会话中。"],
+    ["No training data has been sent to our mission server. Leaving the session discards this local simulation.","Тренировочные данные не отправлялись на сервер миссий. При выходе локальная тренировка исчезнет.","训练数据不会发送到任务服务器。退出后本地训练内容将被清除。"],
+    ["YOUR DATA / MISSION CONTROL","ВАШИ ДАННЫЕ / УПРАВЛЕНИЕ МИССИЕЙ","您的数据 / 任务管理"],
+    ["Export or erase this mission.","Сохраните или удалите миссию.","导出或删除此任务。"],
+    ["AGENT ACCESS","ДОСТУП АГЕНТА","特工权限"],
+    ["Export contains only the data your role is authorized to view. Deletion removes the shared mission for BOTH agents.","В экспорт войдут только данные, доступные вашей роли. Удаление уничтожит общую миссию для ОБОИХ агентов.","导出的内容仅限您当前角色有权查看的数据。删除后双方特工都将失去该任务。"],
+    ["ROOM EXPIRY","СРОК ХРАНЕНИЯ","房间到期时间"],
+    ["EXPORT MY DATA .JSON ↓","СКАЧАТЬ МОИ ДАННЫЕ .JSON ↓","导出我的数据 .JSON ↓"],
+    ["DELETE MISSION","УДАЛИТЬ МИССИЮ","删除任务"],
+    ["DATA CONTROL / MISSION ERASURE","УПРАВЛЕНИЕ ДАННЫМИ / УДАЛЕНИЕ","数据控制 / 任务删除"],
+    ["DELETE MISSION PERMANENTLY","УДАЛИТЬ МИССИЮ НАВСЕГДА","永久删除任务"],
+    ["Both agents will lose access to the room, messages, private intelligence and dossier. This cannot be undone.","Оба агента потеряют доступ к комнате, сообщениям, закрытым данным и досье. Отменить действие нельзя.","双方特工都将无法再访问房间、消息、私密情报和档案。此操作无法撤销。"],
+    ["TYPE THIS ROOM CODE TO CONFIRM","ВВЕДИТЕ ЭТОТ КОД ДЛЯ ПОДТВЕРЖДЕНИЯ","输入房间代码以确认"],
+    ["ROOM CODE","КОД КОМНАТЫ","房间代码"],
+    ["CANCEL","ОТМЕНА","取消"],
+    ["DELETE ON SERVER","УДАЛИТЬ С СЕРВЕРА","从服务器删除"],
+    ["LEAVE SESSION","ВЫЙТИ ИЗ МИССИИ","退出会话"],
+    ["This mission was deleted or has expired.","Миссия удалена или срок её действия истёк.","此任务已删除或过期。"],
+    ["Leaving only removes this browser session. The shared room remains on the server until deleted or expired. Leave anyway?","Выход удалит доступ к миссии только из этого браузера. Комната останется на сервере до удаления или истечения срока. Выйти?","退出只会清除此浏览器中的会话。共享房间仍将保留在服务器上，直至删除或过期。确定退出吗？"],
+    ["The room code does not match.","Код комнаты не совпадает.","房间代码不匹配。"],
+    ["Your role-scoped data was exported.","Данные вашей роли сохранены в файл.","您当前角色可访问的数据已导出。"],
+    ["Mission deleted from the server. Both agents lost access.","Миссия удалена с сервера. Оба агента потеряли доступ.","任务已从服务器删除，双方特工均已失去访问权限。"],
+    ["Deletion was not confirmed by the server","Сервер не подтвердил удаление","服务器未确认删除"],
+    ["Deletion failed. Please retry.","Не удалось удалить. Попробуйте ещё раз.","删除失败，请重试。"]
+  );
+  entries.push(
+    ["DATA & PRIVACY ↗","ДАННЫЕ И ПРИВАТНОСТЬ ↗","数据与隐私 ↗"],
+    ["READ THE DATA HANDLING NOTICE ↗","ПРОЧИТАТЬ ОБРАБОТКУ ДАННЫХ ↗","查看数据处理说明 ↗"]
+  );
   const maps = { ru: new Map(), zh: new Map() };
   const reverse = new Map();
   for (const [en, ru, zh] of entries) {

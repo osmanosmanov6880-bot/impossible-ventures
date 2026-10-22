@@ -32,12 +32,7 @@ jobs:
       - name: Verify runtime and API source
         run: npm run check
       - name: Prepare public static preview
-        run: |
-          mkdir -p _site/apps
-          cp index.html _site/index.html
-          cp -R apps/dead-drop _site/apps/dead-drop
-          cp -R apps/appeal-2049 _site/apps/appeal-2049
-          touch _site/.nojekyll
+        run: python3 scripts/build_static_preview.py
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload static site
