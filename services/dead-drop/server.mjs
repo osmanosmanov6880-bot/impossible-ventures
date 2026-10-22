@@ -451,6 +451,7 @@ export function createApp({
   });
   server.on('close', handlePilots.stop);
   server.on('close', handleExperiments.stop);
+  server.on('close', proposals.stop);
   server.on('close', () => clearInterval(cleanupTimer));
   return { server, db, pruneExpired, close: () => { server.close(() => db.close()); } };
 }
