@@ -111,7 +111,7 @@ const elements = Object.fromEntries([
   'listStatus','newCampaign','saveCampaign'
 ].map(id => [id, document.getElementById(id)]));
 
-const state = { workspaceId: '', token: '', role: '', workspaceName: '', templates: [], campaigns: [], editing: null };
+const state = { workspaceId: '', token: '', role: '', workspaceName: '', templates: [], campaigns: [], editing: null, demo: false };
 const palette = { cyan:'#8feafe',violet:'#c5a8fb',coral:'#ffb1aa',gold:'#ffe0a2',mint:'#adf7cd',pink:'#f4b5f5',blue:'#9acaff' };
 const glyphs = { 'dead-drop':'◇','appeal-2049':'⚖','anti-persona':'⌁','brief-theatre':'◈','ad-biome':'✳','museum-of-attention':'✧','attention-republic':'◎' };
 const t = k => (dict[elements.lang.value] || dict.ru)[k] || k;
@@ -216,13 +216,13 @@ function renderTemplates(selected = elements.venture.value) {
   }
 }
 function setPermission() {
-  const canEdit=['owner','editor'].includes(state.role);
+  const canEdit=['owner','editor'].includes(state.role) || state.demo;
   for(const input of elements.campaignForm.querySelectorAll('input,select,textarea'))input.disabled=!canEdit;
-  elements.saveCampaign.disabled=!canEdit;
+  elements.saveCampaign.disabled=!canEdit || state.demo;
   elements.ownerTools.hidden=state.role!=='owner';
   for(const input of document.querySelectorAll('#proposalForm input,#proposalForm select,#proposalForm textarea'))input.disabled=!canEdit;
-  document.getElementById('saveProposal').disabled=!canEdit;
-  if(!canEdit)feedback(t('readOnly'));
+  document.getElementById('saveProposal').disabled=!canEdit || state.demo;
+  if(!canEdit && !state.demo)feedback(t('readOnly'));
 }
 function renderCampaigns() {
   elements.campaignList.replaceChildren();
@@ -287,6 +287,7 @@ async function refresh() {
   prepareProposalCampaigns();
 }
 async function loadWorkspace() {
+  state.demo=false;
   const data=await api('/api/v1/workspaces/'+state.workspaceId);
   state.role=data.credential.role;
   state.workspaceName=data.workspace.name;
@@ -336,7 +337,7 @@ elements.campaignForm.addEventListener('input',renderPreview);
 elements.venture.addEventListener('change',()=>{renderPreview();renderTemplates()});
 elements.newCampaign.addEventListener('click',()=>{emptyForm();feedback(t('newReady'))});
 elements.logout.addEventListener('click',()=>{
-  state.token='';state.workspaceId='';state.role='';state.workspaceName='';state.campaigns=[];state.editing=null;
+  state.token='';state.workspaceId='';state.role='';state.workspaceName='';state.campaigns=[];state.editing=null;state.demo=false;
   elements.workspaceApp.hidden=true;elements.receipt.replaceChildren();elements.bootstrapForm.reset();elements.loginForm.reset();
   proposalState.items=[];proposalState.summary=null;proposalState.editing=null;
   proposalUI.receipt.replaceChildren();proposalUI.form.reset();
@@ -400,7 +401,9 @@ elements.reload.addEventListener('click',()=>refresh().then(()=>feedback(t('load
 async function init(){
   translate();
   try{
-    const catalog=await api('/api/v1/commercial/ventures');
+    const catalog=document.body.dataset.staticPreview==='true'
+      ? {items:staticTemplates}
+      : await api('/api/v1/commercial/ventures');
     state.templates=Array.isArray(catalog.items)?catalog.items:[];
     elements.venture.replaceChildren();
     for(const venture of state.templates){
@@ -408,6 +411,12 @@ async function init(){
       elements.venture.appendChild(option);
     }
     renderTemplates();emptyForm();
+    if(document.body.dataset.staticPreview==='true'){
+      for(const form of [elements.bootstrapForm,elements.loginForm]){
+        for(const control of form.querySelectorAll('input,button'))control.disabled=true;
+      }
+      openDemo();
+    }
   }catch(err){feedback(err.message,true)}
 }
 
@@ -426,6 +435,9 @@ const proposalUI={
 };
 const proposalState={items:[],summary:null,editing:null};
 Object.assign(dict.ru,{
+ demoHeading:'Сначала просто посмотрите, как всё устроено.',
+ demoExplain:'Деморежим открывает все семь творческих шаблонов и редактор без ключей, записи данных и регистрации.',
+ viewDemo:'ОТКРЫТЬ ДЕМО БЕЗ РЕГИСТРАЦИИ →',demoStatus:'Открыта локальная демонстрация. Ничего не сохраняется и не публикуется.',
  proposalTitle:'Предложения, которые можно принять.',
  proposalExplain:'Создайте предложение по конкретной кампании, определите стоимость и передайте приватную ссылку заказчику. Принятие не является оплатой.',
  proposalEditor:'РЕДАКТОР ПРЕДЛОЖЕНИЯ',linkedCampaign:'СВЯЗАННАЯ КАМПАНИЯ',
@@ -441,6 +453,9 @@ Object.assign(dict.ru,{
  acceptedNominal:'ПРИНЯТЫХ ПРЕДЛОЖЕНИЙ',sentNominal:'ОЖИДАЮТ РЕШЕНИЯ',realRevenue:'ПОДТВЕРЖДЁННЫХ ПЛАТЕЖЕЙ: НЕТ ИНТЕГРАЦИИ'
 });
 Object.assign(dict.en,{
+ demoHeading:'Explore the platform before creating an account.',
+ demoExplain:'Preview seven creative worlds and the editor without credentials or server writes.',
+ viewDemo:'EXPLORE WITHOUT REGISTRATION →',demoStatus:'Local preview is open. No campaign or proposal is stored.',
  proposalTitle:'Proposals clients can actually review.',
  proposalExplain:'Create a quote from a saved campaign and share a private link. Acceptance is not verified payment.',
  proposalEditor:'PROPOSAL EDITOR',linkedCampaign:'LINKED CAMPAIGN',
@@ -456,6 +471,9 @@ Object.assign(dict.en,{
  acceptedNominal:'ACCEPTED PROPOSALS',sentNominal:'AWAITING DECISION',realRevenue:'VERIFIED PAYMENTS: NOT INTEGRATED'
 });
 Object.assign(dict.zh,{
+ demoHeading:'无需注册，先了解平台。',
+ demoExplain:'预览七种创意世界和编辑器，不需要密钥，也不会保存数据。',
+ viewDemo:'免注册体验 →',demoStatus:'本地预览已打开。不会保存或发布任何活动。',
  proposalTitle:'客户可以查看的真实报价。',
  proposalExplain:'从保存的广告活动创建报价并分享私人链接。接受不等于已付款。',
  proposalEditor:'报价编辑器',linkedCampaign:'关联广告活动',
@@ -625,5 +643,28 @@ proposalUI.form.addEventListener('submit',async event=>{
  finally{save.disabled=state.role==='viewer'}
 });
 elements.logout.addEventListener('click',()=>{proposalState.items=[];proposalState.summary=null;proposalUI.receipt.replaceChildren()});
+
+const staticTemplates=[
+ {id:'dead-drop',name:'Dead Drop Agency',audience:'Маркетологи и основатели',concept:'Совместная секретная миссия двух рекламных агентов.',exampleHeadline:'У вас есть одно секретное задание.',exampleBody:'Один агент знает продукт, второй — аудиторию. Совместите сведения в рекламной истории.',accent:'cyan'},
+ {id:'appeal-2049',name:'Appeal 2049',audience:'Продуктовые команды',concept:'Суд будущего испытывает факты и рекламные аргументы.',exampleHeadline:'Ваше рекламное обещание вызвали в суд.',exampleBody:'В 2049 году каждое обещание проверяется на доказательства и слабые стороны.',accent:'violet'},
+ {id:'anti-persona',name:'AntiPersona',audience:'Креативные команды',concept:'Роли меняются — попробуйте рекламу для неожиданных людей.',exampleHeadline:'Ваш клиент может быть совсем другим.',exampleBody:'Посмотрите на продукт глазами человека, которого вы не считали потенциальным покупателем.',accent:'coral'},
+ {id:'brief-theatre',name:'Brief Theatre',audience:'Агентства',concept:'Рекламная сцена меняется с каждым новым ограничением.',exampleHeadline:'Один продукт, три неожиданных роли.',exampleBody:'Меняйте сценарий, сохраняя честное предложение продукта.',accent:'gold'},
+ {id:'ad-biome',name:'AdBiome',audience:'Performance-специалисты',concept:'Экосистема творческих вариантов для осторожного экспериментирования.',exampleHeadline:'Проверяйте рекламные идеи на практике.',exampleBody:'Создайте творческую гипотезу и сравните её в реальном эксперименте.',accent:'mint'},
+ {id:'museum-of-attention',name:'Museum of Attention',audience:'Бренды и школы',concept:'Интерактивные экспонаты о том, на что обращают внимание люди.',exampleHeadline:'Добро пожаловать в музей секунд.',exampleBody:'Откройте короткую историю о человеческом внимании.',accent:'pink'},
+ {id:'attention-republic',name:'Attention Republic',audience:'Сообщества',concept:'Вымышленная республика творческих решений и общей ответственности.',exampleHeadline:'Ваша идея может изменить город.',exampleBody:'Примите участие в выборе новой рекламной истории и оцените последствия.',accent:'blue'}
+];
+function openDemo(){
+ if(!state.templates.length){feedback(t('missingBackend'),true);return}
+ state.demo=true;state.workspaceId='';state.token='';state.role='demo';state.campaigns=[];state.editing=null;
+ state.workspaceName='DEMO / CREATIVE STUDIO';
+ elements.currentWorkspace.textContent='DEMO / CREATIVE STUDIO';
+ elements.workspaceMeta.textContent='UNTRACKED LOCAL PREVIEW / NO ACCOUNT / NO DATABASE';
+ elements.workspaceApp.hidden=false;
+ setPermission();renderCampaigns();prepareProposalCampaigns();emptyForm();clearProposal();
+ feedback(t('demoStatus'));
+ elements.workspaceApp.scrollIntoView({behavior:'smooth'});
+}
+document.getElementById('viewDemo').addEventListener('click',openDemo);
+
 
 init();
