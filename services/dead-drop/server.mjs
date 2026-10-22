@@ -219,6 +219,7 @@ const STATIC_FILES = new Map([
   ['/apps/creative-worlds/worlds.mjs', 'apps/creative-worlds/worlds.mjs'],
   ['/apps/creative-worlds/engine.mjs', 'apps/creative-worlds/engine.mjs'],
   ['/apps/creative-worlds/runner.mjs', 'apps/creative-worlds/runner.mjs'],
+  ['/apps/creative-worlds/bridge.mjs', 'apps/creative-worlds/bridge.mjs'],
   ['/apps/anti-persona/', 'apps/anti-persona/index.html'],
   ['/apps/anti-persona/index.html', 'apps/anti-persona/index.html'],
   ['/apps/brief-theatre/', 'apps/brief-theatre/index.html'],
