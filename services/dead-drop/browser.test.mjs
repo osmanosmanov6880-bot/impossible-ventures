@@ -1013,6 +1013,12 @@ test('Attention Republic operator publishes real question; two independently con
  await first.locator('#consent').check();
  await first.locator('#startVote').click();
  await first.locator('#ballot').waitFor({state:'visible'});
+ await first.locator('#cancelSession').click();
+ await first.locator('#empty').waitFor({state:'visible'});
+ assert.match(await first.locator('#startStatus').textContent(),/отозвано/);
+ await first.locator('#consent').check();
+ await first.locator('#startVote').click();
+ await first.locator('#ballot').waitFor({state:'visible'});
  await first.locator('[data-ballot-choice="a"]').click();
  await first.locator('#ballotResult').waitFor({state:'visible'});
  assert.match(await first.locator('#countMetrics').innerText(),/1/);
