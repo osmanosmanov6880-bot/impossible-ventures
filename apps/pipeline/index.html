@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#121524"><meta name="description" content="Impossible Ventures Creative Pipeline — безопасная передача рекламных идей из пяти продуктов в Commercial Command без автоматической публикации.">
+<title>Creative Pipeline — Impossible Ventures</title>
+<link rel="stylesheet" href="../shared/studio.css"><script type="module" src="./app.js"></script>
+</head>
+<body data-universe="antipersona">
+<header class="topbar">
+<a class="wordmark" href="../../"><span class="mark">IV<span>·</span></span><span>CREATIVE <b>PIPELINE</b><small>RESEARCH → HUMAN REVIEW → COMMERCIAL</small></span></a>
+<div class="toplinks"><span class="top-status">IV / PRIVATE HANDOFF</span><a href="../../commercial/" data-i18n="commercial">COMMERCIAL COMMAND ↗</a><label class="sr-only" for="locale">Language</label><select id="locale" aria-label="Language"><option value="ru">Русский</option><option value="en">English</option><option value="zh">中文</option></select></div>
+</header>
+<main class="shell">
+<section class="hero"><div class="hero-copy"><div class="eyebrow" data-i18n="overline">ОТ ИДЕИ К КАМПАНИИ — С ЧЕЛОВЕКОМ В ЦЕНТРЕ.</div>
+<h1><span data-i18n="hero1">Собери идею.</span><em data-i18n="hero2">Передай на проверку.</em></h1>
+<p data-i18n="intro">Импортируй творческий результат из одного из пяти продуктов. Получи понятный рекламный черновик и передай его в Commercial Command только после собственного решения. Никакой автоматической публикации.</p>
+<div class="hero-tags"><span class="tag" data-i18n="tag1">05 ФОРМАТОВ</span><span class="tag" data-i18n="tag2">00 АВТОМАТИЧЕСКИХ ПУБЛИКАЦИЙ</span><span class="tag" data-i18n="tag3">ВСЁ В БРАУЗЕРЕ</span></div></div>
+<div class="sculpture" aria-hidden="true"><div class="orbit"></div><div class="orbit alt"></div><div class="sculpture-core"><strong>IV</strong><small>HUMAN<br>CONTROL</small></div><div class="orbit-caption">INGEST → REVIEW → HANDOFF</div></div></section>
+<div class="section-divider"><span data-i18n="stage">01 / ИМПОРТ И ПРОВЕРКА</span><i></i><span>LOCAL / SAFE / EXPLICIT</span></div>
+<div class="workbench">
+<section class="panel" aria-labelledby="importTitle"><div class="eyebrow">INPUT / AUTHOR-APPROVED</div><h2 id="importTitle" class="panel-title" data-i18n="importHeading">Загрузи результат творчества.</h2><p class="panel-description" data-i18n="importDescription">Принимаются JSON-отчёты Appeal 2049, AntiPersona, Brief Theatre, AdBiome и завершённое досье Dead Drop. Файлы читаются только локально.</p>
+<div class="notice" data-i18n="sourceReminder">Оригинальные отчёты могут содержать рабочие идеи. Держите файлы в безопасности и не включайте в них секретные ключи, персональные данные и реальные пароли.</div>
+<label class="field" for="importFile"><span data-i18n="fileLabel">Файл отчёта (.json до 200 КБ)</span><input id="importFile" type="file" accept=".json,application/json" aria-describedby="fileStatus"></label>
+<p id="fileStatus" class="status-message" role="status" aria-live="polite"></p>
+<div class="section-divider"><span data-i18n="pathTitle">03 ШАГА</span><i></i></div>
+<div class="record-list"><article class="record"><div class="eyebrow">01 / IMPORT</div><h3 data-i18n="step1">Выбери творческий исходник</h3><p data-i18n="step1desc">Не нужно создавать аккаунт и отправлять файл в сеть.</p></article>
+<article class="record"><div class="eyebrow">02 / EDIT</div><h3 data-i18n="step2">Проверь каждое утверждение</h3><p data-i18n="step2desc">Составь понятный заголовок и призыв, не выдавая гипотезы за доказательства.</p></article>
+<article class="record"><div class="eyebrow">03 / EXPORT</div><h3 data-i18n="step3">Передай черновик осознанно</h3><p data-i18n="step3desc">Файл можно отдельно импортировать в Commercial Command. Он не будет сохранён без команды пользователя.</p></article></div>
+</section>
+<section class="panel" aria-labelledby="reviewTitle"><div class="eyebrow">DRAFT / NOT PUBLISHED</div><h2 id="reviewTitle" class="panel-title" data-i18n="reviewHeading">Черновик для проверки человеком.</h2>
+<div id="empty" class="is-empty"><div class="empty-symbol" aria-hidden="true">⇄</div><h2 data-i18n="emptyTitle">Пока нечего проверять.</h2><p data-i18n="emptyDescription">Загрузи рабочий JSON-файл слева. Здесь появится редактируемая рекламная идея и кнопка экспорта.</p></div>
+<form id="editor" hidden>
+<div class="card-top"><span id="sourceName">RESEARCH FILE / SOURCE</span><span class="pill" data-i18n="unsaved">НЕ СОХРАНЕНО</span></div>
+<label class="field"><span data-i18n="titleLabel">Название кампании</span><input id="campaignTitle" maxlength="100" minlength="3" required></label>
+<label class="field"><span data-i18n="audienceLabel">Целевая аудитория</span><textarea id="campaignAudience" minlength="3" maxlength="300" required></textarea></label>
+<label class="field"><span data-i18n="offerLabel">Реальное предложение</span><textarea id="campaignOffer" minlength="3" maxlength="240" required></textarea></label>
+<label class="field"><span data-i18n="headlineLabel">Рекламный заголовок</span><textarea id="campaignHeadline" minlength="5" maxlength="180" required></textarea></label>
+<label class="field"><span data-i18n="bodyLabel">Рекламный текст</span><textarea id="campaignBody" minlength="10" maxlength="700" required></textarea></label>
+<label class="field"><span data-i18n="ctaLabel">Текст кнопки</span><input id="campaignCta" minlength="3" maxlength="60" required></label>
+<div class="notice" data-i18n="warning">Предпросмотр — не подтверждение фактов. Никаких рассылок, платных показов или публикаций система не запускает.</div>
+<div id="campaignPreview" class="card" aria-live="polite"><div class="card-top" data-i18n="preview">ПРЕДПРОСМОТР</div><h3 id="previewHeadline"></h3><p id="previewBody"></p><span class="pill" id="previewCta"></span></div>
+<div class="button-row"><button type="submit" class="button" id="download" data-i18n="export">СКАЧАТЬ РЕДАКТОРСКИЙ ЧЕРНОВИК .JSON ↓</button><a href="../../commercial/" class="button ghost" data-i18n="openCommand">ОТКРЫТЬ COMMERCIAL COMMAND ↗</a></div>
+<p id="exportStatus" class="status-message" role="status"></p>
+</form></section>
+</div>
+<section class="bottom"><article><span>01 / PRIVACY</span><h3 data-i18n="p1Title">Важные данные под контролем.</h3><p data-i18n="p1Body">Неизвестные поля, токены и чужие скрытые сведения не переходят в рекламный черновик.</p></article><article><span>02 / EVIDENCE</span><h3 data-i18n="p2Title">Гипотеза, а не факт.</h3><p data-i18n="p2Body">Текст остаётся материалом для редактора; реальные заявления нужно проверить до публикации.</p></article><article><span>03 / COMMERCIAL</span><h3 data-i18n="p3Title">Коммерческий контроль.</h3><p data-i18n="p3Body">Подготовленный файл вручную открывается в Commercial Command и сохраняется только авторизованным пользователем.</p></article></section>
+</main>
+<footer class="footer"><span>IMPOSSIBLE VENTURES · CREATIVE PIPELINE · LOCAL-ONLY STUDIO</span><span data-i18n="footnote">Файлы и черновики обрабатываются в этой вкладке без отправки в API</span><a href="../../privacy.html" data-i18n="privacy">Обработка данных ↗</a></footer>
+</body></html>
