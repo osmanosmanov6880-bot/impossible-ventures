@@ -1,6 +1,6 @@
 {
   "name": "impossible-ventures",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "description": "Impossible Ventures: Dead Drop, Pilot Studio and Experiment Lab with writable readiness, backup recovery and localized operators.",
