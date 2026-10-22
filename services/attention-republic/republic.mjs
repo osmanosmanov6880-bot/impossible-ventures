@@ -132,6 +132,22 @@ export function createRepublicRouter({db,now,operatorToken='',ApiError,jsonBody,
    sendJSON(response,200,{challenge:publicChallenge(load(row.id))});
    return true;
   }
+  // A participant may revoke consent and erase an UNVOTED session with
+  // their own capability. Successful ballots remain aggregate only and cannot
+  // be subtracted safely by a caller who no longer has an active session.
+  const revoke=/^\\/api\\/v1\\/republic\\/challenges\\/([a-f0-9]{24})\\/sessions\\/([a-f0-9]{32})$/u.exec(pathname);
+  if(revoke&&method==='DELETE'){
+   const token=bearer(request);
+   if(!token)throw new ApiError(401,'Session token required');
+   const [id,sid]=revoke.slice(1);
+   const row=db.prepare('SELECT * FROM republic_sessions WHERE id=? AND challenge_id=?').get(sid,id);
+   if(!row||!secureMatch(token,row.token_hash))throw new ApiError(403,'Session token invalid');
+   if(row.voted!==null)throw new ApiError(409,'Recorded ballots cannot be revoked using session deletion');
+   const result=db.prepare('DELETE FROM republic_sessions WHERE id=? AND challenge_id=? AND voted IS NULL').run(sid,id);
+   if(result.changes!==1)throw new ApiError(409,'Session is no longer unvoted');
+   sendJSON(response,200,{revoked:true,ballotRecorded:false,sessionDeleted:true});
+   return true;
+  }
   const match=/^\/api\/v1\/republic\/challenges\/([a-f0-9]{24})(?:\/(sessions|votes))?$/u.exec(pathname);
   if(match){
    const id=match[1],action=match[2];
