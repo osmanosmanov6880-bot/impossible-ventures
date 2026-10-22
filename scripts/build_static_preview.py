@@ -145,6 +145,48 @@ def build() -> None:
     )
     app_file.write_text(app_code, encoding="utf-8")
 
+    # New premium studio variants stay isolated from existing creative-world
+    # demos. Static distribution carries no database or operator controls.
+    for asset in ("site.css", "site.js"):
+        copy2(ROOT / asset, DIST / asset)
+    for name in (
+        "appeal-2049-studio", "antipersona", "brief-theatre-studio",
+        "adbiome", "museum-of-attention-studio"
+    ):
+        copytree(ROOT / "apps" / name, DIST / "apps" / name)
+    copytree(ROOT / "apps" / "shared", DIST / "apps" / "shared")
+    republic = DIST / "apps" / "attention-republic-live"
+    republic.mkdir()
+    for asset in ("index.html", "app.js"):
+        copy2(ROOT / "apps" / "attention-republic-live" / asset, republic / asset)
+    page = republic / "index.html"
+    html = page.read_text(encoding="utf-8")
+    if '<body data-universe="republic">' not in html:
+        raise RuntimeError("Republic static preview body marker missing")
+    page.write_text(
+        html.replace(
+            '<body data-universe="republic">',
+            '<body data-universe="republic" data-static-preview="true">',
+            1
+        ),
+        encoding="utf-8"
+    )
+    for name in (
+        "site.css", "site.js",
+        "apps/appeal-2049-studio/index.html",
+        "apps/antipersona/index.html",
+        "apps/brief-theatre-studio/index.html",
+        "apps/adbiome/index.html",
+        "apps/museum-of-attention-studio/index.html",
+        "apps/attention-republic-live/index.html"
+    ):
+        if not (DIST / name).is_file():
+            raise RuntimeError("Missing premium five-wave static file: " + name)
+    if (republic / "operator.html").exists() or (republic / "operator.js").exists():
+        raise RuntimeError("Do not publish Republic operator source in static preview")
+    if 'data-static-preview="true"' not in page.read_text(encoding="utf-8"):
+        raise RuntimeError("Republic static ballot must be marked as untracked")
+
     (DIST / ".nojekyll").touch()
 
     for name in (
