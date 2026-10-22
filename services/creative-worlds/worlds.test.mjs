@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../dead-drop/server.mjs';
 import { WORLD_IDS, WORLDS } from '../../apps/creative-worlds/worlds.mjs';
+import { toCampaignDraft } from '../../apps/creative-worlds/bridge.mjs';
 import {
   EDITION, LANGUAGES, createRun, nextStage, choose, rewind,
   progress, heuristicScores, report, worldIntro, auditWorldDefinitions, CreativeInputError
@@ -189,7 +190,8 @@ test('HTTP serves five actual CSP-protected games, three shared ES modules and n
     '/apps/creative-worlds/style.css',
     '/apps/creative-worlds/engine.mjs',
     '/apps/creative-worlds/worlds.mjs',
-    '/apps/creative-worlds/runner.mjs'
+    '/apps/creative-worlds/runner.mjs',
+    '/apps/creative-worlds/bridge.mjs'
   ];
   for (const path of assets) {
     const response=await fetch(base+path);
@@ -207,4 +209,44 @@ test('HTTP serves five actual CSP-protected games, three shared ES modules and n
   }
   const notFound=await fetch(base+'/apps/creative-worlds/private-token.json');
   assert.equal(notFound.status,404);
+});
+
+
+test('WAVE 10: locally authored outcomes become editable, explicitly UNSAVED commercial drafts for all five worlds', () => {
+  for(const world of WORLD_IDS) {
+    for(const locale of LANGUAGES){
+      const artifact=report(finish(world,locale,0));
+      const campaign=toCampaignDraft(artifact,locale);
+      assert.equal(campaign.venture,world);
+      assert.equal(campaign.goal,'validation');
+      assert.equal(campaign.channel,'landing');
+      assert.equal(campaign.audience,sample.audience);
+      assert.equal(campaign.offer,sample.product);
+      assert.equal(campaign.headline,sample.product);
+      assert.ok(campaign.title.startsWith(WORLDS[world].name));
+      assert.ok(campaign.body.length>=10 && campaign.body.length<=700);
+      assert.ok(campaign.title.length<=100);
+      assert.equal(campaign._bridge.persisted,false);
+      assert.equal(campaign._bridge.requiresEditorialReview,true);
+      assert.equal(campaign._bridge.noRealPerformanceMetrics,true);
+      assert.equal(campaign._bridge.steps,WORLDS[world].turns.length);
+      assert.equal(JSON.stringify(campaign).includes('heuristics'),false);
+      assert.equal(JSON.stringify(campaign).includes('totalCTA'),false);
+    }
+  }
+});
+test('WAVE 10: file bridge rejects forged metrics, incomplete reports, untrusted choices and invalid metadata',()=>{
+ const valid=report(finish('anti-persona','ru'));
+ assert.throws(()=>toCampaignDraft(null),/Not a compatible/);
+ assert.throws(()=>toCampaignDraft({...valid,schema:'fake'}),/Not a compatible/);
+ assert.throws(()=>toCampaignDraft({...valid,metricType:'actual-ad-conversion'}),/Not a compatible/);
+ assert.throws(()=>toCampaignDraft({...valid,provenance:{...valid.provenance,realParticipants:true}}),/Not a compatible/);
+ assert.throws(()=>toCampaignDraft({...valid,decisions:valid.decisions.slice(1)}),/incomplete/);
+ assert.throws(()=>toCampaignDraft({...valid,decisions:[{...valid.decisions[0],selectedChoice:'fraud'},...valid.decisions.slice(1)]}),/Invalid creative decision/);
+ assert.throws(()=>toCampaignDraft({...valid,project:{...valid.project,brand:'a'}}),/Invalid project metadata/);
+ assert.throws(()=>toCampaignDraft(valid,'de'),/Unsupported language/);
+ const short={...valid,project:{...valid.project,product:'Pen'}};
+ const campaign=toCampaignDraft(short);
+ assert.ok(campaign.headline.length>=5);
+ assert.equal(campaign._bridge.persisted,false);
 });
