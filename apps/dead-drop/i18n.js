@@ -198,6 +198,11 @@
     ["DATA & PRIVACY ↗","ДАННЫЕ И ПРИВАТНОСТЬ ↗","数据与隐私 ↗"],
     ["READ THE DATA HANDLING NOTICE ↗","ПРОЧИТАТЬ ОБРАБОТКУ ДАННЫХ ↗","查看数据处理说明 ↗"]
   );
+  entries.push(
+    ["EXPORT FOR APPEAL .JSON ↓","СКАЧАТЬ ДЛЯ APPEAL .JSON ↓","导出供 APPEAL 使用的 .JSON ↓"],
+    ["OPEN APPEAL 2049 ↗","ОТКРЫТЬ APPEAL 2049 ↗","打开 APPEAL 2049 ↗"],
+    ["Dossier JSON exported for Appeal 2049. Import it there to review. Nothing was sent to the server.","JSON-досье сохранено для Appeal 2049. Импортируйте файл в трибунал. Данные не отправлялись на сервер.","JSON 档案已导出供 Appeal 2049 使用。请在审查页面导入，数据未发送到服务器。"]
+  );
   const maps = { ru: new Map(), zh: new Map() };
   const reverse = new Map();
   for (const [en, ru, zh] of entries) {

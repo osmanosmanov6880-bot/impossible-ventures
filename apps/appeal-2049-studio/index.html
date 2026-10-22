@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#110e1b">
+<meta name="description" content="Appeal 2049 — независимый творческий трибунал для проверки рекламных идей и импорта досье Dead Drop. Локальный детерминированный инструмент.">
+<title>Appeal 2049 — Creative Tribunal · Impossible Ventures</title>
+<link rel="stylesheet" href="./style.css">
+<script type="module" src="./app.js"></script>
+</head>
+<body>
+<div class="atmosphere" aria-hidden="true"></div>
+<header class="site-header">
+  <a class="brand" href="../../" aria-label="Impossible Ventures">
+    <span class="brand-mark">A<span>⟡</span></span>
+    <span>APPEAL <b>2049</b><small>FUTURE CREATIVE TRIBUNAL</small></span>
+  </a>
+  <div class="header-actions">
+    <span class="top-meta" data-i18n="alpha">RESEARCH PROTOTYPE / 01</span>
+    <label class="screenreader" for="locale">Язык</label>
+    <select id="locale" aria-label="Русский / English / 中文"><option value="ru">РУ</option><option value="en">EN</option><option value="zh">中文</option></select>
+    <a href="../dead-drop/" class="back-link" data-i18n="deadDrop">DEAD DROP ↗</a>
+  </div>
+</header>
+<main class="container">
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow"><span class="heartbeat">✦</span> <span data-i18n="overline">ВОЗРАЖЕНИЕ ПРИНЯТО / 2049</span></span>
+      <h1><span data-i18n="heroFirst">Твоя реклама</span><span class="accent" data-i18n="heroSecond">на допросе.</span></h1>
+      <p data-i18n="intro">Проверьте рекламную идею на понятность, убедительность и качество доказательств — прежде чем тратить бюджет. Никаких выдуманных побед и неподтверждённых обещаний.</p>
+      <div class="trust-line"><span>01 / <b data-i18n="trustA">Чёткие критерии</b></span><span>02 / <b data-i18n="trustB">Без авторизации</b></span><span>03 / <b data-i18n="trustC">Данные остаются в браузере</b></span></div>
+    </div>
+    <div class="artifact" aria-hidden="true"><div class="artifact-orbit orbit-a"></div><div class="artifact-orbit orbit-b"></div><div class="artifact-ring"></div><div class="artifact-core"><span>2049</span><small>VERDICT<br>ENGINE</small></div><div class="artifact-label label-a">EVIDENCE / REQUIRED</div><div class="artifact-label label-b">CREATIVE / EXAMINATION</div></div>
+  </section>
+  <div class="divider"><span data-i18n="caseStart">01 / ОТКРЫТЬ ДЕЛО</span><span></span><span>INPUT / REVIEW / EXPORT</span></div>
+  <div class="workspace">
+    <section class="panel input-panel" aria-labelledby="formTitle">
+      <div class="panel-heading"><span class="pill">CASE FILE / INPUT</span><h2 id="formTitle" data-i18n="formTitle">Расскажите, что рекламируем.</h2><p data-i18n="formHint">Достаточно черновой идеи — трибунал покажет, что нужно усилить.</p></div>
+      <form id="caseForm">
+        <label for="product" data-i18n="productLabel">Продукт или бренд</label><input id="product" name="product" maxlength="160" minlength="3" required placeholder="Например, Aurora — AI-помощник" data-placeholder="productExample">
+        <label for="idea" data-i18n="ideaLabel">Рекламная идея</label><textarea id="idea" name="idea" maxlength="1600" minlength="3" required placeholder="Что обещаем, как это показываем и что предлагаем сделать?" data-placeholder="ideaExample"></textarea>
+        <label for="audience" data-i18n="audienceLabel">Для кого это</label><input id="audience" name="audience" maxlength="240" minlength="3" required placeholder="Самозанятые дизайнеры и небольшие агентства" data-placeholder="audienceExample">
+        <label for="evidence" data-i18n="proofLabel">Какие есть доказательства?</label><textarea class="short-textarea" id="evidence" name="evidence" maxlength="600" placeholder="Демо, исследование, источник или факт для проверки" data-placeholder="evidenceExample"></textarea>
+        <label for="goal" data-i18n="goalLabel">Цель кампании</label><select id="goal" name="goal"><option value="awareness" data-i18n="awareness">Узнаваемость</option><option value="leads" data-i18n="leads">Заявки</option><option value="sales" data-i18n="sales">Продажи</option></select>
+        <div class="import-panel">
+          <div><div class="import-title" data-i18n="importTitle">Уже есть досье Dead Drop?</div><p data-i18n="importHint">Загрузите JSON из финализированной миссии. Чужие закрытые поля и токены не импортируются.</p></div>
+          <label class="upload-button" for="dossierFile"><span aria-hidden="true">↓</span> <span data-i18n="importButton">ИМПОРТИРОВАТЬ .JSON</span></label>
+          <input id="dossierFile" type="file" accept=".json,application/json" class="screenreader" aria-label="Импорт досье Dead Drop">
+        </div>
+        <div class="form-footer"><span class="form-note"><span class="signal-dot"></span> <span data-i18n="privateNote">Без загрузки данных на сервер</span></span><button type="submit" class="primary"><span data-i18n="reviewButton">НАЧАТЬ РАЗБОР</span><span aria-hidden="true"> ↗</span></button></div>
+        <p id="formError" class="form-error" role="alert"></p>
+      </form>
+    </section>
+    <section class="panel review-panel" aria-labelledby="reviewTitle">
+      <div class="review-head"><span class="pill amber">CREATIVE COURT / VERDICT</span><span class="case-number">CASE № <span id="caseCount">000</span></span></div>
+      <div id="reviewEmpty" class="review-empty">
+        <div class="empty-glyph" aria-hidden="true">§</div>
+        <h2 id="reviewTitle" data-i18n="emptyTitle">Суд ещё не начался.</h2><p data-i18n="emptyText">Добавьте идею слева. Здесь появится оценка по пяти критериям, конкретные возражения и файл отчёта.</p>
+        <div class="empty-lines"><i></i><i></i><i></i></div>
+      </div>
+      <div id="reviewContent" hidden aria-live="polite">
+        <div class="result-lead"><div><div class="eyebrow" data-i18n="readinessLabel">СИГНАЛЫ ГОТОВНОСТИ</div><strong class="result-score"><span id="totalScore">0</span><small>/ 20</small></strong></div><div class="score-disc"><svg viewBox="0 0 120 120" role="img" aria-label="Готовность черновика"><circle cx="60" cy="60" r="49" class="meter-back"></circle><circle id="meterProgress" cx="60" cy="60" r="49" class="meter-front"></circle></svg><span>5 <small>CHECKS</small></span></div></div>
+        <p class="editorial-warning" data-i18n="notPerformance">Это сигналы качества текста, а не вероятность продаж или независимая проверка фактов.</p>
+        <div id="scorecards" class="scorecards"></div>
+        <div class="objections"><div class="review-section-head"><span class="eyebrow" data-i18n="objectionsLabel">ВОЗРАЖЕНИЯ ТРИБУНАЛА</span><span>✦</span></div><div id="objectionList"></div></div>
+        <div class="objections caution"><div class="review-section-head"><span class="eyebrow" data-i18n="riskLabel">ПРОВЕРИТЬ ПЕРЕД ПУБЛИКАЦИЕЙ</span><span>!</span></div><div id="riskList"></div></div>
+        <div class="result-actions"><button type="button" id="downloadJSON" class="primary secondary" data-i18n="exportJson">СКАЧАТЬ ОТЧЁТ .JSON ↓</button><button type="button" id="downloadText" class="primary outline" data-i18n="exportText">СКАЧАТЬ .TXT ↓</button><button type="button" id="copyReport" class="primary outline" data-i18n="copy">КОПИРОВАТЬ ↗</button></div>
+        <p id="reportStatus" role="status" class="report-status"></p>
+      </div>
+    </section>
+  </div>
+  <section class="principles" aria-label="Метод"><article><span>01 / EVIDENCE</span><h3 data-i18n="p1Title">Правда прежде креатива.</h3><p data-i18n="p1Body">Поле доказательств не значит, что факт подтверждён. Проверка источников остаётся за человеком.</p></article><article><span>02 / AUDIENCE</span><h3 data-i18n="p2Title">Люди, а не клики.</h3><p data-i18n="p2Body">Оценка помогает обнаружить слабый оффер, но не предсказывает интерес реальной аудитории.</p></article><article><span>03 / NEXT STEP</span><h3 data-i18n="p3Title">Следующий шаг — тест.</h3><p data-i18n="p3Body">После редакторского разбора можно проверять гипотезу в контролируемом A/B-эксперименте.</p><a href="../../experiments/" data-i18n="experimentsLink">EXPERIMENT LAB ↗</a></article></section>
+</main>
+<footer class="site-footer"><span>APPEAL 2049 · LOCAL RESEARCH PROTOTYPE · NO MODEL API</span><span data-i18n="footerPrivacy">Обработка только в браузере · Результаты не проверены</span><a href="../../privacy.html" data-i18n="privacyLink">Условия обработки данных ↗</a></footer>
+</body>
+</html>

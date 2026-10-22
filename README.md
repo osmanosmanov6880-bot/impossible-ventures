@@ -1,5 +1,26 @@
 # Impossible Ventures
 
+## FIVE DEVELOPMENT WAVES — v1.6 experimental release
+
+The code now includes a premium **Russian / English / Chinese** portal with **seven individually branded interactive research experiences**, plus all previously developed **Commercial Command**, Pilot Studio, Experiment Lab, operational recovery tools and earlier creative-world prototypes. The premium studio routes are separate, so no older product is overwritten.
+
+| Premium creative world | Path | Real source-level mechanic |
+|---|---|---|
+| Dead Drop Agency | `/apps/dead-drop/` | Two-person mission, shared dossier and mutual-consent optional AI |
+| Appeal 2049 — Creative Tribunal | `/apps/appeal-2049-studio/` | Five-criterion editorial review and private Dead Drop dossier import |
+| AntiPersona | `/apps/antipersona/` | Four adversarial viewpoints, rebuttal and local report |
+| Brief Theatre Studio | `/apps/brief-theatre-studio/` | Three user-written acts with branch-sensitive director constraints |
+| AdBiome | `/apps/adbiome/` | Five-gene creative mutation, crossover and deterministic lineage |
+| Museum of Attention Studio | `/apps/museum-of-attention-studio/` | Four openly fictional artifacts and visitor-authored placards |
+| Attention Republic Live | `/apps/attention-republic-live/` | Operator-moderated, opt-in anonymous one-ballot-per-session SQLite voting |
+
+Real server-only voting, commercial and pilot actions require a running Node.js backend. On GitHub Pages, the Republic product only supports an **untracked local demo**. These source files do not create seven legal companies, domain registrations, verified customers, advertising revenues or GDPR certification.
+
+- Full engineering and commercialization caveats: [Five-Wave Source Report](docs/five-waves-release.md)
+- Start locally with Node 22+: `npm start`, then open **http://localhost:3000/**.
+- Run all source and server regression tests: `npm run check`.
+
+---
 **Platform v1.1 beta — seven browser creative worlds plus Commercial Command v1.0 and v0.8 Operations & Recovery.** Dead Drop, Pilot Studio and Experiment Lab now share writable SQLite diagnostics, a backup/restore tool and a multilingual server status page. This is source-level staging readiness, **not a confirmed public deployment**.
 
 
@@ -71,7 +92,7 @@ A standalone commercial validation workflow at `/pilot/`, with Russian / English
 This is **experimental code**, not a live advertising network or actual revenue. See [Pilot Studio implementation and security gaps](docs/pilot-studio.md). This extension does not replace the Dead Drop v0.5 optional AI and data-management functionality described below.
 
 
-Seven experimental creative-technology products. **Dead Drop Agency v0.5** is the flagship multiplayer alpha. **Appeal 2049** is a separate browser prototype. Five further concepts are documented but not commercially launched.
+Seven experimental creative-technology worlds have working prototype implementations in the premium studio routes listed above. Earlier browser-only demonstrations and Commercial Command retain their original paths. No prototype should be represented as a registered, commercially launched company.
 
 > These are not seven registered businesses. There is no confirmed product-market fit, production cloud deployment, licensed AI usage or payments.
 

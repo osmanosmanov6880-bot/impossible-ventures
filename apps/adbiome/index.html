@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#091b1c"><meta name="description" content="AdBiome — создавайте, мутируйте и скрещивайте рекламные концепции из пяти генов.">
+<title>AdBiome — Creative DNA Evolution · Impossible Ventures</title>
+<link rel="stylesheet" href="../shared/studio.css"><script type="module" src="./app.js"></script></head>
+<body data-universe="adbiome">
+<header class="topbar"><a class="wordmark" href="../../"><span class="mark">A<span>·</span></span><span>AD<b>BIOME</b><small>EVOLVING CREATIVE SYSTEM</small></span></a><div class="toplinks"><span class="top-status" data-i18n="alpha">ДВИЖОК КОНЦЕПЦИЙ / RULE-BASED</span><a href="../brief-theatre-studio/" data-i18n="theatreLink">BRIEF THEATRE ↗</a><label for="locale" class="sr-only">Language</label><select id="locale" aria-label="Language"><option value="ru">Русский</option><option value="en">English</option><option value="zh">中文</option></select></div></header>
+<main class="shell">
+<section class="hero"><div class="hero-copy"><div class="eyebrow" data-i18n="kicker">ЭВОЛЮЦИЯ НЕ РАВНА ПОБЕДЕ. ОНА ДАЁТ ВАРИАНТЫ.</div><h1><span data-i18n="titleA">У рекламы</span><em data-i18n="titleB">есть ДНК.</em></h1><p data-i18n="lead">Соберите концепцию из пяти составляющих. Меняйте один ген, скрещивайте две версии и получите реальные отличающиеся сценарии — без выдуманных конверсий.</p><div class="hero-tags"><span class="tag" data-i18n="tagA">05 ГЕНОВ</span><span class="tag" data-i18n="tagB">01 МУТАЦИЯ ЗА ШАГ</span><span class="tag" data-i18n="tagC">СРАВНЕНИЕ ДНК</span></div></div><div class="sculpture" aria-hidden="true"><div class="orbit"></div><div class="orbit alt"></div><div class="sculpture-core"><strong>DNA</strong><small>IDEAS / MUTATE<br>NOT SALES</small></div><div class="orbit-caption">IV / CREATIVE BIOLOGICAL LAB</div></div></section>
+<div class="section-divider"><span data-i18n="labTitle">01 / СОЗДАЙТЕ ГЕНОМ</span><i></i><span>PROMISE · PROOF · TENSION · VOICE · ACTION</span></div>
+<div class="workbench">
+<section class="panel" aria-labelledby="createTitle"><div class="eyebrow">DNA / ORIGIN</div><h2 id="createTitle" class="panel-title" data-i18n="createTitle">Пять генов креатива.</h2><p class="panel-description" data-i18n="createHint">Каждый ген влияет на текст. Доказательство здесь — направление для проверки, не подтверждённый факт.</p>
+<form id="genomeForm">
+<label class="field"><span data-i18n="brand">Продукт или бренд</span><input id="brand" minlength="3" maxlength="140" required placeholder="Aurora Studio" data-placeholder="brandHint"></label>
+<label class="field"><span data-i18n="audience">Для кого предложение</span><input id="audience" minlength="3" maxlength="240" required placeholder="Команды небольших агентств" data-placeholder="audienceHint"></label>
+<div class="field-grid">
+<label class="field"><span data-i18n="promise">Обещание</span><select id="promise"><option value="clarity" data-i18n="gClarity">Ясность</option><option value="control" data-i18n="gControl">Контроль</option><option value="time" data-i18n="gTime">Время</option><option value="trust" data-i18n="gTrust">Доверие</option></select></label>
+<label class="field"><span data-i18n="proof">Направление доказательства</span><select id="proof"><option value="demo" data-i18n="gDemo">Демонстрация</option><option value="case" data-i18n="gCase">Кейс</option><option value="audit" data-i18n="gAudit">Отчёт</option><option value="comparison" data-i18n="gComparison">Сравнение</option></select></label>
+<label class="field"><span data-i18n="tension">Проблема аудитории</span><select id="tension"><option value="friction" data-i18n="gFriction">Сложный процесс</option><option value="waste" data-i18n="gWaste">Потери ресурсов</option><option value="uncertainty" data-i18n="gUncertainty">Неопределённость</option><option value="change" data-i18n="gChange">Перемены</option></select></label>
+<label class="field"><span data-i18n="voice">Тональность</span><select id="voice"><option value="direct" data-i18n="gDirect">Прямо</option><option value="warm" data-i18n="gWarm">Тепло</option><option value="bold" data-i18n="gBold">Смело</option><option value="quiet" data-i18n="gQuiet">Спокойно</option></select></label>
+<label class="field"><span data-i18n="action">Призыв к действию</span><select id="action"><option value="explore" data-i18n="gExplore">Узнать</option><option value="request" data-i18n="gRequest">Запросить демо</option><option value="test" data-i18n="gTest">Попробовать</option><option value="compare" data-i18n="gCompare">Сравнить</option></select></label>
+</div>
+<div class="form-footer"><small data-i18n="localNote">Без AI и внешней обработки идей</small><button type="submit" class="button" data-i18n="create">СОЗДАТЬ ПЕРВЫЙ ГЕНОМ ↗</button></div>
+</form><p class="status-message" id="formStatus" role="alert"></p>
+<section id="mutationLab" hidden>
+<div class="section-divider"><span data-i18n="evolutionLabel">02 / ЭВОЛЮЦИЯ</span><i></i></div>
+<label class="field"><span data-i18n="mutateSource">Геном-источник</span><select id="sourceGenome"></select></label>
+<label class="field"><span data-i18n="mutationLabel">Что изменить?</span><select id="mutateGene"><option value="promise" data-i18n="promise">Обещание</option><option value="proof" data-i18n="proof">Доказательство</option><option value="tension" data-i18n="tension">Проблема</option><option value="voice" data-i18n="voice">Тональность</option><option value="action" data-i18n="action">Действие</option></select></label>
+<button class="button wide" id="mutate" type="button" data-i18n="mutateButton">МУТИРОВАТЬ ОДИН ГЕН ↗</button>
+<div class="notice" data-i18n="mutateExplain">Мутация меняет ровно один ген и сохраняет происхождение варианта.</div>
+<div class="section-divider"><span data-i18n="breedLabel">03 / СКРЕЩИВАНИЕ</span><i></i></div>
+<div class="field-grid"><label class="field"><span data-i18n="parentA">Геном A</span><select id="parentLeft"></select></label><label class="field"><span data-i18n="parentB">Геном B</span><select id="parentRight"></select></label></div>
+<button id="crossbreed" class="button wide ghost" type="button" disabled data-i18n="crossbreedButton">СОЗДАТЬ ГИБРИД ↗</button>
+</section>
+</section>
+<section class="panel" aria-labelledby="resultsHeading"><div class="eyebrow" data-i18n="resultsLabel">ДНК / ЖИВАЯ БИБЛИОТЕКА</div><div id="empty" class="is-empty"><div class="empty-symbol" aria-hidden="true">⌘</div><h2 id="resultsHeading" data-i18n="emptyTitle">Пока нет геномов.</h2><p data-i18n="emptyDescription">Выберите пять творческих признаков. Затем исследуйте их мутации и гибриды.</p></div>
+<div id="workspace" hidden>
+<h2 class="panel-title" data-i18n="variantsTitle">Библиотека вариантов.</h2>
+<div class="metric-grid"><div class="metric"><span data-i18n="variants">ВАРИАНТОВ</span><strong id="variantCount">0</strong></div><div class="metric"><span data-i18n="unique">УНИКАЛЬНЫХ ДНК</span><strong id="uniqueCount">0</strong></div><div class="metric"><span data-i18n="distance">ОТЛИЧИЙ ОТ ОСНОВЫ</span><strong id="distanceCount">0/5</strong></div></div>
+<div class="notice" data-i18n="notMetrics">Это реальные различия в пяти текстовых генах, а не статистика показов, CTR или продаж.</div>
+<div id="variantList" class="results"></div>
+<div class="section-divider"><span data-i18n="previewLabel">ТЕКУЩАЯ КОНЦЕПЦИЯ</span><i></i></div>
+<div id="creativePreview" class="card" aria-live="polite"></div>
+<div class="button-row"><button id="exportDNA" type="button" class="button small ghost" data-i18n="exportDNA">СКАЧАТЬ ДНК .JSON ↓</button><a class="button small ghost" href="../appeal-2049-studio/" data-i18n="reviewLink">ПРОВЕРИТЬ ИДЕЮ ↗</a></div>
+<p id="resultStatus" class="status-message" role="status"></p>
+</div></section>
+</div>
+<section class="bottom"><article><span>01 / MUTATE</span><h3 data-i18n="p1Title">Меняйте по одному.</h3><p data-i18n="p1Text">Поймите, какая часть сообщения изменена и почему новая версия отличается.</p></article><article><span>02 / CROSS</span><h3 data-i18n="p2Title">Скрещивайте осмысленно.</h3><p data-i18n="p2Text">Гибрид получает гены от двух уже существующих вариантов без подмены аудитории.</p></article><article><span>03 / VERIFY</span><h3 data-i18n="p3Title">Эволюция не равна успеху.</h3><p data-i18n="p3Text">Каждая версия — гипотеза. Сравнивайте её эффективность только после честного теста.</p></article></section>
+</main><footer class="footer"><span>ADBIOME · IMPOSSIBLE VENTURES · EVOLUTION ALPHA</span><span data-i18n="footerText">Нет регистрации, модели и оплаченных рекламных показов</span><a href="../../privacy.html" data-i18n="privacyLink">Данные и приватность ↗</a></footer>
+</body></html>
