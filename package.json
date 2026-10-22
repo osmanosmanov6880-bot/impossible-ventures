@@ -1,17 +1,17 @@
 {
   "name": "impossible-ventures",
-  "version": "1.1.0-beta.1",
+  "version": "1.2.0-beta.1",
   "private": true,
   "type": "module",
-  "description": "Seven honest interactive advertising worlds, commercial v1.0 workspaces and measurable consented pilot experiments",
+  "description": "Commercial Launch Studio: consent-aware first-party interactive ad microsites, actual CTA-to-lead attribution, privacy metrics and publication governance",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "start": "node services/dead-drop/server.mjs",
     "dev": "node services/dead-drop/server.mjs",
-    "test": "node --test services/dead-drop/server.test.mjs services/dead-drop/creative-engine.test.mjs services/pilot-studio/pilots.test.mjs services/dead-drop/privacy.test.mjs services/experiment-lab/experiments.test.mjs services/dead-drop/operations.test.mjs scripts/db-recovery.test.mjs services/commercial/workspaces.test.mjs services/commercial/campaigns.test.mjs services/commercial/attribution.test.mjs services/commercial/proposals.test.mjs services/creative-worlds/worlds.test.mjs",
-    "check": "node --check services/dead-drop/server.mjs && node --check services/dead-drop/creative-engine.mjs && node --check services/pilot-studio/pilots.mjs && node --check apps/dead-drop/app.js && node --check apps/pilot-studio/app.js && node --check apps/pilot-studio/operator.js && node --check services/dead-drop/dossier-locales.mjs && node --check apps/dead-drop/i18n.js && node --check services/experiment-lab/experiments.mjs && node --check apps/experiment-lab/app.js && node --check apps/experiment-lab/operator.js && node --check scripts/db-recovery.mjs && node --check apps/status/app.js && node --check services/commercial/workspaces.mjs && node --check services/commercial/campaigns.mjs && node --check services/commercial/proposals.mjs && node --check apps/commercial/app.js && node --check apps/commercial/showcase.js && node --check apps/commercial/proposal.js && node --check apps/creative-worlds/worlds.mjs && node --check apps/creative-worlds/engine.mjs && node --check apps/creative-worlds/runner.mjs && node --check apps/creative-worlds/bridge.mjs && npm test",
+    "test": "node --test services/dead-drop/server.test.mjs services/dead-drop/creative-engine.test.mjs services/pilot-studio/pilots.test.mjs services/dead-drop/privacy.test.mjs services/experiment-lab/experiments.test.mjs services/dead-drop/operations.test.mjs scripts/db-recovery.test.mjs services/commercial/workspaces.test.mjs services/commercial/campaigns.test.mjs services/commercial/attribution.test.mjs services/commercial/proposals.test.mjs services/creative-worlds/worlds.test.mjs services/commercial/launches.test.mjs",
+    "check": "node --check services/dead-drop/server.mjs && node --check services/dead-drop/creative-engine.mjs && node --check services/pilot-studio/pilots.mjs && node --check apps/dead-drop/app.js && node --check apps/pilot-studio/app.js && node --check apps/pilot-studio/operator.js && node --check services/dead-drop/dossier-locales.mjs && node --check apps/dead-drop/i18n.js && node --check services/experiment-lab/experiments.mjs && node --check apps/experiment-lab/app.js && node --check apps/experiment-lab/operator.js && node --check scripts/db-recovery.mjs && node --check apps/status/app.js && node --check services/commercial/workspaces.mjs && node --check services/commercial/campaigns.mjs && node --check services/commercial/proposals.mjs && node --check apps/commercial/app.js && node --check apps/commercial/showcase.js && node --check apps/commercial/proposal.js && node --check apps/creative-worlds/worlds.mjs && node --check apps/creative-worlds/engine.mjs && node --check apps/creative-worlds/runner.mjs && node --check apps/creative-worlds/bridge.mjs && node --check services/commercial/launches.mjs && node --check apps/launch/story.mjs && node --check apps/launch/app.mjs && npm test",
     "start:ai": "node --env-file=.env services/dead-drop/server.mjs",
     "db:inspect": "node scripts/db-recovery.mjs inspect",
     "db:backup": "node scripts/db-recovery.mjs backup",
