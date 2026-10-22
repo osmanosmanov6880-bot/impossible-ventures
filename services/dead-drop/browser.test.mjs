@@ -1065,7 +1065,17 @@ test('global seven-world portfolio routes, RU/EN/ZH translation and category fil
    assert.equal(response.status(),200,href);
    assert.match(response.headers()['content-security-policy']||'',/script-src 'self'/);
  }
- assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+ const geometry=await page.evaluate(()=>({
+   viewport:innerWidth,rootWidth:document.documentElement.scrollWidth,
+   bodyWidth:document.body.scrollWidth,
+   offenders:Array.from(document.querySelectorAll('body *')).map(element=>{
+     const rect=element.getBoundingClientRect();
+     return {tag:element.tagName.toLowerCase(),className:String(element.className).slice(0,80),
+       left:Math.round(rect.left),right:Math.round(rect.right),width:Math.round(rect.width)};
+   }).filter(item=>item.right>innerWidth+2 || item.left < -2).slice(0,18)
+ }));
+ assert.ok(geometry.rootWidth<=geometry.viewport+2,
+   'Seven-world mobile overflow: '+JSON.stringify(geometry));
  mkdirSync('artifacts',{recursive:true});
  await page.screenshot({path:'artifacts/impossible-ventures-seven-worlds-mobile.png',fullPage:true});
  assert.deepEqual(errors,[]);
