@@ -493,3 +493,80 @@ test('status dashboard verifies live SQLite writes, multilingual copy and degrad
   assert.equal(await page.locator('#overallStatus').textContent(), '服务响应正常');
   assert.deepEqual(exceptions, []);
 });
+
+
+test('Appeal 2049 premium mobile tribunal reviews ideas, imports finalized Dead Drop JSON, exports safe reports in 3 languages',async t=>{
+  const { context, base }=await setup(t,390,844);
+  const page=await context.newPage();
+  const errors=[];
+  const mutations=[];
+  attachErrors(page,errors);
+  page.on('request',r=>{
+    if(r.method()!=='GET' && r.method()!=='HEAD') mutations.push(r.method()+' '+r.url());
+  });
+
+  await page.goto(base+'/apps/appeal-2049/');
+  await page.getByRole('heading',{name:/Твоя реклама/}).waitFor();
+  await page.locator('#product').fill('Aurora studio');
+  await page.locator('#idea').fill('A research-driven campaign inviting independent designers to compare real team workflows and request a short onboarding consultation.');
+  await page.locator('#audience').fill('Independent designers who manage several client projects');
+  await page.locator('#evidence').fill('Product demo, internal experiment report with documented cases');
+  await page.locator('#goal').selectOption('leads');
+  await page.locator('#caseForm').evaluate(form=>form.requestSubmit());
+  await page.locator('#scorecards .score-item').first().waitFor();
+  assert.equal(await page.locator('#scorecards .score-item').count(),5);
+  assert.match(await page.locator('#reviewContent').innerText(),/ПРОВЕРИТЬ ПЕРЕД ПУБЛИКАЦИЕЙ/);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+  mkdirSync('artifacts',{recursive:true});
+  await page.screenshot({path:'artifacts/appeal-2049-ru-mobile.png',fullPage:true});
+
+  const downloadPromise=page.waitForEvent('download');
+  await page.locator('#downloadJSON').click();
+  const download=await downloadPromise;
+  assert.equal(download.suggestedFilename(),'appeal-2049-review.json');
+  const report=JSON.parse(readFileSync(await download.path(),'utf8'));
+  assert.equal(report.kind,'appeal-2049-editorial-report');
+  assert.equal(report.evaluation.evidenceVerified,false);
+  assert.equal(report.evaluation.humanVerificationRequired,true);
+  assert.ok(report.evaluation.total<=20);
+  assert.ok(!JSON.stringify(report).includes('Bearer '));
+
+  await page.locator('#locale').selectOption('en');
+  assert.match(await page.locator('#reviewContent').innerText(),/DRAFT READINESS SIGNALS/);
+  await page.locator('#locale').selectOption('zh');
+  assert.match(await page.locator('#reviewContent').innerText(),/草案准备程度指标/);
+
+  const dossier={
+    brand:'Aurora research',
+    audience:'Independent creative agencies who want verifiable experiments',
+    openingHook:'An evidence-led opening',
+    concept:'A precise demonstration of campaign testing that invites agencies to request a pilot appointment.',
+    callToAction:'Request a briefing',
+    evidenceToVerify:'Public sample methodology under review',
+    interceptedSignals:{productAgent:'PRIVATE ROLE SIGNAL'},
+    hostTokenHash:'PRIVATE-SHA'
+  };
+  const data={
+    kind:'dead-drop-agent-export',
+    mission:{status:'finalized',code:'ABCDEFGH',role:'product',token:'raw-private-token',
+      ownIntel:{product:'TOP SECRET NOTES'},dossier}
+  };
+  await page.locator('#dossierFile').setInputFiles({
+    name:'dead-drop-final.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))
+  });
+  assert.equal(await page.locator('#product').inputValue(),'Aurora research');
+  assert.equal(await page.locator('#goal').inputValue(),'leads');
+  assert.ok(!(await page.locator('#idea').inputValue()).includes('PRIVATE ROLE SIGNAL'));
+  await page.locator('#caseForm').evaluate(form=>form.requestSubmit());
+  await page.locator('#scorecards .score-item').first().waitFor();
+  const nextDownload=page.waitForEvent('download');
+  await page.locator('#downloadJSON').click();
+  const sanitized=JSON.parse(readFileSync(await(await nextDownload).path(),'utf8'));
+  const serialized=JSON.stringify(sanitized);
+  assert.ok(!serialized.includes('raw-private-token'));
+  assert.ok(!serialized.includes('TOP SECRET NOTES'));
+  assert.ok(!serialized.includes('PRIVATE-SHA'));
+  assert.ok(!serialized.includes('ABCDEFGH'));
+  assert.deepEqual(mutations,[],'Tribunal must not submit client content to an HTTP API');
+  assert.deepEqual(errors,[]);
+});
