@@ -187,3 +187,35 @@ input::placeholder,textarea::placeholder{color:#8196aa}
 .proposal-next{padding-top:24px}
 @media(max-width:900px){.proposal-summary,.proposal-summary:has(>.score:nth-child(4)){grid-template-columns:repeat(2,minmax(0,1fr))}.proposal-breakdown{grid-template-columns:1fr}.proposal-row{flex-direction:column}.proposal-row strong{text-align:left}}
 @media(max-width:570px){.proposal-summary,.proposal-summary:has(>.score:nth-child(4)){grid-template-columns:1fr 1fr}.proposal-summary .score{padding:17px}.proposal-summary .score strong{font-size:26px}.proposal-total{padding:21px}.proposal-buttons{flex-direction:column}.proposal-buttons button{width:100%}.proposal-page h1{font-size:clamp(41px,10vw,62px)}.proposal-intro{font-size:15px}}
+
+/* Premium public entry: real product navigation and correct seven-venture statuses */
+.home-hero{min-height:740px}
+.home-feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}
+.home-feature{display:flex;flex-direction:column;gap:20px;background:linear-gradient(135deg,#182c42,#111d2d);border:1px solid #4f7385;color:#eefbff;border-radius:18px;padding:clamp(22px,2.5vw,37px);min-height:360px;transition:transform .2s,border-color .2s,box-shadow .2s}
+.home-feature.premium{background:radial-gradient(ellipse at 85% 0%,#4a68868c,transparent 64%),linear-gradient(145deg,#1d354e,#112334);border-color:#9bd2ca}
+.home-feature:hover{transform:translateY(-3px);border-color:#b9f9df;box-shadow:0 25px 57px #0007}
+.feature-no{font:11px monospace;color:#acf2d3;letter-spacing:.09em}
+.feature-glyph{font-size:56px;line-height:1.1;color:#abf1dd;text-shadow:0 0 40px #b6f6ee89}
+.home-feature h3{font-size:clamp(26px,2.7vw,36px);line-height:1.15;letter-spacing:-.05em;margin:0}
+.home-feature p{font-size:13px;color:#bfd4e2;line-height:1.8;margin:0}
+.feature-link{margin-top:auto;color:#c8fbdc;font:11px monospace;letter-spacing:.04em}
+.home-world-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
+.home-world{display:flex;flex-direction:column;gap:17px;border:1px solid #4e677f;background:linear-gradient(140deg,#192a40,#101b2a);border-radius:15px;padding:24px;min-height:248px;transition:border-color .2s,transform .2s}
+.home-world:hover{border-color:var(--world-color);transform:translateY(-2px)}
+.home-world>span{font:10px monospace;color:var(--world-color);letter-spacing:.06em}
+.home-world strong{font-size:21px;line-height:1.2;letter-spacing:-.035em}
+.home-world p{font-size:12px;line-height:1.7;color:#b9cedd;margin:0}
+.home-world small{color:var(--world-color);font:10px monospace;line-height:1.5;margin-top:auto}
+.home-end{padding-bottom:110px;max-width:1470px}
+.home-end h2{font-size:clamp(41px,5.6vw,77px);line-height:1.09;letter-spacing:-.075em;max-width:1090px;margin:20px 0}
+.home-end p{max-width:870px;font-size:17px;line-height:1.8;color:#bfcfde}
+.home-end .actions{margin-top:30px}
+.home-nav-cta{min-height:43px;padding:9px 13px}
+.demo-entry{padding:23px 25px;border:1px solid #67988c;border-radius:14px;background:radial-gradient(ellipse at 80% 30%,#31574e9c,transparent 65%),#122d2b;display:flex;align-items:center;justify-content:space-between;gap:22px;margin-bottom:20px}
+.demo-entry strong{font-size:19px;letter-spacing:-.035em}
+.demo-entry p{margin:5px 0 0;max-width:770px}
+.demo-entry button{white-space:normal;flex:none;max-width:340px;text-align:center}
+@media(max-width:1150px){.home-world-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1000px){.home-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.home-feature.premium{grid-column:span 2}.home-hero{min-height:0}}
+@media(max-width:720px){.home-world-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.demo-entry{flex-direction:column;align-items:start}.demo-entry button{max-width:100%;width:100%}.home-feature-grid{grid-template-columns:1fr}.home-feature.premium{grid-column:auto}.home-feature{min-height:300px}}
+@media(max-width:510px){.home-world-grid{grid-template-columns:1fr}.home-world{min-height:200px}.home-feature{min-height:300px}.home-end h2{font-size:39px}.home-end p{font-size:15px}.home-hero h1{font-size:clamp(47px,10.6vw,65px)}.home-nav-cta{display:none}}
