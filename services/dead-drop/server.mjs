@@ -312,7 +312,7 @@ export function createApp({
           mode: 'cooperative',
           persistent: dbPath !== ':memory:',
           aiAvailable,
-          version: '0.7.0',
+          version: '0.8.0',
           check: 'sqlite-transaction',
           storage: ready ? 'writable' : 'unavailable'
         });
