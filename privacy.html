@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080e0b">
+<meta name="description" content="Experimental alpha privacy and data handling notice for Impossible Ventures' Dead Drop Agency.">
+<title>Privacy & Data Handling — Dead Drop Agency</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,"Segoe UI",system-ui,sans-serif;background:#080e0b;color:#edf5e9}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 82% -10%,#31481b,transparent 48%),#080e0b}
+header,main,footer{max-width:960px;margin:auto;padding:24px}
+header{display:flex;align-items:center;justify-content:space-between;gap:15px;border-bottom:1px solid #304333}
+.logo{font-weight:850;letter-spacing:-.05em;font-size:22px}.logo span{color:#caff7c}
+a{color:#caff7c;text-decoration:underline;text-underline-offset:3px}
+a:focus-visible,summary:focus-visible{outline:2px solid #caff7c;outline-offset:4px}
+h1{font-size:clamp(35px,6vw,67px);line-height:1.06;letter-spacing:-.065em;max-width:820px;margin:24px 0}
+h2{font-size:24px;letter-spacing:-.035em;margin-top:34px}
+h3{font-size:18px;margin:27px 0 10px;color:#dcf4cc}
+p,li{font-size:15px;line-height:1.75;color:#b7c8b8}
+p{max-width:810px}
+nav{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0 45px}
+nav a{display:inline-flex;text-decoration:none;border:1px solid #57734a;padding:11px 16px;border-radius:9px;background:#172517}
+nav a:hover{border-color:#caff7c}
+.label{color:#caff7c;font:11px Consolas,monospace;letter-spacing:.16em}
+.notice{background:#162218;border:1px solid #506646;border-left:4px solid #caff7c;padding:17px 21px;border-radius:9px}
+.notice p{margin:0}
+.lang-block{padding:25px 0 45px;border-bottom:1px solid #314333}
+ul{padding-left:23px}
+strong{color:#f4fff1}
+footer{font:12px Consolas,monospace;color:#839785;border-top:1px solid #314333;margin-top:45px}
+@media(max-width:600px){header,main,footer{padding:17px}h1{margin-top:30px}.lang-block{padding-top:15px}}
+</style>
+</head>
+<body>
+<header><div class="logo">DEAD DROP<span>.</span> <span style="color:#a8bba9;font-size:13px;font-weight:400;letter-spacing:0">/ ALPHA</span></div><a href="./apps/dead-drop/">← Return to agency</a></header>
+<main>
+<div class="label">TRANSPARENT DATA OPERATIONS / OCTOBER 2026</div>
+<h1>What happens to your mission data?</h1>
+<div class="notice">
+<p><strong>Experimental prototype, not a production privacy policy.</strong> This page describes the behavior of the current open-source Dead Drop implementation. No legal entity, privacy officer, production hosting operator or independent compliance audit is being represented here.</p>
+</div>
+<nav aria-label="Languages">
+<a href="#en">English</a><a href="#ru">Русский</a><a href="#zh">简体中文</a>
+</nav>
+
+<section class="lang-block" id="en" lang="en" aria-labelledby="heading-en">
+<div class="label">ENGLISH</div><h2 id="heading-en">Alpha data handling notice</h2>
+<h3>What is stored?</h3>
+<p>A running cooperative Node server stores the brand, product description, user-provided evidence, audience details, game messages, AI consent choices and final campaign dossier in its local SQLite database. The two agent access-token <strong>hashes</strong> are stored, not the raw tokens. The raw bearer token is held in your browser tab's sessionStorage. Your language preference is stored in localStorage. The server does not set marketing cookies or run third-party analytics in this version.</p>
+<h3>Who sees which data?</h3>
+<p>Before finalization, Agent Vector sees their product information and Agent Echo sees their audience information. Both see the shared messages. After finalization, the generated dossier combines information from both roles. Whoever possesses an agent bearer token can act in that role. A room code alone can claim an unoccupied second role. Do not enter client secrets, regulated data or personal information.</p>
+<h3>AI requests</h3>
+<p>By default the dossier is created using local rules, with no model API call. If an API provider is configured, <strong>both agents must independently opt in</strong> before private mission content is sent to OpenAI for creative refinement. Either agent may revoke consent until the dossier is finalized. The service requests <code>store: false</code> for OpenAI Responses API calls; upstream processing and retention follow the provider's applicable policies. Consent is a product-level safeguard, not proof of legal compliance. Verify all advertising claims.</p>
+<h3>Export, deletion and retention</h3>
+<ul>
+<li>Each authorized agent may download a JSON export of their role-specific view, including shared messages and, after finalization, the dossier. Raw access tokens are never included.</li>
+<li>Either authorized agent can delete the entire room by entering its exact room code in a confirmation dialog. Both agents immediately lose access.</li>
+<li>Rooms expire seven days after creation. The server prunes expired rooms on startup and then hourly, so deletion may happen after the seven-day mark; if the server is offline, cleanup resumes when it restarts.</li>
+<li>The local SQLite database is configured with secure-delete and attempts to truncate the write-ahead log after erasure. This cannot guarantee removal from backups, filesystem snapshots or physical storage media. No production backup or deletion policy has been established.</li>
+</ul>
+<h3>Hosting and status</h3>
+<p>Static training simulation stays in your browser; it does not send mission input to the multiplayer API. When a private or self-hosted multiplayer server is running, it stores data on that host. A public deployment with HTTPS, verified data controller, privacy assessment and operational retention procedures has not been confirmed.</p>
+<p>For technical questions, consult <a href="https://github.com/osmanosmanov6880-bot/impossible-ventures">the source repository</a>. Do not post personal data in public repository issues.</p>
+</section>
+
+<section class="lang-block" id="ru" lang="ru" aria-labelledby="heading-ru">
+<div class="label">РУССКИЙ</div><h2 id="heading-ru">Уведомление об обработке данных в альфа-версии</h2>
+<h3>Какие данные сохраняются?</h3>
+<p>Работающий сервер Node хранит в локальной базе SQLite название бренда, описание продукта, указанные пользователем доказательства, сведения об аудитории, сообщения агентов, выбор согласия на ИИ и итоговое рекламное досье. Сохраняются <strong>хеши</strong> токенов доступа, но не сами токены. Токен находится в sessionStorage вкладки браузера, а выбранный язык — в localStorage. В текущей версии нет маркетинговых cookie и сторонней аналитики.</p>
+<h3>Кто видит информацию?</h3>
+<p>До завершения миссии агент Вектор видит закрытые сведения о продукте, агент Эхо — сведения об аудитории. Сообщения видны обоим. Итоговое досье объединяет информацию двух участников. Любой обладатель токена может действовать от имени соответствующего агента, а код свободной комнаты позволяет присоединиться второму участнику. Не вводите персональные, конфиденциальные или регулируемые данные.</p>
+<h3>Запросы к ИИ</h3>
+<p>По умолчанию досье создаётся локальными правилами без внешнего ИИ. Если серверный API настроен, <strong>оба агента должны отдельно согласиться</strong> на передачу данных миссии в OpenAI для улучшения текста. До финализации согласие можно отозвать. Программа передаёт параметр <code>store: false</code>, но обработка данных провайдером регулируется его действующими условиями. Согласие в интерфейсе не подтверждает юридическое соответствие требованиям GDPR. Рекламные утверждения необходимо проверять.</p>
+<h3>Экспорт, удаление и сроки хранения</h3>
+<ul>
+<li>Каждый агент может скачать JSON с данными, которые доступны его роли, общими сообщениями и, после завершения, рекламным досье. Токены доступа в экспорт не входят.</li>
+<li>Любой из двух агентов может удалить всю комнату, введя её точный код в подтверждающем окне. Доступ обоих участников прекращается.</li>
+<li>Срок хранения комнаты — семь дней от создания. Сервер удаляет просроченные комнаты при запуске и затем каждый час. Во время простоя сервера удаление выполняется после перезапуска.</li>
+<li>SQLite настроена с secure_delete; после удаления сервер пытается очистить журнал WAL. Это не гарантирует физического удаления из резервных копий, снимков диска и носителей. Промышленная политика резервирования и удаления ещё не создана.</li>
+</ul>
+<h3>Размещение и юридический статус</h3>
+<p>Тренировка без сервера работает только в браузере. Настоящие онлайн-миссии сохраняются там, где запущен Node-сервер. Публичный сервер с HTTPS, установленным оператором данных, правовой оценкой и проверенными процедурами хранения ещё не подтверждён.</p>
+<p>Исходный код размещён <a href="https://github.com/osmanosmanov6880-bot/impossible-ventures">на GitHub</a>. Не публикуйте персональные сведения в открытых обращениях репозитория.</p>
+</section>
+
+<section class="lang-block" id="zh" lang="zh-CN" aria-labelledby="heading-zh">
+<div class="label">简体中文</div><h2 id="heading-zh">测试版数据处理说明</h2>
+<h3>保存哪些信息？</h3>
+<p>运行中的 Node 服务器将品牌、产品描述、用户提供的证据、受众信息、游戏消息、AI 同意状态和最终广告档案存储在本机 SQLite 数据库中。服务器保存访问令牌的<strong>哈希值</strong>，不保存原始令牌。原始令牌保存在浏览器标签页的 sessionStorage 中，语言偏好保存在 localStorage 中。当前版本不设置营销 Cookie，也不使用第三方分析服务。</p>
+<h3>谁能查看数据？</h3>
+<p>任务完成前，向量特工仅能查看自己的产品私密信息，回声特工仅能查看自己的受众私密信息，双方均可查看共同传递的消息。最终档案将融合双方信息。持有代理令牌的人可以使用该角色，拥有未被领取房间代码的人可以作为第二位特工加入。请勿输入个人隐私、商业机密或受监管的数据。</p>
+<h3>AI 请求</h3>
+<p>默认情况下，系统只使用本地规则生成档案，不调用外部 AI。如果服务器配置了 AI，<strong>双方特工必须分别明确同意</strong>，系统才会将任务数据发送给 OpenAI 优化创意。任意一方可在最终生成前撤回同意。服务请求使用 <code>store: false</code>，但上游处理和保留仍以服务商适用政策为准。产品中的同意选项不等同于法律合规性证明。发布广告前必须人工核实事实。</p>
+<h3>导出、删除与保留</h3>
+<ul>
+<li>每位特工可将自身角色可见的信息、共享消息及完成后的广告档案导出为 JSON。导出不包含原始访问令牌。</li>
+<li>任何一位授权特工都可以输入准确房间代码确认删除整个房间。删除后双方均失去访问权限。</li>
+<li>房间在创建七天后过期。服务器启动时及之后每小时清理过期房间；如果服务器离线，则在下次启动时清理。</li>
+<li>SQLite 启用 secure_delete，并在删除后尝试截断 WAL 日志。这并不保证备份、磁盘快照或物理介质中的数据被完全清除。目前尚未制定生产级备份与删除政策。</li>
+</ul>
+<h3>托管与状态</h3>
+<p>静态训练仅在浏览器中进行，不会将任务数据发送至多人协作 API。多人游戏数据存储在实际运行 Node 服务器的主机上。公开 HTTPS 部署、经验证的数据控制者、隐私评估和正式保留流程尚未确认。</p>
+<p>技术信息参见 <a href="https://github.com/osmanosmanov6880-bot/impossible-ventures">源代码仓库</a>。请勿在公开的 GitHub 问题中发布个人资料。</p>
+</section>
+</main>
+<footer>DEAD DROP AGENCY · EXPERIMENTAL ALPHA · OCTOBER 2026</footer>
+</body></html>
