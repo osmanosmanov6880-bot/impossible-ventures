@@ -365,7 +365,7 @@ test('status dashboard verifies live SQLite writes, multilingual copy and degrad
   const failedRequests = [];
   page.on('pageerror', e => exceptions.push(e.message));
   page.on('response', response => {
-    if (response.status >= 400) failedRequests.push({
+    if (response.status() >= 400) failedRequests.push({
       url: new URL(response.url()).pathname, status: response.status()
     });
   });
