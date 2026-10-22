@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111714"><meta name="description" content="Brief Theatre — интерактивная трёхактная репетиция рекламного брифа и сценария.">
+<title>Brief Theatre — The Living Creative Stage · Impossible Ventures</title>
+<link rel="stylesheet" href="../shared/studio.css"><script type="module" src="./app.js"></script></head>
+<body data-universe="brief-theatre">
+<header class="topbar"><a class="wordmark" href="../../"><span class="mark">B<span>·</span></span><span>BRIEF <b>THEATRE</b><small>LIVE CREATIVE REHEARSAL</small></span></a>
+<div class="toplinks"><span class="top-status" data-i18n="prototype">РУЧНАЯ РЕПЕТИЦИЯ / БЕЗ AI</span><a href="../antipersona/" data-i18n="other">ANTIPERSONA ↗</a><label class="sr-only" for="locale">Language</label><select id="locale" aria-label="Language"><option value="ru">Русский</option><option value="en">English</option><option value="zh">中文</option></select></div></header>
+<main class="shell">
+<section class="hero"><div class="hero-copy"><div class="eyebrow" data-i18n="eyebrow">ТРИ АКТА. ОДНА КАМПАНИЯ. НИКАКИХ ИЛЛЮЗИЙ.</div><h1><span data-i18n="h1a">Бриф выходит</span><em data-i18n="h1b">на сцену.</em></h1><p data-i18n="lead">Рекламная идея меняется, когда режиссёр добавляет ограничения. Напишите вступление, доказательство и призыв к действию — три сцены, которые вы действительно создадите сами.</p><div class="hero-tags"><span class="tag" data-i18n="tag1">03 АКТА</span><span class="tag" data-i18n="tag2">02 РЕЖИССЁРСКИХ ВЫБОРА</span><span class="tag" data-i18n="tag3">01 ЭКСПОРТ СЦЕНАРИЯ</span></div></div><div class="sculpture" aria-hidden="true"><div class="orbit"></div><div class="orbit alt"></div><div class="sculpture-core"><strong>III</strong><small>ACT / LIVE<br>REHEARSAL</small></div><div class="orbit-caption">SOUND · LIGHT · CREATIVE</div></div></section>
+<div class="section-divider"><span data-i18n="sequence">01 / ПОДГОТОВКА СЦЕНЫ</span><i></i><span>BRIEF / ACTS / SCRIPT</span></div>
+<div class="workbench">
+<section class="panel" aria-labelledby="briefTitle"><div class="eyebrow">DIRECTOR / BRIEF</div><h2 class="panel-title" id="briefTitle" data-i18n="briefTitle">Что должно стать историей?</h2><p class="panel-description" data-i18n="briefDescription">Сначала сформулируйте исходную идею и аудиторию. После начала репетиции эти поля будут сохранены только в памяти вкладки.</p>
+<form id="playForm">
+  <label class="field"><span data-i18n="brand">Продукт или бренд</span><input id="brand" required minlength="3" maxlength="120" placeholder="Aurora Studio" data-placeholder="brandExample"></label>
+  <label class="field"><span data-i18n="audience">Для кого история</span><input id="audience" required minlength="3" maxlength="220" placeholder="Независимые агентства" data-placeholder="audienceExample"></label>
+  <label class="field"><span data-i18n="concept">Исходная идея</span><textarea id="concept" required minlength="20" maxlength="900" placeholder="Открываем проблему, затем показываем её решение…" data-placeholder="conceptExample"></textarea></label>
+  <label class="field"><span data-i18n="channel">Основная площадка</span><select id="channel"><option value="social" data-i18n="social">Социальные сети</option><option value="video" data-i18n="video">Короткое видео</option><option value="landing" data-i18n="landing">Посадочная страница</option></select></label>
+  <div class="notice" data-i18n="notice">Это авторская работа с ограничениями. Сценарий не создаётся нейросетью и не публикуется.</div>
+  <div class="form-footer"><small data-i18n="localNote">Сцены не сохраняются на сервере</small><button type="submit" class="button" data-i18n="start">НАЧАТЬ РЕПЕТИЦИЮ ↗</button></div>
+</form><p id="briefError" class="status-message" role="alert"></p>
+</section>
+<section class="panel" aria-labelledby="stageTitle"><div class="eyebrow" data-i18n="rightEyebrow">СЦЕНА / ПРЯМОЙ ЭФИР МЫСЛИ</div>
+<div id="empty" class="is-empty"><div class="empty-symbol" aria-hidden="true">◈</div><h2 data-i18n="emptyTitle" id="stageTitle">Занавес закрыт.</h2><p data-i18n="emptyDescription">Заполните бриф слева. Затем режиссёр предложит вам три последовательных задачи с реальными творческими решениями.</p></div>
+<div id="playArea" hidden>
+<h2 class="panel-title" data-i18n="playTitle">Репетиция началась.</h2>
+<div class="steps"><span class="step" id="step1">01 / HOOK</span><span class="step" id="step2">02 / PROOF</span><span class="step" id="step3">03 / ACTION</span></div>
+<section id="currentScene">
+  <div class="card"><div class="card-top" id="actLabel">ACT 01 / 03</div><h3 id="actHeading"></h3><p id="actInstructions"></p><p class="card-note" id="directorPressure"></p></div>
+  <form id="sceneForm" class="card after-cards">
+    <label class="field"><span data-i18n="directionLabel">Режиссёрский выбор</span><select id="direction"><option value="careful" data-i18n="careful">Точность и ясность</option><option value="bold" data-i18n="bold">Смелость и конфликт</option></select></label>
+    <label class="field"><span data-i18n="writeScene">Напишите эту сцену</span><textarea id="sceneDraft" minlength="20" maxlength="1000" required placeholder="Что зритель увидит и поймёт?" data-placeholder="sceneExample"></textarea></label>
+    <button class="button wide" type="submit" data-i18n="next">СЫГРАТЬ СЦЕНУ ↗</button>
+  </form>
+</section>
+<section id="complete" hidden><div class="card"><div class="card-top" data-i18n="completed">ТРЕТИЙ АКТ ЗАВЕРШЁН / ДЛЯ ПРОВЕРКИ ЧЕЛОВЕКОМ</div><div class="quote" data-i18n="finale">Занавес. Теперь нужен реальный тест.</div><p data-i18n="finalWarning">Три сцены написаны вами. Баллы — сигналы структуры текста, не продажи, качество рекламы или доказательства.</p></div></section>
+<div class="section-divider"><span data-i18n="timeline">ХРОНИКА РЕПЕТИЦИИ</span><i></i><span id="actProgress">0 / 3</span></div>
+<div id="history" class="record-list"></div>
+<div class="button-row"><button id="exportJSON" class="button small ghost" type="button" data-i18n="export">СКАЧАТЬ СЦЕНАРИЙ .JSON ↓</button><button id="resetPlay" class="button small ghost" type="button" data-i18n="restart">НАЧАТЬ ЗАНОВО ↻</button></div>
+<p id="stageStatus" role="status" class="status-message"></p>
+</div></section>
+</div>
+<section class="bottom"><article><span>01 / DRAMA</span><h3 data-i18n="p1Head">Интрига вместо клише.</h3><p data-i18n="p1Text">Первый акт открывает конфликт, понятный настоящей аудитории.</p></article><article><span>02 / TRUST</span><h3 data-i18n="p2Head">Доказательство вместо мифа.</h3><p data-i18n="p2Text">Второй акт требует конкретного источника или демонстрации — без автоматической проверки.</p></article><article><span>03 / ACTION</span><h3 data-i18n="p3Head">Зритель должен понимать шаг.</h3><p data-i18n="p3Text">Третий акт заканчивается ясным действием, которое затем надо проверить с реальными людьми.</p></article></section>
+</main><footer class="footer"><span>BRIEF THEATRE · IMPOSSIBLE VENTURES · WRITING PROTOTYPE</span><span data-i18n="footerDisclaimer">Не использует AI · Не запускает рекламу · Не придумывает реальные результаты</span><a href="../../privacy.html" data-i18n="privacy">Данные и приватность ↗</a></footer>
+</body></html>
