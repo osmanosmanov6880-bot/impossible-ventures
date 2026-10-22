@@ -54,7 +54,7 @@ async function launch(base,ws,{activate=true,approve=true}={}){
   }
   const created=await api(base,root+'/launches',{method:'POST',token:ws.token,body:{campaignId:ws.campaignId}});
   assert.equal(created.status,201);
-  const result={id:created.data.launch.id,...ws};
+  const result={...ws,id:created.data.launch.id};
   if(activate){
     const active=await api(base,root+'/launches/'+result.id+'/activate',{method:'POST',token:ws.token});
     assert.equal(active.status,200);
@@ -84,7 +84,7 @@ test('WAVE 11: explicit owner governance freezes one approved creative revision,
   const created=await api(base,root+'/launches',{method:'POST',token:ws.token,body:{campaignId:ws.campaignId}});
   assert.equal(created.status,201);
   const id=created.data.launch.id;
-  assert.equal(created.data.launch.sourceRevision,ws.campaignRevision);
+  assert.equal(created.data.launch.sourceRevision,approved.data.campaign.revision);
   assert.equal(created.data.launch.creative.headline,campaign.headline);
   assert.match(created.data.notice,/not publicly accessible/);
   assert.equal((await api(base,'/api/v1/launches/'+id)).status,404);
