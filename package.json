@@ -1,6 +1,6 @@
 {
   "name": "impossible-ventures",
-  "version": "0.7.0",
+  "version": "1.0.0-beta.1",
   "private": true,
   "type": "module",
   "description": "Dead Drop, Pilot Studio and first-party anonymous A/B Experiment Lab research alpha",
@@ -10,8 +10,8 @@
   "scripts": {
     "start": "node services/dead-drop/server.mjs",
     "dev": "node services/dead-drop/server.mjs",
-    "test": "node --test services/dead-drop/server.test.mjs services/dead-drop/creative-engine.test.mjs services/pilot-studio/pilots.test.mjs services/dead-drop/privacy.test.mjs services/experiment-lab/experiments.test.mjs",
-    "check": "node --check services/dead-drop/server.mjs && node --check services/dead-drop/creative-engine.mjs && node --check services/pilot-studio/pilots.mjs && node --check apps/dead-drop/app.js && node --check apps/pilot-studio/app.js && node --check apps/pilot-studio/operator.js && node --check services/dead-drop/dossier-locales.mjs && node --check apps/dead-drop/i18n.js && node --check services/experiment-lab/experiments.mjs && node --check apps/experiment-lab/app.js && node --check apps/experiment-lab/operator.js && npm test",
+    "test": "node --test services/dead-drop/server.test.mjs services/dead-drop/creative-engine.test.mjs services/pilot-studio/pilots.test.mjs services/dead-drop/privacy.test.mjs services/experiment-lab/experiments.test.mjs services/commercial/workspaces.test.mjs",
+    "check": "node --check services/dead-drop/server.mjs && node --check services/dead-drop/creative-engine.mjs && node --check services/pilot-studio/pilots.mjs && node --check apps/dead-drop/app.js && node --check apps/pilot-studio/app.js && node --check apps/pilot-studio/operator.js && node --check services/dead-drop/dossier-locales.mjs && node --check apps/dead-drop/i18n.js && node --check services/experiment-lab/experiments.mjs && node --check apps/experiment-lab/app.js && node --check apps/experiment-lab/operator.js && node --check services/commercial/workspaces.mjs && npm test",
     "start:ai": "node --env-file=.env services/dead-drop/server.mjs"
   }
 }
