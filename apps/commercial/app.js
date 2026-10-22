@@ -727,7 +727,7 @@ document.getElementById('viewDemo').addEventListener('click',openDemo);
  */
 Object.assign(dict.ru, {
  importTitle:'Импортировать результат игры в рекламный черновик.',
- importDisclaimer:'Локальный JSON из одного из пяти новых миров превратится в редактируемый черновик. Никаких сетевых запросов при импорте. Сохранение в организации — только по отдельному действию.',
+ importDisclaimer:'Локальный JSON из одного из пяти новых миров превратится в редактируемый черновик. Данные файла не отправляются в API. Сохранение в организации — только по отдельному действию.',
  importLabel:'ВЫБРАТЬ JSON-ФАЙЛ',
  importSuccess:'Творческий результат загружен в редактор. Проверьте реальные утверждения, внесите исправления и сохраните черновик отдельно.',
  importError:'Не удалось импортировать игровой отчёт. Файл должен быть создан одним из пяти миров и иметь корректную структуру.',
@@ -735,7 +735,7 @@ Object.assign(dict.ru, {
 });
 Object.assign(dict.en, {
  importTitle:'Bring your creative world into a campaign draft.',
- importDisclaimer:'Import a local JSON file from one of five worlds into an editable draft. No network request happens on import. Server saving always requires a separate action.',
+ importDisclaimer:'Import a local JSON file from one of five worlds into an editable draft. The file content is not uploaded by importing. Server saving always requires a separate action.',
  importLabel:'CHOOSE A LOCAL JSON FILE',
  importSuccess:'Creative report loaded into the editor. Verify all claims, refine the copy and save deliberately.',
  importError:'Could not import this creative report. It must have a valid five-world format.',
@@ -743,7 +743,7 @@ Object.assign(dict.en, {
 });
 Object.assign(dict.zh, {
  importTitle:'将创意世界成果导入广告草稿。',
- importDisclaimer:'从五个世界之一导入本地JSON文件，生成可编辑草稿。导入时不会发送网络请求；服务器保存必须另行确认。',
+ importDisclaimer:'从五个世界之一导入本地JSON文件，生成可编辑草稿。导入时不会上传文件内容；服务器保存必须另行确认。',
  importLabel:'选择本地 JSON 文件',
  importSuccess:'成果已导入编辑器。请核实所有主张，完善文案，然后再选择保存。',
  importError:'无法导入该创意报告。必须是有效的五世界文件格式。',
