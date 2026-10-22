@@ -1,5 +1,12 @@
 # Impossible Ventures
 
+## New: Pilot Studio v0.4
+
+A standalone commercial validation workflow at `/pilot/`, with Russian / English / Chinese UI, modeled campaign economics, a controlled A/B test plan and a consent-based SQLite pilot application. Authorized operator console: `/pilot/operator/` (set `OPERATOR_TOKEN`, minimum 32 characters).
+
+This is **experimental code**, not a live advertising network or actual revenue. See [Pilot Studio implementation and security gaps](docs/pilot-studio.md). This extension does not replace the Dead Drop v0.4 optional AI functionality described below.
+
+
 Seven experimental creative-technology products. **Dead Drop Agency v0.4** is the flagship multiplayer alpha. **Appeal 2049** is a separate browser prototype. Five further concepts are documented but not commercially launched.
 
 > These are not seven registered businesses. There is no confirmed product-market fit, production cloud deployment, licensed AI usage or payments.
