@@ -1,5 +1,9 @@
 # Impossible Ventures
 
+## Static preview distribution
+
+The main-branch Pages workflow publishes only when GitHub Pages is configured. Even if it is not, a downloadable artifact named **impossible-ventures-static-preview** is produced by Actions. See [deployment instructions](docs/deployment.md). It includes untracked demos only; backend pilot applications and measured experiments need the Node server.
+
 ## NEW — Experiment Lab v0.7 / First-party research
 
 The project now contains a **real opt-in A/B experiment engine**: a randomly assigned direct-control ad (A) versus an authored two-choice interactive story (B), with separate results, anonymous session tokens, durable daily SQLite aggregates, once-only CTA counting, 7-day session expiry and 90-day aggregate retention. The operator can create drafts, activate/pause/finish tests and export CSV of measured sessions and CTA clicks. No registration is needed for the public untracked story preview.
