@@ -54,6 +54,36 @@ def build() -> None:
     )
     (experiment / "index.html").write_text(experiment_html, encoding="utf-8")
 
+    # The commercial website is safe to preview as a local, non-persistent creative editor.
+    # Never bundle system/tenant secrets, public proposal tokens or operator APIs.
+    commercial = DIST / "commercial"
+    commercial.mkdir()
+    for name in ("index.html", "app.js", "style.css"):
+        copy2(ROOT / "apps" / "commercial" / name, commercial / name)
+    commercial_html = (commercial / "index.html").read_text(encoding="utf-8")
+    for original, replacement in {
+        'href="/commercial/style.css"': 'href="./style.css"',
+        'src="/commercial/app.js"': 'src="./app.js"',
+        'href="/"': 'href="../"',
+        'href="/experiments/"': 'href="../experiments/"',
+        'href="/pilot/"': 'href="../pilot/"',
+        'href="/privacy.html"': 'href="../privacy.html"',
+    }.items():
+        if original not in commercial_html:
+            raise RuntimeError(f"Missing Commercial Command static-preview link: {original}")
+        commercial_html = commercial_html.replace(original, replacement)
+    commercial_html = commercial_html.replace(
+        "<body>",
+        '<body data-static-preview="true"><div role="note" '
+        'style="padding:14px 24px;color:#dcfce8;background:#1a3431;'
+        'font:14px/1.6 system-ui;text-align:center">'
+        'STATIC PREVIEW / ДЕМОВЕРСИЯ / 静态预览 — '
+        'Only local creative templates and pricing estimates work. '
+        'No workspace credentials, lead storage, proposals or payments.'
+        '</div>', 1,
+    )
+    (commercial / "index.html").write_text(commercial_html, encoding="utf-8")
+
     pilot = DIST / "pilot"
     pilot.mkdir()
     for name in ("index.html", "app.js", "style.css"):
@@ -125,6 +155,9 @@ def build() -> None:
         "experiments/index.html",
         "experiments/app.js",
         "experiments/style.css",
+        "commercial/style.css",
+        "commercial/app.js",
+        "commercial/index.html",
         "apps/dead-drop/index.html",
         "apps/dead-drop/app.js",
         "apps/dead-drop/i18n.js",
@@ -144,6 +177,11 @@ def build() -> None:
         raise RuntimeError("Operator console must not be in public static preview")
     if 'data-static-preview="true"' not in (DIST / "experiments/index.html").read_text(encoding="utf-8"):
         raise RuntimeError("Experiment Lab static-only disclosure missing")
+
+    if 'data-static-preview="true"' not in (DIST / "commercial/index.html").read_text(encoding="utf-8"):
+        raise RuntimeError("Commercial local-only preview declaration missing")
+    if (DIST / "commercial" / "operator").exists() or (DIST / "proposal").exists():
+        raise RuntimeError("Static preview must not include customer proposals or operator pages")
 
     print("Static preview built:", DIST)
 

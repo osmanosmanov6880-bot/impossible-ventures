@@ -1,6 +1,34 @@
 # Impossible Ventures
 
-**Platform v0.8 — Operations & Recovery.** Dead Drop, Pilot Studio and Experiment Lab now share writable SQLite diagnostics, a backup/restore tool and a multilingual server status page. This is source-level staging readiness, **not a confirmed public deployment**.
+**Platform v1.0 beta — Commercial Command plus v0.8 Operations & Recovery.** Dead Drop, Pilot Studio and Experiment Lab now share writable SQLite diagnostics, a backup/restore tool and a multilingual server status page. This is source-level staging readiness, **not a confirmed public deployment**.
+
+## Five-WAVE Commercial Command v1.0 beta — implemented in source
+
+This release adds a premium Russian-first global entry page; a no-registration seven-world local creative demonstration; real operator-provisioned organization workspaces with expiring owner/editor/viewer credentials and auditing; organization-scoped versioned creative campaigns and approved-only shareable previews; opt-in one-time attribution of measured A/B CTA to a separately consented Pilot Studio form; and real customer-viewable commercial proposals with exact monetary arithmetic, private tokens, decision tracking and 180-day proposal retention.
+
+The full five-wave release log, setup steps, API semantics, risk controls and verified boundaries are documented in **[docs/five-wave-release.md](docs/five-wave-release.md)**.
+
+**Working Node server pages**
+- [Main premium marketing site](/) — open locally at http://localhost:3000/
+- http://localhost:3000/commercial/ — seven-world interactive demo plus persisted workspaces and campaign/proposal editor.
+- http://localhost:3000/experiments/ — genuinely consent-gated experiment flow.
+- http://localhost:3000/pilot/ — campaign model and separately consented commercial pilot request.
+- http://localhost:3000/showcase/?id=CAMPAIGN_ID — published creative only, no advertising network delivery.
+- http://localhost:3000/proposal/?id=PROPOSAL_ID#token=PRIVATE_SECRET — private customer quote, not invoice or payment.
+
+Quick start (Node 22+):
+
+```powershell
+git clone https://github.com/osmanosmanov6880-bot/impossible-ventures.git
+cd impossible-ventures
+$env:OPERATOR_TOKEN = node -e "process.stdout.write(require('node:crypto').randomBytes(48).toString('base64url'))"
+npm start
+```
+
+Use npm run check for integrated server tests, or the published CI workflow for Playwright, Docker and static preview QA. The static bundle lets visitors explore the seven worlds and view mockups without registration; it cannot persist real data or accept customer decisions.
+
+**Commercial limitation:** accepted quotes, manual lead status and CTA activity **do not prove collected revenue, invoiced charges, unique human audience, actual ad delivery or independent sales**. No live third-party ad-platform connector, Stripe billing, MFA/SSO or externally verified commercial deployment is claimed. First deploy only to protected staging with synthetic data and review privacy/security before real customers.
+
 
 ## Static preview distribution
 
@@ -139,7 +167,8 @@ GitHub Actions additionally runs Chromium end-to-end tests for two agents, langu
 | Product | Status |
 |---|---|
 | Dead Drop Agency | Two-agent cooperative alpha, training and optional model-assisted editing |
-| Experiment Lab | Anonymous opt-in A/B research alpha with local counters (not verified lift) |
+| Experiment Lab | Anonymous opt-in A/B research alpha with local counters and separately consented lead attribution (not verified lift) |
+| Commercial Command | Seven editable creative worlds, tenant-scoped campaign/proposal beta; no third-party ad buying or payments |
 | Appeal 2049 | Deterministic browser critique demo |
 | AntiPersona | Concept |
 | Brief Theatre | Concept |
@@ -156,6 +185,7 @@ GitHub Actions additionally runs Chromium end-to-end tests for two agents, langu
 - [Staging deployment guide](docs/deployment.md)
 - [Multilingual Dead Drop data handling notice](privacy.html)
 - [Operations & Recovery Runbook](docs/operations-runbook.md)
+- [Five-WAVE commercial beta specification](docs/five-wave-release.md)
 
 ## Operational and legal limitations
 

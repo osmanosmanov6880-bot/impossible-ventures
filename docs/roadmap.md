@@ -80,6 +80,16 @@ No live hosted cooperative server, production security certification, LLM connec
 4. User testing (including Russian/English/Chinese usability and accessibility) and paid pilot validation.
 5. Improve model evaluations against factuality, creativity and conversion-oriented usefulness.
 
+## Five-WAVE v1.0 commercial beta extension (source)
+
+1. Published-artifact CI and a premium seven-world website with safe no-registration static previews (not a verified public domain).
+2. Tenant-scoped owner/editor/viewer capability tokens, audit, owner export and deliberate organization deletion.
+3. Seven editable creative worlds with versioned campaign drafts and approved-only public creative previews.
+4. Opt-in one-time CTA receipts linking real Pilot Studio form submissions to an A/B group; never claim human reach or payment from counters.
+5. Integer-cent commercial proposals with private review/decisions, retention controls and a clear separation of pipeline value from collected revenue.
+
+**Not implemented:** actual ad-buying networks, customer billing or payment verification, identity-grade authentication, off-host recovery automation, anti-fraud attribution and live revenue. See [Five-WAVE release specification](five-wave-release.md).
+
 ## v0.8 operational reliability milestone (source)
 
 - Real process vs writable-SQLite readiness endpoints and a readable localized public status dashboard.
