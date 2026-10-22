@@ -356,3 +356,84 @@ test('browser exports only one agent view, confirms erasure and revokes both ses
   );
   assert.deepEqual(errors.filter(message => !message.includes('404 (Not Found)')), []);
 });
+
+
+test('Experiment Lab works in an actual mobile browser: untracked story, operator-created live A/B, opt-in CTA and measured report', async t => {
+  const oldOperator = process.env.OPERATOR_TOKEN;
+  const token = 'operator-browser-alpha-long-token-123456789abcdef';
+  process.env.OPERATOR_TOKEN = token;
+  t.after(() => {
+    if (oldOperator === undefined) delete process.env.OPERATOR_TOKEN;
+    else process.env.OPERATOR_TOKEN = oldOperator;
+  });
+  const { context, base } = await setup(t, 390, 844);
+  const errors = [];
+  const operator = await context.newPage();
+  attachErrors(operator, errors);
+  await operator.goto(base + '/experiments/operator/');
+  await operator.locator('#operatorToken').fill(token);
+  await operator.locator('#authForm').evaluate(form => form.requestSubmit());
+  await operator.locator('#dashboard').waitFor({ state: 'visible' });
+  await operator.locator('#sample').click();
+  await operator.locator('#experimentForm').evaluate(form => form.requestSubmit());
+  await operator.locator('.experiment-item').first().waitFor();
+  await operator.locator('.operator-controls select').first().selectOption('running');
+  await operator.getByRole('button', { name: 'ПРИМЕНИТЬ' }).first().click();
+  await operator.getByText('АКТИВЕН').first().waitFor();
+
+  const visitor = await context.newPage();
+  attachErrors(visitor, errors);
+  await visitor.goto(base + '/experiments/');
+  await visitor.waitForFunction(() => document.querySelector('#campaign')?.disabled === false);
+  assert.equal(await visitor.locator('#start').isDisabled(), true);
+
+  // The preview has a genuine two-choice branch and creates no server session.
+  await visitor.locator('#preview').click();
+  assert.equal(await visitor.locator('#storyStep').isHidden(), true);
+  await visitor.locator('#preview').click();
+  await visitor.locator('#storyStep').waitFor({ state: 'visible' });
+  assert.equal(await visitor.locator('#cta').isHidden(), true);
+  await visitor.locator('#choiceOne').click();
+  await visitor.locator('#choiceOutcome').waitFor({ state: 'visible' });
+  assert.equal(await visitor.locator('#cta').isVisible(), true);
+  await operator.locator('#refresh').click();
+  assert.equal((await operator.locator('.operator-summary .stat-tile').first().locator('b').textContent()).trim(), '0');
+
+  await visitor.locator('#lang').selectOption('en');
+  await visitor.getByText('Stop guessing.').waitFor();
+  await visitor.locator('#lang').selectOption('zh');
+  await visitor.getByText('停止猜测。').waitFor();
+  await visitor.locator('#lang').selectOption('ru');
+
+  await visitor.locator('#optin').check();
+  await visitor.locator('#start').click();
+  await visitor.waitForFunction(() => document.querySelector('#armLabel')?.textContent?.includes('EXPERIMENT / '));
+  const assignedArm = (await visitor.locator('#armLabel').textContent()).trim();
+  assert.match(assignedArm, /^EXPERIMENT \/ [AB]$/);
+  if (assignedArm.endsWith('B')) {
+    await visitor.locator('#storyStep').waitFor({ state: 'visible' });
+    assert.equal(await visitor.locator('#cta').isHidden(), true);
+    await visitor.locator('#choiceTwo').click();
+    await visitor.locator('#choiceOutcome').waitFor({ state: 'visible' });
+  } else {
+    assert.equal(await visitor.locator('#storyStep').isHidden(), true);
+  }
+  const overflowing = await visitor.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2);
+  assert.equal(overflowing, false, 'Experiment Lab must not overflow a 390px screen');
+  mkdirSync('artifacts', { recursive: true });
+  await visitor.screenshot({ path: 'artifacts/experiment-lab-mobile-creative.png', fullPage: true });
+
+  await visitor.locator('#cta').click();
+  await visitor.waitForURL('**/pilot/#request');
+  await operator.locator('#refresh').click();
+  await operator.waitForFunction(() => {
+    const values = [...document.querySelectorAll('.operator-summary .stat-tile b')].map(x => x.textContent.trim());
+    return values[0] === '1' && values[1] === '1';
+  });
+  await operator.screenshot({ path: 'artifacts/experiment-lab-operator-report.png', fullPage: true });
+  const download = operator.waitForEvent('download');
+  await operator.locator('#download').click();
+  const file = await download;
+  assert.equal(file.suggestedFilename(), 'iv-experiment-lab-results.csv');
+  assert.deepEqual(errors, []);
+});

@@ -1,5 +1,16 @@
 # Impossible Ventures
 
+## NEW — Experiment Lab v0.7 / First-party research
+
+The project now contains a **real opt-in A/B experiment engine**: a randomly assigned direct-control ad (A) versus an authored two-choice interactive story (B), with separate results, anonymous session tokens, durable daily SQLite aggregates, once-only CTA counting, 7-day session expiry and 90-day aggregate retention. The operator can create drafts, activate/pause/finish tests and export CSV of measured sessions and CTA clicks. No registration is needed for the public untracked story preview.
+
+- Public: http://localhost:3000/experiments/
+- Operator: http://localhost:3000/experiments/operator/
+- Full architecture and risk limitations: [docs/experiment-lab.md](docs/experiment-lab.md)
+
+**These counts are not validated ad impressions, unique users, qualified leads, payments, uplift or revenue.** The new experiment UI supports RU / EN / Chinese; creative text in real experiments is authored by the operator and is not machine-translated. A live public deployment has not been confirmed.
+
+
 ## New: Pilot Studio v0.4
 
 A standalone commercial validation workflow at `/pilot/`, with Russian / English / Chinese UI, modeled campaign economics, a controlled A/B test plan and a consent-based SQLite pilot application. Authorized operator console: `/pilot/operator/` (set `OPERATOR_TOKEN`, minimum 32 characters).

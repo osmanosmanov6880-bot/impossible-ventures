@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#071018">
+<title>EXPERIMENT COMMAND — Impossible Ventures</title>
+<link rel="stylesheet" href="../style.css">
+<script src="./app.js" defer></script>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="wordmark" href="../../"><span class="glyph">I<span>V</span><i></i></span><span class="brandcopy"><strong>IMPOSSIBLE <em>VENTURES</em></strong><small>EXPERIMENT / OPERATOR</small></span></a>
+  <nav class="topnav"><a href="../">ПУБЛИЧНЫЙ ЭКСПЕРИМЕНТ ↗</a><a href="../../pilot/operator/">КАБИНЕТ ЗАЯВОК ↗</a></nav>
+  <span class="network-status"><span class="status-light"></span> OPERATOR / ALPHA</span>
+</header>
+<main class="operator-main shell">
+  <div class="operator-head"><div><div class="eyebrow"><span class="dash"></span> CAMPAIGN OPERATIONS / RESEARCH 0.7</div><h1>Experiment <span class="display-color">Command.</span></h1><p class="operator-subtitle">Создавайте контролируемые A/B-эксперименты, открывайте публичную ссылку и смотрите анонимные реальные действия. Статистика не равна рекламному охвату, лидам, выручке или доказанному влиянию.</p></div></div>
+  <form class="operator-auth" id="authForm">
+    <label for="operatorToken">OPERATOR_TOKEN / ДОСТУП К ДАННЫМ<input id="operatorToken" name="operatorToken" type="password" minlength="32" autocomplete="off" required placeholder="Длинный секрет из серверной переменной OPERATOR_TOKEN"></label>
+    <button type="submit" class="btn btn-primary" id="unlock">ОТКРЫТЬ КАБИНЕТ ↗</button>
+  </form>
+  <div id="message" class="operator-flash" role="status" aria-live="polite"></div>
+  <div id="dashboard" hidden>
+    <div class="operator-grid">
+      <section class="operator-panel">
+        <div class="eyebrow"><span class="dash"></span> NEW RESEARCH / CONTROLLED EXPERIMENT</div>
+        <h2>Новый A/B-тест</h2>
+        <p>Один продукт, одна аудитория, одинаковый CTA. Отличается только творческая подача. Создание черновика ничего не публикует — сначала нужно активировать кампанию.</p>
+        <form id="experimentForm">
+          <label class="operator-field">Название теста<input name="title" type="text" minlength="3" maxlength="100" required placeholder="Например: Signal / Coffee Pilot"></label>
+          <label class="operator-field">Целевая аудитория<input name="audience" type="text" minlength="3" maxlength="180" required placeholder="Кто должен увидеть оба варианта"></label>
+          <label class="operator-field">Одинаковое предложение<input name="offer" type="text" minlength="3" maxlength="160" required placeholder="Один продукт, одинаковый оффер"></label>
+          <label class="operator-field">Проверяемая гипотеза<textarea name="hypothesis" minlength="10" maxlength="300" required placeholder="Например: интерактивный заголовок увеличит долю кликов CTA."></textarea></label>
+          <div class="operator-annotation">CONTROL / A — обычное рекламное сообщение без интерактивного сюжета.</div>
+          <label class="operator-field">Заголовок A<input name="controlHeadline" type="text" minlength="5" maxlength="125" required></label>
+          <label class="operator-field">Описание A<textarea name="controlBody" minlength="10" maxlength="450" required></textarea></label>
+          <div class="operator-annotation">EXPERIMENT / B — альтернативная подача того же продукта с историей или дилеммой.</div>
+          <label class="operator-field">Заголовок B<input name="variantHeadline" type="text" minlength="5" maxlength="125" required></label>
+          <label class="operator-field">Описание B<textarea name="variantBody" minlength="10" maxlength="450" required></textarea></label>
+          <div class="operator-annotation">INTERACTIVE SCENE / B — создайте точку выбора, два разных ответа и два последствия. При выборе посетитель увидит результат и тот же CTA.</div>
+          <label class="operator-field">Вопрос / точка выбора B<textarea name="decisionPrompt" minlength="8" maxlength="220" required placeholder="Вы выбираете между двумя путями…"></textarea></label>
+          <label class="operator-field">Вариант решения B.1<input name="choiceOneLabel" type="text" minlength="3" maxlength="70" required placeholder="Выбрать скорость"></label>
+          <label class="operator-field">Последствие B.1<textarea name="choiceOneReveal" minlength="8" maxlength="280" required placeholder="Что меняется в истории после выбора"></textarea></label>
+          <label class="operator-field">Вариант решения B.2<input name="choiceTwoLabel" type="text" minlength="3" maxlength="70" required placeholder="Выбрать качество"></label>
+          <label class="operator-field">Последствие B.2<textarea name="choiceTwoReveal" minlength="8" maxlength="280" required placeholder="Что меняется после второго выбора"></textarea></label>
+          <label class="operator-field">Общий текст кнопки CTA<input name="ctaLabel" type="text" minlength="3" maxlength="45" required placeholder="Открыть пилот"></label>
+          <div class="operator-mini"><button class="btn btn-outline" type="button" id="sample">ЗАПОЛНИТЬ ПРИМЕР</button><button class="btn btn-primary" type="submit" id="create">СОХРАНИТЬ ЧЕРНОВИК ↗</button></div>
+        </form>
+      </section>
+      <section class="operator-panel">
+        <div class="eyebrow"><span class="dash"></span> LIVE PERFORMANCE / REAL EVENTS ONLY</div>
+        <h2>Журнал экспериментов</h2>
+        <p>Показы ниже — это созданные добровольные сессии. Одна кнопка CTA может быть учтена только один раз на сессию. Результаты носят исследовательский характер.</p>
+        <div class="operator-mini"><button class="btn btn-outline" type="button" id="refresh">ОБНОВИТЬ ↻</button><button class="btn btn-outline" type="button" id="download">ЭКСПОРТ CSV ↓</button></div>
+        <div id="experimentList" class="operator-list" aria-live="polite"><p class="operator-annotation">Нет загруженных экспериментов.</p></div>
+      </section>
+    </div>
+    <div class="operator-annotation">Метрики: техническое начало сессии и нажатие CTA. 95% интервалы Уилсона показывают неопределённость отдельных долей, но не доказывают победу одной версии. Не проводите публичный сбор данных без HTTPS, понятной юридической информации и проверки процедур хранения. Нет реальных платежей, интеграции с рекламными сетями или защиты от сложного ботового трафика.</div>
+  </div>
+</main>
+<footer class="footer shell"><span>IMPOSSIBLE VENTURES / OPERATOR ALPHA</span><span>NO FICTIONAL CAMPAIGN PERFORMANCE</span><a href="../../privacy.html">DATA HANDLING</a></footer>
+</body>
+</html>

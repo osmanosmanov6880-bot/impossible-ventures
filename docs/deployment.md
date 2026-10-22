@@ -2,6 +2,17 @@
 
 **Status:** deployment source/configuration is prepared, but **no public Node server, Railway project, verified domain, or paid model connection is claimed**. Use a controlled staging environment with synthetic test data only. Never put API secrets in Git.
 
+## v0.7 — Experiment Lab staging (not a production advertising network)
+
+The Docker image also includes the Experiment Lab operator and participant workflow. Operator access requires a strong environment variable OPERATOR_TOKEN. For docker compose, pass it through your local uncommitted environment or secret manager. Generate an unpredictable value with Node's crypto.randomBytes; see [Experiment Lab source and retention plan](experiment-lab.md).
+
+- /experiments/ — public experiment UI and local untracked preview.
+- /experiments/operator/ — private operator UI; do not expose openly without HTTPS and network access controls.
+- /pilot/operator/ — separate pilot-request operator UI.
+- /api/v1/operator/experiments — protected API; no third-party ad networks are connected.
+
+A valid HTTPS staging domain, signed off data handling, distributed rate limits, a verified controller, backups and a threat-model review are still **required before real customer data**.
+
 ## Local Docker smoke
 
 ```bash

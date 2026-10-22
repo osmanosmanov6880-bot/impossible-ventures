@@ -16,3 +16,10 @@ html{overflow-x:clip}
 .hero h1,.section-head h2,.contact-note h3,.closing h2,.eyebrow,.metric strong{overflow-wrap:anywhere}
 .comparison-head{flex-wrap:wrap}
 @media(max-width:560px){.proof>div{flex:1}.hero h1{max-width:100%}.brand{min-width:0}.proof{max-width:100%}}
+
+/* Standalone research entry on Pilot Studio, no backend dependency in the static preview. */
+.experiment-entry{border:1px solid #426f77;border-radius:20px;background:radial-gradient(ellipse at 80% 0%,#305c6259,transparent 53%),#11232d;padding-top:37px;padding-bottom:37px;display:flex;align-items:center;justify-content:space-between;gap:22px;margin-top:55px}
+.experiment-entry h2{font-size:clamp(28px,3vw,42px);line-height:1.13;letter-spacing:-.06em;max-width:640px;margin:16px 0}
+.experiment-entry p{color:#bed5dd;font-size:14px;max-width:730px;line-height:1.75}
+.experiment-entry .secondary{white-space:nowrap}
+@media(max-width:770px){.experiment-entry{display:flex;flex-direction:column;align-items:flex-start}.experiment-entry .secondary{white-space:normal}}

@@ -2,6 +2,14 @@
 
 Updated 2026-10-22. **Statements of implementation are scoped to source files, not a verified production deployment.**
 
+## v0.7 Experiment Lab extension — code only
+
+- Working first-party A/B sessions with true random 50/50 assignment probability, consent, static control creative and a two-choice interactive treatment.
+- Operator-controlled draft→running→paused→completed lifecycle; authenticated API, time-bucketed anonymous CTA counts and 95% Wilson descriptive intervals.
+- Client-side story choices do not create server event profiles. Test sessions expire after seven days; daily aggregates after ninety days. Browser preview without consent creates no analytics.
+- Two working operator surfaces for experiment reporting and B2B pilot requests; both use the same configurable shared token, **not** production employee accounts.
+- Automated API/privacy and Playwright testing, but no confirmed paid customer, ad network delivery, billing or causal effect. See [Experiment Lab specification](experiment-lab.md).
+
 ## In the repository
 
 - Portfolio landing with seven separate concepts.

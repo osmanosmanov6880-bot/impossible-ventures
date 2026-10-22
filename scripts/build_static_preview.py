@@ -23,6 +23,28 @@ def build() -> None:
     for name in ("dead-drop", "appeal-2049"):
         copytree(ROOT / "apps" / name, DIST / "apps" / name)
 
+
+    experiment = DIST / "experiments"
+    experiment.mkdir()
+    for name in ("index.html", "app.js", "style.css"):
+        copy2(ROOT / "apps" / "experiment-lab" / name, experiment / name)
+    experiment_html = (experiment / "index.html").read_text(encoding="utf-8")
+    experiment_html = experiment_html.replace(
+        '<a href="./operator/" data-i18n="operatorLink">Кабинет оператора</a>',
+        '<span data-i18n="operatorLink">Кабинет доступен через Node-сервер</span>',
+        1,
+    )
+    experiment_html = experiment_html.replace(
+        "<body>",
+        '<body data-static-preview="true"><div role="note" '
+        'style="padding:13px 24px;text-align:center;color:#d4fce7;'
+        'background:#1a3431;border-bottom:1px solid #7ab69d">'
+        'STATIC PREVIEW / ДЕМОВЕРСИЯ / 静态演示: '
+        'Real A/B events and operators require a Node server.</div>',
+        1,
+    )
+    (experiment / "index.html").write_text(experiment_html, encoding="utf-8")
+
     pilot = DIST / "pilot"
     pilot.mkdir()
     for name in ("index.html", "app.js", "style.css"):
@@ -88,6 +110,9 @@ def build() -> None:
         "pilot/index.html",
         "pilot/app.js",
         "pilot/style.css",
+        "experiments/index.html",
+        "experiments/app.js",
+        "experiments/style.css",
         "apps/dead-drop/index.html",
         "apps/dead-drop/app.js",
         "apps/dead-drop/i18n.js",
@@ -100,6 +125,11 @@ def build() -> None:
         raise RuntimeError("Static Pilot Studio data mode not declared")
     if "disabled aria-disabled" not in (DIST / "pilot/index.html").read_text(encoding="utf-8"):
         raise RuntimeError("Static Pilot Studio application button must be disabled")
+
+    if (DIST / "experiments" / "operator").exists():
+        raise RuntimeError("Operator console must not be in public static preview")
+    if 'data-static-preview="true"' not in (DIST / "experiments/index.html").read_text(encoding="utf-8"):
+        raise RuntimeError("Experiment Lab static-only disclosure missing")
 
     print("Static preview built:", DIST)
 

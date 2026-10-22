@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#08111a">
+<meta name="description" content="Impossible Ventures Experiment Lab — first-party controlled A/B research with explicit consent and real anonymous event counts.">
+<meta name="robots" content="noindex,nofollow">
+<title>EXPERIMENT LAB — Impossible Ventures</title>
+<link rel="stylesheet" href="./style.css">
+<script src="./app.js" defer></script>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="wordmark" href="../" aria-label="Impossible Ventures">
+    <span class="glyph">I<span>V</span><i></i></span>
+    <span class="brandcopy"><strong>IMPOSSIBLE <em>VENTURES</em></strong><small>EXPERIMENTAL CREATIVE SYSTEMS</small></span>
+  </a>
+  <nav class="topnav" aria-label="Navigation">
+    <a href="../pilot/" data-i18n="pilotLink">СТУДИЯ ПИЛОТОВ</a>
+    <a href="../apps/dead-drop/" data-i18n="gameLink">DEAD DROP ↗</a>
+  </nav>
+  <div class="top-actions"><span class="network-status"><span class="status-light"></span><span data-i18n="stage">RESEARCH ALPHA / 0.7</span></span><label class="sr-only" for="lang">Language</label><select id="lang" aria-label="Language"><option value="ru">РУ</option><option value="en">EN</option><option value="zh">中文</option></select></div>
+</header>
+
+<main>
+<section class="hero shell">
+  <div class="hero-content">
+    <div class="eyebrow"><span class="dash"></span> <span data-i18n="eyebrow">THE EXPERIMENTAL FRONTIER / 001</span></div>
+    <h1><span data-i18n="headline1">Не угадывай.</span><span class="display-color" data-i18n="headline2">Проверяй.</span></h1>
+    <p class="intro" data-i18n="lead">Создавайте две рекламные версии. Распределяйте посетителей случайно. Измеряйте реальные переходы к заявке — без стороннего отслеживания и поддельной статистики.</p>
+    <div class="hero-actions"><a href="#test" class="btn btn-primary" data-i18n="startAction">ОТКРЫТЬ ЭКСПЕРИМЕНТ <span aria-hidden="true">↗</span></a><a href="../pilot/" class="btn btn-outline" data-i18n="pilotAction">СПЛАНИРОВАТЬ КАМПАНИЮ <span aria-hidden="true">→</span></a></div>
+    <div class="hero-facts">
+      <div><strong>50/50</strong><small data-i18n="random">СЛУЧАЙНОЕ РАСПРЕДЕЛЕНИЕ</small></div>
+      <div><strong>0</strong><small data-i18n="thirdParty">СТОРОННИХ ТРЕКЕРОВ</small></div>
+      <div><strong>100%</strong><small data-i18n="consent">ЯВНОЕ СОГЛАСИЕ</small></div>
+    </div>
+  </div>
+  <div class="orbital-art" aria-hidden="true">
+    <div class="gridlines"></div><div class="orbital-disc disc-one"></div><div class="orbital-disc disc-two"></div>
+    <div class="core"><div class="core-inner"><span>A</span><span>B</span></div></div>
+    <div class="analysis-card card-north"><small>SPLIT / SYSTEM</small><b>CONTROL <span>50</span></b><b>VARIANT <span>50</span></b><div class="microbars"><i></i><i></i></div></div>
+    <div class="analysis-card card-south"><small>DATA / INTEGRITY</small><b>REAL EVENTS ONLY</b><p>CONSENT → ASSIGN → ACTION</p></div>
+    <div class="art-footer"><span>IV / EXPERIMENT LAB</span><span>NO SYNTHETIC RESULTS</span></div>
+  </div>
+</section>
+
+<div class="band"><div class="band-inner"><span data-i18n="band1">RESEARCH, NOT PROMISES</span><span class="spark">✦</span><span data-i18n="band2">REAL SIGNALS, NOT IMPRESSIONS SOLD</span><span class="spark">✦</span><span data-i18n="band3">EXPLICIT CONSENT ONLY</span></div></div>
+
+<section class="workbench shell" id="test">
+  <div class="section-top">
+    <div><div class="eyebrow"><span class="dash"></span><span data-i18n="labLabel">01 / INTERACTIVE RESEARCH</span></div><h2 data-i18n="experimentHeading">Испытайте новую рекламу.</h2><p data-i18n="experimentHint">Выберите активный эксперимент или откройте демонстрацию без передачи данных.</p></div>
+    <div class="sequence"><span>01</span><span class="sequence-line"></span><span>02</span><span class="sequence-line"></span><span>03</span></div>
+  </div>
+
+  <div class="experiment-shell">
+    <div class="experiment-config">
+      <div class="panel-label"><span class="accent-dot"></span> <span data-i18n="chooseLabel">ВЫБОР ЭКСПЕРИМЕНТА</span><span class="panel-count">I / IV</span></div>
+      <label class="control-label" for="campaign" data-i18n="choose">Активная кампания</label>
+      <select id="campaign" disabled><option data-i18n="loading">Проверяем доступные эксперименты…</option></select>
+      <p id="campaignNote" class="micro-text" aria-live="polite" data-i18n="loading">Проверяем доступные эксперименты…</p>
+
+      <div class="consent-panel">
+        <div class="consent-title"><span class="seal">◎</span><div><strong data-i18n="privacyHeading">Приватность под вашим контролем</strong><small data-i18n="privacySubtitle">Согласие требуется только для измеряемого теста</small></div></div>
+        <label class="consent-line"><input type="checkbox" id="optin"><span data-i18n="optinText">Я согласен(на) на анонимное участие в A/B-исследовании и учёт начала сессии и нажатия на кнопку предложения.</span></label>
+        <p class="micro-text" data-i18n="privacyDetail">Мы не сохраняем IP-адрес, имя или почту в аналитике. Случайный токен сессии живёт в памяти вкладки, данные сессии удаляются через 7 дней; агрегаты — через 90 дней. Это исследование, не показ оплаченной рекламы.</p>
+      </div>
+
+      <div class="button-stack"><button id="start" class="btn btn-primary btn-block" type="button" disabled data-i18n="join">НАЧАТЬ СЛУЧАЙНЫЙ A/B-ТЕСТ ↗</button><button id="preview" class="btn btn-outline btn-block" type="button" data-i18n="demo">ПОСМОТРЕТЬ ДЕМО БЕЗ УЧЁТА →</button></div>
+      <div class="foot-status"><span class="status-light"></span><span id="testStatus" role="status" aria-live="polite" data-i18n="untracked">Пока нет измеряемой сессии.</span></div>
+    </div>
+
+    <div class="creative-area">
+      <div class="creative-topbar"><span class="meta-code" data-i18n="creativeTitle">EXPERIENCE / PREVIEW</span><span id="armLabel" class="arm-label">—</span></div>
+      <div id="placeholder" class="creative-empty">
+        <div class="empty-icon">⟡</div><p class="empty-overline">NO ASSIGNMENT / NO TRACKING</p>
+        <h3 data-i18n="emptyHeading">История начинается с выбора.</h3>
+        <p data-i18n="emptyBody">Выберите активный тест или демонстрацию. До вашего согласия мы не записываем события.</p>
+      </div>
+      <div id="creative" class="creative-live" hidden>
+        <span class="creative-kicker" id="offerLabel">CREATIVE / SIGNAL 001</span>
+        <h3 id="creativeHeadline">—</h3><p id="creativeBody">—</p>
+        <div id="storyStep" class="story-step" hidden>
+          <div class="story-topline"><span>INTERACTIVE STORY / CHOICE</span><span>↘ ↙</span></div>
+          <h4 id="decisionPrompt">—</h4>
+          <div class="story-choices" role="group" aria-label="Narrative choices">
+            <button type="button" id="choiceOne" class="story-choice">01 / —</button>
+            <button type="button" id="choiceTwo" class="story-choice">02 / —</button>
+          </div>
+          <div id="choiceOutcome" class="story-outcome" role="status" aria-live="polite" hidden></div>
+          <p class="micro-text" data-i18n="choiceNotice">Выбор меняет только эту историю в памяти вкладки. Он не отправляется на сервер и не учитывается как конверсия.</p>
+        </div>
+        <div class="creative-actions"><button type="button" id="cta" class="btn btn-primary" disabled>REQUEST A PILOT ↗</button><span class="micro-text" id="creativeNote"></span></div>
+      </div>
+      <div class="creative-footer"><span data-i18n="editorial">КОНЦЕПЦИЯ И РЕЗУЛЬТАТЫ НЕ ПРОВЕРЕНЫ НЕЗАВИСИМО</span><span class="mono">IV / ALPHA</span></div>
+    </div>
+  </div>
+
+  <div class="principles">
+    <article><span class="principle-id">01 / ASSIGN</span><h3 data-i18n="p1Title">Честное распределение</h3><p data-i18n="p1Desc">Сервер случайно назначает A или B, когда человек даёт согласие.</p></article>
+    <article><span class="principle-id">02 / MEASURE</span><h3 data-i18n="p2Title">Реальное действие</h3><p data-i18n="p2Desc">Одно нажатие CTA учитывается лишь однажды для данной сессии. Это не продажа.</p></article>
+    <article><span class="principle-id">03 / REVIEW</span><h3 data-i18n="p3Title">Решение на основе данных</h3><p data-i18n="p3Desc">Оператор видит реальные выборки и интервалы неопределённости — без выдуманной победы.</p></article>
+  </div>
+</section>
+
+<section class="next-step shell">
+  <div><span class="eyebrow"><span class="dash"></span><span data-i18n="closingEyebrow">02 / FROM RESEARCH TO BUSINESS</span></span><h2 data-i18n="closingHeading">Следующий шаг — платящие клиенты, а не красивые графики.</h2><p data-i18n="closingText">Эксперимент измеряет интерес к призыву действовать. Квалифицированные заявки, выручка и окупаемость требуют отдельной проверки.</p></div>
+  <a href="../pilot/#request" class="btn btn-outline" data-i18n="closingButton">ОБСУДИТЬ ПИЛОТ ↗</a>
+</section>
+</main>
+<footer class="footer shell"><div>© 2026 IMPOSSIBLE VENTURES / PRODUCT RESEARCH</div><div><a href="../privacy.html" data-i18n="privacyLink">Обработка данных</a><span> · </span><a href="./operator/" data-i18n="operatorLink">Кабинет оператора</a></div><span data-i18n="footerNote">Нет рекламы в эфире, оплаты или подтверждённого роста дохода.</span></footer>
+</body>
+</html>

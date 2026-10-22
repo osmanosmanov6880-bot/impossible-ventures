@@ -5,6 +5,7 @@ import { createReadStream, existsSync, mkdirSync, statSync } from 'node:fs';
 import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createPilotRouter } from '../pilot-studio/pilots.mjs';
+import { createExperimentRouter } from '../experiment-lab/experiments.mjs';
 import { refineDossier } from './creative-engine.mjs';
 import { localizeRuleDossier } from './dossier-locales.mjs';
 
@@ -189,7 +190,14 @@ const STATIC_FILES = new Map([
   ['/pilot/style.css', 'apps/pilot-studio/style.css'],
   ['/pilot/operator/', 'apps/pilot-studio/operator.html'],
   ['/pilot/operator.html', 'apps/pilot-studio/operator.html'],
-  ['/pilot/operator.js', 'apps/pilot-studio/operator.js']
+  ['/pilot/operator.js', 'apps/pilot-studio/operator.js'],
+  ['/experiments/', 'apps/experiment-lab/index.html'],
+  ['/experiments/index.html', 'apps/experiment-lab/index.html'],
+  ['/experiments/app.js', 'apps/experiment-lab/app.js'],
+  ['/experiments/style.css', 'apps/experiment-lab/style.css'],
+  ['/experiments/operator/', 'apps/experiment-lab/operator.html'],
+  ['/experiments/operator/index.html', 'apps/experiment-lab/operator.html'],
+  ['/experiments/operator/app.js', 'apps/experiment-lab/operator.js']
 ]);
 
 function sendJSON(response, status, payload) {
@@ -213,7 +221,7 @@ function sendStatic(response, pathname) {
     '.js': 'text/javascript; charset=utf-8',
     '.svg': 'image/svg+xml'
   }[extname(path)] || 'application/octet-stream';
-  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/')) {
+  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/')) {
     response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
   }
   response.writeHead(200, {
@@ -263,6 +271,7 @@ export function createApp({
   cleanupTimer.unref();
   const requestsByIP = new Map();
   const handlePilots = createPilotRouter({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
+  const handleExperiments = createExperimentRouter({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
   const aiAvailable = Boolean(aiKey && aiModel);
   const finalizing = new Set();
   const server = createServer(async (request, response) => {
@@ -279,6 +288,7 @@ export function createApp({
       if (pathname.startsWith('/api/')) {
         if (request.method === 'POST' || request.method === 'DELETE') throttle(requestsByIP, request, now);
         if (await handlePilots(request, response, pathname)) return;
+        if (await handleExperiments(request, response, pathname)) return;
         if (pathname === '/api/v1/missions' && request.method === 'POST') {
           const body = await jsonBody(request);
           const host = {
@@ -421,6 +431,7 @@ export function createApp({
     }
   });
   server.on('close', handlePilots.stop);
+  server.on('close', handleExperiments.stop);
   server.on('close', () => clearInterval(cleanupTimer));
   return { server, db, pruneExpired, close: () => { server.close(() => db.close()); } };
 }
