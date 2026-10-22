@@ -146,3 +146,27 @@ test('Republic is exposed through same-origin strict CSP; arbitrary private path
   }
   assert.equal((await fetch(base+'/apps/attention-republic-live/private.sqlite')).status,404);
 });
+
+
+test('consent can be revoked by deleting an unvoted anonymous session, never by a different bearer',async t=>{
+ const {base,app}=await setup(t);
+ const id=await createAndActivate(base),url='/api/v1/republic/challenges/'+id;
+ const first=(await req(base,url+'/sessions','POST',{consent:true})).data;
+ const revoke=url+'/sessions/'+first.sessionId;
+ assert.equal((await req(base,revoke,'DELETE')).status,401);
+ assert.equal((await req(base,revoke,'DELETE',undefined,'wrong-bearer')).status,403);
+ assert.equal(app.db.prepare('SELECT COUNT(*) AS n FROM republic_sessions').get().n,1);
+ const removed=await req(base,revoke,'DELETE',undefined,first.token);
+ assert.equal(removed.status,200);
+ assert.equal(removed.data.revoked,true);
+ assert.equal(removed.data.ballotRecorded,false);
+ assert.equal(app.db.prepare('SELECT COUNT(*) AS n FROM republic_sessions').get().n,0);
+ assert.equal((await req(base,url+'/votes','POST',{sessionId:first.sessionId,choice:'a'},first.token)).status,403);
+ assert.equal((await req(base,url)).data.challenge.counts.total,0);
+
+ const second=(await req(base,url+'/sessions','POST',{consent:true})).data;
+ assert.equal((await req(base,url+'/votes','POST',{sessionId:second.sessionId,choice:'b'},second.token)).status,201);
+ assert.equal((await req(base,url+'/sessions/'+second.sessionId,'DELETE',undefined,second.token)).status,409);
+ assert.equal((await req(base,url)).data.challenge.counts.total,1);
+ assert.equal((await req(base,url)).data.challenge.counts.b,1);
+});
