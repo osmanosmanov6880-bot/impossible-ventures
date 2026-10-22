@@ -32,6 +32,7 @@ jobs:
           files = [
               'index.html',
               'privacy.html',
+              'apps/status/index.html',
               'apps/dead-drop/index.html',
               'apps/appeal-2049/index.html',
               'apps/pilot-studio/index.html',
