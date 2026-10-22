@@ -1308,9 +1308,14 @@ test('WAVE 11–15: mobile launch studio -> actual first-party story -> opt-in e
     document.querySelector('#launchList .stage')?.textContent.includes('НА ПАУЗЕ')
   );
   const unavailable=await context.newPage();
-  attachErrors(unavailable,errors);
+  // A deliberately paused launch must fail closed with 404; Chromium logs
+  // that expected network rejection as console.error, not a JS exception.
+  // Keep real runtime-error detection on all functional participant pages.
+  const deniedExceptions=[];
+  unavailable.on('pageerror',err=>deniedExceptions.push(err.message));
   await unavailable.goto(base+publicUrl);
   await unavailable.locator('#message.error').waitFor();
   assert.equal(await unavailable.locator('#preflight').isVisible(),false);
+  assert.deepEqual(deniedExceptions,[]);
   assert.deepEqual(errors,[]);
 });
