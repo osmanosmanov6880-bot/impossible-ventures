@@ -145,3 +145,15 @@ html{overflow-x:clip}
 .hero,.hero-content,.orbital-art,.experiment-shell,.experiment-config,.creative-area,.operator-panel,.creative-live{min-width:0;max-width:100%}
 h1,h2,h3,p,.eyebrow,.section-top,.creative-kicker{overflow-wrap:anywhere}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* True two-choice narrative treatment: decisions stay in browser memory, only CTA is measured. */
+.story-step{background:linear-gradient(145deg,#152e3b,#101d2e);border:1px solid #5d8a92;border-radius:15px;margin:26px 0 24px;padding:clamp(17px,2.7vw,27px)}
+.story-topline{display:flex;justify-content:space-between;gap:10px;align-items:center;color:#a6f4dd;font:11px monospace;letter-spacing:.11em}
+.story-step h4{font-size:clamp(19px,2.4vw,27px);letter-spacing:-.04em;line-height:1.3;margin:21px 0 20px;overflow-wrap:anywhere}
+.story-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.story-choice{background:#102a38;color:#effbf8;border:1px solid #567f8d;border-radius:9px;padding:17px 15px;min-width:0;min-height:73px;font-size:13px;text-align:left;line-height:1.5;overflow-wrap:anywhere;transition:border-color .16s,background .16s}
+.story-choice:hover{border-color:#b6f1df;background:#1c3d44}
+.story-choice.selected{border-color:#b6f1df;background:#264f4b;box-shadow:inset 0 0 0 1px #b6f1df88}
+.story-outcome{color:#d4fae8;border-left:3px solid #9dedc1;background:#13352f;padding:16px 19px;border-radius:0 9px 9px 0;margin:20px 0 5px;font-size:14px;line-height:1.75}
+.error-text{color:#ffbdbd!important}
+@media(max-width:600px){.story-choices{grid-template-columns:1fr}.story-choice{min-height:58px}}
