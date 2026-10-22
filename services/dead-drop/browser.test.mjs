@@ -439,3 +439,74 @@ test('Experiment Lab works in an actual mobile browser: untracked story, operato
   assert.equal(file.suggestedFilename(), 'iv-experiment-lab-results.csv');
   assert.deepEqual(errors, []);
 });
+
+
+test('FIVE WAVES: premium commercial mobile demo -> owner workspace -> approved creative -> private accepted proposal',async t=>{
+  const former=process.env.OPERATOR_TOKEN;
+  const systemToken='commercial-ci-system-key-minimum-32-chars-987654321';
+  process.env.OPERATOR_TOKEN=systemToken;
+  t.after(()=>former===undefined?delete process.env.OPERATOR_TOKEN:process.env.OPERATOR_TOKEN=former);
+  const {context,base}=await setup(t,390,844);
+  const errors=[];
+  const page=await context.newPage();
+  attachErrors(page,errors);
+  await page.goto(base+'/commercial/');
+  await page.locator('#ventureGrid .venture-card').first().waitFor({state:'attached',timeout:15000});
+  assert.equal(await page.locator('#workspaceApp').isHidden(),true);
+
+  await page.locator('#viewDemo').click();
+  await page.locator('#workspaceApp').waitFor({state:'visible'});
+  assert.equal(await page.locator('#ventureGrid .venture-card').count(),7);
+  await page.locator('#ventureGrid .venture-card').first().click();
+  assert.match(await page.locator('#previewHeadline').textContent(),/секретное задание/i);
+  assert.equal(await page.locator('#saveCampaign').isDisabled(),true);
+  const noOverflow=await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2);
+  assert.equal(noOverflow,true,'Commercial studio should not overflow mobile viewport');
+  mkdirSync('artifacts',{recursive:true});
+  await page.screenshot({path:'artifacts/commercial-studio-mobile-demo.png',fullPage:true});
+
+  await page.locator('#bootstrapForm input[name="name"]').fill('Production Test Agency');
+  await page.locator('#bootstrapForm input[name="systemToken"]').fill(systemToken);
+  await page.locator('#bootstrapForm').evaluate(f=>f.requestSubmit());
+  await page.locator('#receipt code').first().waitFor();
+  await page.waitForFunction(()=>document.querySelector('#workspaceMeta')?.textContent.includes('owner'));
+  assert.equal(await page.locator('#saveCampaign').isEnabled(),true);
+
+  await page.locator('#campaignForm').evaluate(f=>f.requestSubmit());
+  await page.locator('.campaign-card').first().waitFor();
+  assert.equal((await page.locator('#countTotal').textContent()).trim(),'1');
+  await page.getByRole('button',{name:/ОДОБРИТЬ МАКЕТ/}).click();
+  await page.getByRole('link',{name:/ПУБЛИЧНЫЙ МАКЕТ/}).first().waitFor();
+  const previewUrl=await page.getByRole('link',{name:/ПУБЛИЧНЫЙ МАКЕТ/}).first().getAttribute('href');
+  const publicPage=await context.newPage();
+  attachErrors(publicPage,errors);
+  await publicPage.goto(base+previewUrl);
+  await publicPage.getByText(/секретное задание/i).first().waitFor();
+  assert.equal(await publicPage.locator('#showcaseCTA').isVisible(),true);
+
+  await page.locator('#proposalForm input[name="clientName"]').fill('Real Pilot Buyer');
+  await page.locator('#proposalForm input[name="contactEmail"]').fill('buyer@example.org');
+  await page.locator('#proposalForm textarea[name="description"]').fill('A bounded creative workshop and follow-up experiment design, excluding any purchased media.');
+  await page.locator('#proposalForm').evaluate(f=>f.requestSubmit());
+  await page.locator('.proposal-item').first().waitFor();
+  const quoteAmount=await page.locator('#estimateTotal').textContent();
+  assert.match(quoteAmount,/1[.,\s]?950/);
+  await page.getByRole('button',{name:/ПОДГОТОВИТЬ ССЫЛКУ/}).first().click();
+  await page.locator('#proposalReceipt code').waitFor();
+  const privateURL=(await page.locator('#proposalReceipt code').textContent()).trim();
+  assert.match(privateURL,/#token=ivp_/);
+  const customer=await context.newPage();
+  attachErrors(customer,errors);
+  await customer.goto(privateURL);
+  await customer.locator('#proposalCard').waitFor({state:'visible'});
+  assert.equal(await customer.locator('#accept').isDisabled(),true);
+  await customer.locator('#acknowledge').check();
+  await customer.locator('#accept').click();
+  await customer.getByText(/Решение принято и записано сервером/).waitFor();
+  assert.equal(await customer.locator('#currentStatus').textContent(),'ПРИНЯТО');
+  await page.evaluate(()=>refreshProposals());
+  assert.match(await page.locator('#proposalSummary').textContent(),/ПРИНЯТЫХ ПРЕДЛОЖЕНИЙ/);
+  assert.equal(await page.locator('.proposal-item .stage').first().textContent(),'ACCEPTED (UNPAID)');
+  await page.screenshot({path:'artifacts/commercial-workspace-proposal-pipeline.png',fullPage:true});
+  assert.deepEqual(errors,[]);
+});
