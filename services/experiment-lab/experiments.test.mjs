@@ -17,6 +17,11 @@ const payload = {
   controlBody: 'Explore a coffee subscription and read about the sample offer before choosing.',
   variantHeadline: 'A message arrived from the future of your mornings',
   variantBody: 'Every day begins with a decision. Discover what your morning routine could become.',
+  decisionPrompt: 'Your morning has two possible directions. Which path would you choose?',
+  choiceOneLabel: 'A quicker morning routine',
+  choiceOneReveal: 'You discovered a morning with more time for the work you love.',
+  choiceTwoLabel: 'A more mindful coffee ritual',
+  choiceTwoReveal: 'You discovered a ritual that gives you a moment of intention.',
   ctaLabel: 'Explore this pilot'
 };
 
@@ -88,6 +93,11 @@ test('operator can create draft and activate; anonymous catalog hides non-runnin
   const { base } = await fixture(t);
   assert.equal((await send(base, '/api/v1/operator/experiments', { method: 'POST', body: payload })).status, 401);
   assert.equal((await send(base, '/api/v1/operator/experiments', { method: 'POST', token: 'bad', body: payload })).status, 403);
+  const invalidChoice = await send(base, '/api/v1/operator/experiments', {
+    method: 'POST', token: op,
+    body: { ...payload, choiceTwoLabel: payload.choiceOneLabel }
+  });
+  assert.equal(invalidChoice.status, 422);
   const invalid = await send(base, '/api/v1/operator/experiments', {
     method: 'POST', token: op, body: { ...payload, controlHeadline: payload.variantHeadline, controlBody: payload.variantBody }
   });
@@ -129,6 +139,12 @@ test('explicit consent, secure session token, idempotent CTA and accurate per-ar
   assert.equal(first.data.creative.offer, payload.offer);
   const expectHeadline = first.data.arm === 'A' ? payload.controlHeadline : payload.variantHeadline;
   assert.equal(first.data.creative.headline, expectHeadline);
+  if (first.data.arm === 'B') {
+    assert.equal(first.data.creative.interaction.choices.length, 2);
+    assert.equal(first.data.creative.interaction.prompt, payload.decisionPrompt);
+  } else {
+    assert.equal(first.data.creative.interaction, null);
+  }
   assert.equal(Object.hasOwn(first.data, 'email'), false);
   assert.equal(Object.hasOwn(first.data, 'ip'), false);
   const cta = url + '/' + first.data.sessionId + '/cta';
