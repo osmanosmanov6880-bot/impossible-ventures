@@ -27,7 +27,7 @@ const localeCopy = {
   noteRequired:'Нужно не менее восьми символов. Это ваша авторская реплика, а не текст от ИИ.',
   selected:'ЧТО ИЗМЕНИТ ЭТО РЕШЕНИЕ',choose:'Выберите один из трёх вариантов.',
   completed:'ИСТОРИЯ СОБРАНА.',report:'Ваш результат — самостоятельный творческий документ. Проверьте факты до любой реальной рекламной публикации.',
-  download:'СКАЧАТЬ РЕЗУЛЬТАТ JSON ↓',again:'НАЧАТЬ ЗАНОВО',
+  download:'СКАЧАТЬ РЕЗУЛЬТАТ JSON ↓',again:'НАЧАТЬ ЗАНОВО',commercial:'ИМПОРТИРОВАТЬ В КОНСТРУКТОР ↗',
   scoreNotice:'Игровые баллы: только эвристика сценария, не клики и не статистика.',
   disclaimer:'ЛОКАЛЬНЫЙ ТВОРЧЕСКИЙ ТРЕНАЖЁР / НЕТ ТРЕКИНГА',
   reportWarning:'Это художественный сценарий и гипотезы, а не настоящие показы, продажи, аудитория или платформа размещения.',
@@ -48,7 +48,7 @@ const localeCopy = {
   noteRequired:'At least eight characters. This is your authored line, not an AI output.',
   selected:'WHAT YOUR DECISION CHANGES',choose:'Select one of the three directions.',
   completed:'YOUR STORY IS COMPLETE.',report:'A creative deliverable you can take away. Verify all facts before any real advertising.',
-  download:'DOWNLOAD REPORT JSON ↓',again:'RESTART',
+  download:'DOWNLOAD REPORT JSON ↓',again:'RESTART',commercial:'IMPORT INTO CAMPAIGN BUILDER ↗',
   scoreNotice:'Game scores are design heuristics, never clicks or real performance.',
   disclaimer:'BROWSER-ONLY CREATIVE WORKSHOP / NO TRACKING',
   reportWarning:'An authored simulation and hypotheses, not actual impressions, customers, sales or a live ad network.',
@@ -69,7 +69,7 @@ const localeCopy = {
   noteRequired:'至少八个字符。这是您写的台词，不是AI生成。',
   selected:'此决定将带来的变化',choose:'请选择三个方向之一。',
   completed:'故事已完成。',report:'您可以带走创意成果。在真实投放广告前，请核实所有事实。',
-  download:'下载 JSON 报告 ↓',again:'重新开始',
+  download:'下载 JSON 报告 ↓',again:'重新开始',commercial:'导入广告活动编辑器 ↗',
   scoreNotice:'游戏分数只是设计启发，不代表真实点击或效果。',
   disclaimer:'仅浏览器本地创作 / 不跟踪',
   reportWarning:'这是创意模拟与假设，并非真实展示、客户、销售或广告网络。',
@@ -128,6 +128,7 @@ function renderIntro() {
  document.querySelector('#resultWarning').textContent=tr('reportWarning');
  ui.download.textContent=tr('download');
  ui.restart.textContent=tr('again');
+ document.getElementById('toCommercial').textContent=tr('commercial');
 }
 function metricCards(scores,target) {
  target.replaceChildren();
