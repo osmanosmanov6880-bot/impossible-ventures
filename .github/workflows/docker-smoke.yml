@@ -33,6 +33,21 @@ jobs:
             dead-drop-smoke
           curl --retry 30 --retry-all-errors --retry-delay 1 --connect-timeout 3 --max-time 5 -fsS \
             http://127.0.0.1:3017/api/v1/health
+      - name: Smoke-test five-wave commercial routes and seven actual templates
+        run: |
+          node --input-type=module <<'JS'
+          const origin='http://127.0.0.1:3017';
+          for(const page of ['/commercial/','/showcase/','/proposal/']){
+            const result=await fetch(origin+page);
+            if(result.status!==200)throw new Error('Missing commercial page: '+page);
+          }
+          const response=await fetch(origin+'/api/v1/commercial/ventures');
+          if(response.status!==200)throw new Error('Venture catalog API missing');
+          const data=await response.json();
+          if(!Array.isArray(data.items)||data.items.length!==7)throw new Error('Seven worlds unavailable');
+          const restricted=await fetch(origin+'/api/v1/operator/workspaces');
+          if(restricted.status!==503&&restricted.status!==401)throw new Error('Unconfigured operator API not closed');
+          JS
       - name: Verify app process dropped root privileges
         run: |
           docker exec dead-drop-ci sh -c \
