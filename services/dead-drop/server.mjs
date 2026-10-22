@@ -199,7 +199,14 @@ const STATIC_FILES = new Map([
   ['/experiments/style.css', 'apps/experiment-lab/style.css'],
   ['/experiments/operator/', 'apps/experiment-lab/operator.html'],
   ['/experiments/operator/index.html', 'apps/experiment-lab/operator.html'],
-  ['/experiments/operator/app.js', 'apps/experiment-lab/operator.js']
+  ['/experiments/operator/app.js', 'apps/experiment-lab/operator.js'],
+  ['/commercial/', 'apps/commercial/index.html'],
+  ['/commercial/index.html', 'apps/commercial/index.html'],
+  ['/commercial/style.css', 'apps/commercial/style.css'],
+  ['/commercial/app.js', 'apps/commercial/app.js'],
+  ['/showcase/', 'apps/commercial/showcase.html'],
+  ['/showcase/index.html', 'apps/commercial/showcase.html'],
+  ['/showcase/app.js', 'apps/commercial/showcase.js']
 ]);
 
 function sendJSON(response, status, payload) {
@@ -223,7 +230,7 @@ function sendStatic(response, pathname) {
     '.js': 'text/javascript; charset=utf-8',
     '.svg': 'image/svg+xml'
   }[extname(path)] || 'application/octet-stream';
-  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/')) {
+  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/commercial/') || pathname.startsWith('/showcase/')) {
     response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
   }
   response.writeHead(200, {
