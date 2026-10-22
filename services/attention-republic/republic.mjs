@@ -19,7 +19,7 @@ function secureMatch(value,storedHex){
  const expected=Buffer.from(storedHex,'hex'),actual=digest(value);
  return expected.length===actual.length&&timingSafeEqual(expected,actual);
 }
-function text(value,label,ApiError,max=180,min=3){
+function text(value,label,max=180,min=3){
  if(typeof value!=='string')throw new ApiError(400,label+' is required');
  const v=value.trim().replace(/\s+/gu,' ');
  if(v.length<min||v.length>max||/[\u0000-\u001f\u007f]/u.test(v))throw new ApiError(400,label+' has invalid length or characters');
