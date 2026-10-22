@@ -1,4 +1,4 @@
-# Impossible Ventures — Operations & Recovery Runbook (v0.7 alpha)
+# Impossible Ventures — Operations & Recovery Runbook (v0.8 alpha)
 
 Updated 2026-10-22. Covers the single-instance Dead Drop + Pilot Studio Node.js/SQLite service. This is staging guidance, **not evidence of production hosting, certifications or external backups**.
 
