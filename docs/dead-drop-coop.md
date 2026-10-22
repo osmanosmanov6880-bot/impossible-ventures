@@ -47,6 +47,8 @@ All endpoints use JSON. API version `/api/v1`.
 | `/missions/:code` | GET | Room state; Bearer agent token required |
 | `/missions/:code/messages` | POST | Transmit 3–280 characters |
 | `/missions/:code/finalize` | POST | Generate deterministic dossier after one message per agent |
+| `/missions/:code/export` | GET | Authenticated, role-scoped JSON export; no raw tokens or peer-private fields before finalization |
+| `/missions/:code` | DELETE | Authenticated erasure of whole shared room; body `{ "confirmCode": "ROOMCODE" }` must match exact code |
 
 **Tokens** are generated randomly and only their SHA-256 hashes are stored in SQLite. Clients retain their token in sessionStorage for refreshes, not as an invitation link. Room codes are not agent tokens. No username/password system exists.
 
@@ -55,7 +57,7 @@ All endpoints use JSON. API version `/api/v1`.
 - SQLite is designed here for a **single application instance**, not a multi-region deployment.
 - Agent tokens are bearer secrets, not user accounts. Anyone with an unclaimed room code can become the second agent. Do not enter confidential client materials.
 - No formal identity recovery, backups, infrastructure monitoring, per-account billing, rate-limit sharing across replicas or legal privacy assessment.
-- Data is removed **lazily** when a room older than seven days is requested, not by a background cleanup job.
+- Source v0.5: rooms expire seven days after creation; a startup and hourly task prunes expired rows, and stale reads also expire. While a server is offline, cleanup resumes when it restarts. Physical deletion beyond the current SQLite host is not guaranteed.
 - An in-memory 90-POST/minute per-IP limit prevents basic spam but is not sufficient for a public, hostile environment.
 - No LLM is connected. A later optional model integration must be server-side with audited prompts and output checks.
 - GitHub Pages can host static demos only. The multiplayer API requires a running Node server and TLS proxy.
