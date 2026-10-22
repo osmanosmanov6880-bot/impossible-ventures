@@ -1,0 +1,37 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1824"><meta name="description" content="Attention Republic — экспериментальная площадка добровольного голосования за рекламные идеи с реальными анонимными сессиями.">
+<title>Attention Republic — The Voluntary Attention Commons · Impossible Ventures</title>
+<link rel="stylesheet" href="../shared/studio.css"><script type="module" src="./app.js"></script></head>
+<body data-universe="republic">
+<header class="topbar"><a class="wordmark" href="../../"><span class="mark">R<span>·</span></span><span>ATTENTION <b>REPUBLIC</b><small>VOLUNTARY ATTENTION COMMONS</small></span></a><div class="toplinks"><span class="top-status" data-i18n="alpha">ПУБЛИЧНЫЙ ПИЛОТ / НЕ ВЫБОРЫ</span><a href="../museum-of-attention-studio/" data-i18n="museumLink">MUSEUM ↗</a><label for="locale" class="sr-only">Language</label><select id="locale" aria-label="Language"><option value="ru">Русский</option><option value="en">English</option><option value="zh">中文</option></select></div></header>
+<main class="shell">
+<section class="hero"><div class="hero-copy"><div class="eyebrow" data-i18n="eyebrow">КОМУ ПРИНАДЛЕЖИТ ВНИМАНИЕ?</div><h1><span data-i18n="heroA">Внимание —</span><em data-i18n="heroB">добровольный выбор.</em></h1><p data-i18n="heroText">Маленькая исследовательская республика рекламных идей. Голосуйте только после явного согласия: сервер учитывает реальные анонимные сессии, а не выдуманных людей. Без регистрации и cookies.</p><div class="hero-tags"><span class="tag" data-i18n="tagA">01 БЮЛЛЕТЕНЬ НА СЕССИЮ</span><span class="tag" data-i18n="tagB">00 ВЫДУМАННЫХ ГОЛОСОВ</span><span class="tag" data-i18n="tagC">ЯВНОЕ СОГЛАСИЕ</span></div></div><div class="sculpture" aria-hidden="true"><div class="orbit"></div><div class="orbit alt"></div><div class="sculpture-core"><strong>R</strong><small>PEOPLE / CHOOSE<br>CREATIVE / CONSENT</small></div><div class="orbit-caption">IV / OPEN CREATIVE COMMONS</div></div></section>
+<div class="section-divider"><span data-i18n="begin">01 / УЧАСТИЕ</span><i></i><span>CONSENT / CHALLENGE / VOTE</span></div>
+<div class="workbench">
+<section class="panel" aria-labelledby="republicInputHeading"><div class="eyebrow" data-i18n="eyebrowPanel">РЕСПУБЛИКА / ЛОКАЛЬНАЯ ПЛОЩАДКА</div>
+<h2 id="republicInputHeading" class="panel-title" data-i18n="chooseTitle">Выберите открытый вопрос.</h2><p class="panel-description" data-i18n="chooseHint">На сервере отображаются только вопросы, вручную проверенные и активированные оператором. Если сервер не подключён, работает демонстрация без записи.</p>
+<div class="notice" id="connection" role="status" aria-live="polite" data-i18n="loading">Проверяем доступные вопросы…</div>
+<label class="field"><span data-i18n="catalogLabel">Открытые вопросы</span><select id="challenge" disabled><option data-i18n="loading">Проверяем доступные вопросы…</option></select></label>
+<label class="field"><span data-i18n="consentLabel">Условия участия</span></label>
+<label class="consent" for="consent">
+<input id="consent" type="checkbox"><span data-i18n="consentText">Я согласен(на) на создание анонимной сессии и запись ровно одного выбора. Это не официальный опрос или выборы.</span></label>
+<div class="button-row"><button id="startVote" type="button" class="button" disabled data-i18n="enter">НАЧАТЬ УЧАСТИЕ ↗</button><button id="demo" type="button" class="button ghost" data-i18n="demo">ДЕМО БЕЗ ЗАПИСИ →</button></div>
+<p id="startStatus" class="status-message" role="status"></p>
+<div class="notice" data-i18n="privacyNote">Токен анонимной сессии живёт только в памяти вкладки. Сессии удаляются через семь дней, агрегаты — через 90. Это не защита от множества новых сессий одного человека.</div>
+</section>
+<section class="panel" aria-labelledby="ballotHeading"><div class="eyebrow" data-i18n="ballotEyebrow">РЕШЕНИЕ / ОДНА СЕССИЯ</div><div id="empty" class="is-empty"><div class="empty-symbol" aria-hidden="true">☷</div><h2 id="ballotHeading" data-i18n="emptyTitle">Избирательный участок пуст.</h2><p data-i18n="emptyDesc">Выберите вопрос и согласитесь на анонимное участие — либо откройте демо без записи голосов.</p></div>
+<div id="ballot" hidden>
+<div class="card-top"><span id="ballotMode">VOTE / ACTIVE</span><span id="ballotLocale" class="pill">RU</span></div>
+<h2 id="ballotTitle" class="panel-title"></h2><p id="ballotQuestion" class="quote"></p>
+<div id="ballotOptions" class="results"></div>
+<div id="ballotResult" class="card after-cards" hidden aria-live="polite">
+<div class="card-top" data-i18n="resultTitle">ПОДТВЕРЖДЁННЫЕ СЕРВЕРНЫЕ ДАННЫЕ / ИЛИ ДЕМО</div>
+<h3 id="outcomeHeading"></h3><p id="outcomeNote"></p>
+<div class="metric-grid" id="countMetrics"></div>
+</div>
+<p id="ballotStatus" class="status-message" role="status"></p>
+</div></section>
+</div>
+<section class="bottom"><article><span>01 / CONSENT</span><h3 data-i18n="p1Title">Право отказаться.</h3><p data-i18n="p1Text">Измеряемая сессия создаётся только после явного согласия; демонстрация не записывает голос.</p></article><article><span>02 / ACCOUNTABILITY</span><h3 data-i18n="p2Title">Только записанные события.</h3><p data-i18n="p2Text">Счётчики читаются из SQLite. Они не доказывают уникальных людей, репрезентативность или честность выборов.</p></article><article><span>03 / MODERATION</span><h3 data-i18n="p3Title">Вопросы под контролем.</h3><p data-i18n="p3Text">Публикацию вопросов выполняет оператор, а не анонимный пользователь. Это уменьшает риск спама.</p></article></section>
+</main><footer class="footer"><span>ATTENTION REPUBLIC · EXPERIMENTAL ALPHA · NOT AN ELECTION</span><span data-i18n="footerNote">Без платёжной системы, глобального голосования и верификации личности</span><a href="../../privacy.html" data-i18n="privacyLink">Обработка данных ↗</a></footer>
+</body></html>
