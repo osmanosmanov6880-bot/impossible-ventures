@@ -61,7 +61,7 @@ export function toCampaignDraft(artifact, locale = 'ru') {
     channel:'landing',
     audience:safe(audience,300),
     offer:safe(product,240),
-    headline:safe(product,180),
+    headline:safe(product.length>=5?product:'Idea: '+product,180),
     body,
     ctaLabel:cta[locale],
     _bridge:{
