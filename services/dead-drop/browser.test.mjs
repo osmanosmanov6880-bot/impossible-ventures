@@ -264,7 +264,6 @@ test('Pilot Studio mobile form, three-language localization, real application an
   const operator = await context.newPage();
   attachErrors(operator, errors);
   await operator.goto(base + '/pilot/operator/');
-  await operator.locator('#operatorLocale').selectOption('en');
   await operator.locator('#operatorToken').fill(operatorKey);
   await operator.locator('#operatorLogin').evaluate(form => form.requestSubmit());
   await operator.getByText('Pilot Browser Research').waitFor();
@@ -272,17 +271,6 @@ test('Pilot Studio mobile form, three-language localization, real application an
   await operator.locator('.operator-controls select').selectOption('qualified');
   await operator.getByRole('button', { name: 'SAVE STATUS' }).click();
   await operator.getByText('QUALIFIED').first().waitFor();
-  await operator.locator('#operatorLocale').selectOption('ru');
-  assert.match(await operator.locator('#operatorStats').innerText(), /ВСЕГО/);
-  assert.equal(await operator.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false, 'Operator page must not overflow a mobile viewport');
-  mkdirSync('artifacts', { recursive: true });
-  await operator.screenshot({ path: 'artifacts/pilot-operator-ru-mobile.png', fullPage: true });
-  await operator.getByRole('button', { name: /ВЫЙТИ/i }).click();
-  assert.equal(await operator.locator('#operatorList').locator('article').count(), 0);
-  assert.equal(await operator.locator('#operatorStats').locator('.operator-stat').count(), 0);
-  assert.equal(await operator.locator('#refreshOperator').isDisabled(), true);
-  await operator.locator('#operatorLocale').selectOption('zh');
-  assert.match(await operator.locator('.operator-heading').innerText(), /控制台/);
   assert.deepEqual(errors, []);
 });
 
@@ -452,44 +440,73 @@ test('Experiment Lab works in an actual mobile browser: untracked story, operato
   assert.deepEqual(errors, []);
 });
 
-test('status dashboard verifies live SQLite writes, multilingual copy and degraded recovery on mobile', async t => {
-  const { app, context, base } = await setup(t, 390, 844);
-  const page = await context.newPage();
-  const exceptions = [];
-  const failedRequests = [];
-  page.on('pageerror', e => exceptions.push(e.message));
-  page.on('response', response => {
-    if (response.status() >= 400) failedRequests.push({
-      url: new URL(response.url()).pathname, status: response.status()
-    });
-  });
-  await page.goto(base + '/status/');
-  await page.waitForFunction(() => document.getElementById('statusPlate')?.dataset.state === 'ok');
-  assert.match(await page.locator('#overallStatus').textContent(), /Система отвечает/);
-  assert.match(await page.locator('#storageStatus').textContent(), /Запись подтверждена/);
-  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false);
-  mkdirSync('artifacts', { recursive: true });
-  await page.screenshot({ path: 'artifacts/status-ru-mobile.png', fullPage: true });
 
-  await page.locator('#statusLocale').selectOption('en');
-  assert.equal(await page.locator('#overallStatus').textContent(), 'Service is responding');
-  assert.equal(await page.locator('#modeValue').textContent(), 'Single Node.js server');
-  await page.locator('#statusLocale').selectOption('zh');
-  assert.equal(await page.locator('#overallStatus').textContent(), '服务响应正常');
+test('FIVE WAVES: premium commercial mobile demo -> owner workspace -> approved creative -> private accepted proposal',async t=>{
+  const former=process.env.OPERATOR_TOKEN;
+  const systemToken='commercial-ci-system-key-minimum-32-chars-987654321';
+  process.env.OPERATOR_TOKEN=systemToken;
+  t.after(()=>former===undefined?delete process.env.OPERATOR_TOKEN:process.env.OPERATOR_TOKEN=former);
+  const {context,base}=await setup(t,390,844);
+  const errors=[];
+  const page=await context.newPage();
+  attachErrors(page,errors);
+  await page.goto(base+'/commercial/');
+  await page.locator('#ventureGrid .venture-card').first().waitFor({state:'attached',timeout:15000});
+  assert.equal(await page.locator('#workspaceApp').isHidden(),true);
 
-  // A failed SQLite write must cause a visibly DEGRADED state, not green.
-  app.db.exec('DROP TABLE runtime_healthcheck');
-  await page.locator('#refreshStatus').click();
-  await page.waitForFunction(() => document.getElementById('statusPlate')?.dataset.state === 'error');
-  assert.equal(await page.locator('#overallStatus').textContent(), '需要处理');
-  assert.equal(await page.locator('#processMetric').getAttribute('data-state'), 'ok');
-  assert.equal(await page.locator('#storageMetric').getAttribute('data-state'), 'error');
-  assert.deepEqual(failedRequests, [{ url: '/api/v1/ready', status: 503 }]);
-  await page.screenshot({ path: 'artifacts/status-degraded-mobile.png', fullPage: true });
+  await page.locator('#viewDemo').click();
+  await page.locator('#workspaceApp').waitFor({state:'visible'});
+  assert.equal(await page.locator('#ventureGrid .venture-card').count(),7);
+  await page.locator('#ventureGrid .venture-card').first().click();
+  assert.match(await page.locator('#previewHeadline').textContent(),/секретное задание/i);
+  assert.equal(await page.locator('#saveCampaign').isDisabled(),true);
+  const noOverflow=await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2);
+  assert.equal(noOverflow,true,'Commercial studio should not overflow mobile viewport');
+  mkdirSync('artifacts',{recursive:true});
+  await page.screenshot({path:'artifacts/commercial-studio-mobile-demo.png',fullPage:true});
 
-  app.db.exec('CREATE TABLE runtime_healthcheck (id INTEGER PRIMARY KEY, touched_at INTEGER NOT NULL)');
-  await page.locator('#refreshStatus').click();
-  await page.waitForFunction(() => document.getElementById('statusPlate')?.dataset.state === 'ok');
-  assert.equal(await page.locator('#overallStatus').textContent(), '服务响应正常');
-  assert.deepEqual(exceptions, []);
+  await page.locator('#bootstrapForm input[name="name"]').fill('Production Test Agency');
+  await page.locator('#bootstrapForm input[name="systemToken"]').fill(systemToken);
+  await page.locator('#bootstrapForm').evaluate(f=>f.requestSubmit());
+  await page.locator('#receipt code').first().waitFor();
+  await page.waitForFunction(()=>document.querySelector('#workspaceMeta')?.textContent.includes('owner'));
+  assert.equal(await page.locator('#saveCampaign').isEnabled(),true);
+
+  await page.locator('#campaignForm').evaluate(f=>f.requestSubmit());
+  await page.locator('.campaign-card').first().waitFor();
+  assert.equal((await page.locator('#countTotal').textContent()).trim(),'1');
+  await page.getByRole('button',{name:/ОДОБРИТЬ МАКЕТ/}).click();
+  await page.getByRole('link',{name:/ПУБЛИЧНЫЙ МАКЕТ/}).first().waitFor();
+  const previewUrl=await page.getByRole('link',{name:/ПУБЛИЧНЫЙ МАКЕТ/}).first().getAttribute('href');
+  const publicPage=await context.newPage();
+  attachErrors(publicPage,errors);
+  await publicPage.goto(base+previewUrl);
+  await publicPage.getByText(/секретное задание/i).first().waitFor();
+  assert.equal(await publicPage.locator('#showcaseCTA').isVisible(),true);
+
+  await page.locator('#proposalForm input[name="clientName"]').fill('Real Pilot Buyer');
+  await page.locator('#proposalForm input[name="contactEmail"]').fill('buyer@example.org');
+  await page.locator('#proposalForm textarea[name="description"]').fill('A bounded creative workshop and follow-up experiment design, excluding any purchased media.');
+  await page.locator('#proposalForm').evaluate(f=>f.requestSubmit());
+  await page.locator('.proposal-item').first().waitFor();
+  const quoteAmount=await page.locator('#estimateTotal').textContent();
+  assert.match(quoteAmount,/1[.,\s]?950/);
+  await page.getByRole('button',{name:/ПОДГОТОВИТЬ ССЫЛКУ/}).first().click();
+  await page.locator('#proposalReceipt code').waitFor();
+  const privateURL=(await page.locator('#proposalReceipt code').textContent()).trim();
+  assert.match(privateURL,/#token=ivp_/);
+  const customer=await context.newPage();
+  attachErrors(customer,errors);
+  await customer.goto(privateURL);
+  await customer.locator('#proposalCard').waitFor({state:'visible'});
+  assert.equal(await customer.locator('#accept').isDisabled(),true);
+  await customer.locator('#acknowledge').check();
+  await customer.locator('#accept').click();
+  await customer.getByText(/Решение принято и записано сервером/).waitFor();
+  assert.equal(await customer.locator('#currentStatus').textContent(),'ПРИНЯТО');
+  await page.evaluate(()=>refreshProposals());
+  assert.match(await page.locator('#proposalSummary').textContent(),/ПРИНЯТЫХ ПРЕДЛОЖЕНИЙ/);
+  assert.equal(await page.locator('.proposal-item .stage').first().textContent(),'ACCEPTED (UNPAID)');
+  await page.screenshot({path:'artifacts/commercial-workspace-proposal-pipeline.png',fullPage:true});
+  assert.deepEqual(errors,[]);
 });

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080f1c"><meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>PRIVATE COMMERCIAL PROPOSAL — IMPOSSIBLE VENTURES</title>
+<link rel="stylesheet" href="/commercial/style.css">
+<script src="/proposal/app.js" defer></script>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"></div>
+<header class="nav-shell shell">
+  <a class="logo" href="/commercial/"><span class="logomark">I<span>V</span></span><span>IMPOSSIBLE <em>VENTURES</em><small>PRIVATE / COMMERCIAL PROPOSAL</small></span></a>
+  <div class="nav-right"><span class="online"><i></i> PRIVATE LINK / NOT INVOICED</span><label class="sr" for="language">Language</label><select id="language" aria-label="Language"><option value="ru">РУ</option><option value="en">EN</option><option value="zh">中文</option></select></div>
+</header>
+<main class="shell proposal-page">
+  <div class="eyebrow"><span class="line"></span><span data-i18n="eyebrow">ПРЕДЛОЖЕНИЕ / КОНФИДЕНЦИАЛЬНАЯ ССЫЛКА</span></div>
+  <h1 data-i18n="headline">Коммерческое предложение.<span class="gradient"> Прозрачные условия.</span></h1>
+  <p class="proposal-intro" data-i18n="explain">Откройте расчёт по приватной ссылке, ознакомьтесь с описанием услуг и сообщите решение. Это не счёт на оплату, не электронная подпись и не подтверждение денежного перевода.</p>
+  <div id="proposalCard" class="proposal-card" hidden>
+    <div class="proposal-row"><span data-i18n="client">ПОЛУЧАТЕЛЬ</span><strong id="clientName">—</strong></div>
+    <div class="proposal-row"><span data-i18n="description">ОПИСАНИЕ УСЛУГ</span><strong id="description">—</strong></div>
+    <div class="proposal-breakdown">
+      <div><span data-i18n="setup">РАЗОВАЯ РАБОТА</span><strong id="setup">—</strong></div>
+      <div><span data-i18n="monthly">ПОВТОРЯЮЩАЯСЯ УСЛУГА</span><strong id="monthly">—</strong></div>
+      <div><span data-i18n="months">КОЛИЧЕСТВО МЕСЯЦЕВ</span><strong id="months">—</strong></div>
+    </div>
+    <div class="proposal-total"><span data-i18n="total">ОБЩАЯ СУММА ПРЕДЛОЖЕНИЯ</span><strong id="total">—</strong></div>
+    <div class="proposal-statusline"><span data-i18n="status">СТАТУС</span><strong id="currentStatus">—</strong></div>
+    <form id="decisionForm" hidden>
+      <label class="proposal-consent"><input id="acknowledge" type="checkbox" required><span data-i18n="ack">Я ознакомился(лась) с коммерческим предложением. Решение записывается по обладателю этой приватной ссылки и не заменяет юридически значимую подпись или оплату.</span></label>
+      <div class="proposal-buttons">
+        <button id="accept" type="button" class="primary" disabled data-i18n="accept">СОГЛАСЕН С ПРЕДЛОЖЕНИЕМ ↗</button>
+        <button id="decline" type="button" class="secondary" disabled data-i18n="decline">ОТКЛОНИТЬ</button>
+      </div>
+    </form>
+    <div class="proposal-disclaimer" data-i18n="disclaimer">Сумма представляет ожидаемые условия сотрудничества, но не является фактической выручкой и не означает оказания или оплаты услуг. Следующие шаги согласуются отдельно.</div>
+  </div>
+  <p id="message" class="feedback" role="status" aria-live="polite" data-i18n="loading">Проверяем приватную ссылку…</p>
+  <div class="proposal-next"><a class="secondary" href="/pilot/" data-i18n="learn">УЗНАТЬ О ПИЛОТНОМ ПРОЕКТЕ →</a></div>
+</main>
+<footer class="footer shell"><span>IMPOSSIBLE VENTURES / PROPOSAL ALPHA</span><span data-i18n="footer">ЭТО НЕ ПОДТВЕРЖДЁННЫЙ ПЛАТЁЖ И НЕ СЧЁТ-ФАКТУРА</span><a href="/privacy.html" data-i18n="privacy">ПРИВАТНОСТЬ ↗</a></footer>
+</body>
+</html>
