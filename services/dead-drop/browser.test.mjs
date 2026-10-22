@@ -661,3 +661,48 @@ test('Brief Theatre three-act creative rehearsal changes direction, finishes a r
   assert.deepEqual(posts,[]);
   assert.deepEqual(errors,[]);
 });
+
+
+test('AdBiome real mobile DNA mutation and crossbreeding generate distinct ideas and private JSON export',async t=>{
+ const {context,base}=await setup(t,390,844);
+ const page=await context.newPage();const errors=[];attachErrors(page,errors);
+ const posts=[];page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))posts.push(r.method());});
+ await page.goto(base+'/apps/adbiome/');
+ await page.locator('#brand').fill('Aurora Studio');
+ await page.locator('#audience').fill('Independent designers using client approval tools');
+ await page.locator('#genomeForm').evaluate(form=>form.requestSubmit());
+ await page.locator('#workspace').waitFor({state:'visible'});
+ assert.equal(await page.locator('#variantCount').textContent(),'1');
+ await page.locator('#sourceGenome').selectOption('0');
+ await page.locator('#mutateGene').selectOption('promise');
+ await page.locator('#mutate').click();
+ assert.equal(await page.locator('#variantCount').textContent(),'2');
+ await page.locator('#sourceGenome').selectOption('0');
+ await page.locator('#mutateGene').selectOption('proof');
+ await page.locator('#mutate').click();
+ assert.equal(await page.locator('#variantCount').textContent(),'3');
+ await page.locator('#parentLeft').selectOption('1');
+ await page.locator('#parentRight').selectOption('2');
+ await page.locator('#crossbreed').click();
+ assert.equal(await page.locator('#variantCount').textContent(),'4');
+ assert.equal(await page.locator('#distanceCount').textContent(),'2/5');
+ assert.equal(await page.locator('#variantList .card').count(),4);
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+ mkdirSync('artifacts',{recursive:true});
+ await page.screenshot({path:'artifacts/adbiome-mobile-variants.png',fullPage:true});
+ const promise=page.waitForEvent('download');
+ await page.locator('#exportDNA').click();
+ const downloaded=await promise;
+ const report=JSON.parse(readFileSync(await downloaded.path(),'utf8'));
+ assert.equal(report.kind,'adbiome-local-library');
+ assert.equal(report.genomes.length,4);
+ assert.equal(report.claimsUnverified,true);
+ assert.equal(report.measuredBusinessOutcomes,false);
+ assert.equal(report.genomes[3].lineage[0].type,'crossbreed');
+ await page.locator('#locale').selectOption('en');
+ assert.match(await page.locator('#creativePreview').innerText(),/Humans must independently verify/);
+ await page.locator('#locale').selectOption('zh');
+ assert.match(await page.locator('#creativePreview').innerText(),/人工独立验证/);
+ assert.deepEqual(posts,[]);
+ assert.deepEqual(errors,[]);
+});
