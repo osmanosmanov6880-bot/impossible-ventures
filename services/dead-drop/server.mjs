@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { createPilotRouter } from '../pilot-studio/pilots.mjs';
 import { createExperimentRouter } from '../experiment-lab/experiments.mjs';
 import { createWorkspaces } from '../commercial/workspaces.mjs';
+import { createCampaigns } from '../commercial/campaigns.mjs';
 import { refineDossier } from './creative-engine.mjs';
 import { localizeRuleDossier } from './dossier-locales.mjs';
 
@@ -274,6 +275,7 @@ export function createApp({
   const handlePilots = createPilotRouter({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
   const handleExperiments = createExperimentRouter({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
   const commercial = createWorkspaces({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
+  const campaigns = createCampaigns({ db, now, workspaces: commercial, ApiError, jsonBody, sendJSON });
   const aiAvailable = Boolean(aiKey && aiModel);
   const finalizing = new Set();
   const server = createServer(async (request, response) => {
@@ -288,10 +290,11 @@ export function createApp({
         return sendJSON(response, 200, { ok: true, service: 'dead-drop', mode: 'cooperative', persistent: dbPath !== ':memory:', aiAvailable });
       }
       if (pathname.startsWith('/api/')) {
-        if (request.method === 'POST' || request.method === 'DELETE') throttle(requestsByIP, request, now);
+        if (['POST', 'DELETE', 'PATCH'].includes(request.method)) throttle(requestsByIP, request, now);
         if (await handlePilots(request, response, pathname)) return;
         if (await handleExperiments(request, response, pathname)) return;
         if (await commercial.handle(request, response, pathname)) return;
+        if (await campaigns.handle(request, response, pathname)) return;
         if (pathname === '/api/v1/missions' && request.method === 'POST') {
           const body = await jsonBody(request);
           const host = {
