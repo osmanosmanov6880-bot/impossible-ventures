@@ -304,6 +304,7 @@ function renderPrivacyPanel(mission) {
     '<div class="privacy-expiry"><span>ROOM EXPIRY</span><strong data-no-translate>' + safe(readableDate) + '</strong></div>' +
     '<div class="privacy-actions"><button type="button" class="btn btn-ghost" data-action="export-my-data">EXPORT MY DATA .JSON ↓</button>' +
     '<button type="button" class="btn btn-danger-outline" data-action="delete-mission">DELETE MISSION</button></div>' +
+    '<a class="privacy-notice-link" href="../../privacy.html" target="_blank" rel="noopener noreferrer">READ THE DATA HANDLING NOTICE ↗</a>' +
     '</section>';
 }
 
