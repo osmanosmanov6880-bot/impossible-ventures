@@ -8,6 +8,7 @@ import { createPilotRouter } from '../pilot-studio/pilots.mjs';
 import { createExperimentRouter } from '../experiment-lab/experiments.mjs';
 import { createWorkspaces } from '../commercial/workspaces.mjs';
 import { createCampaigns } from '../commercial/campaigns.mjs';
+import { createProposals } from '../commercial/proposals.mjs';
 import { refineDossier } from './creative-engine.mjs';
 import { localizeRuleDossier } from './dossier-locales.mjs';
 
@@ -206,7 +207,10 @@ const STATIC_FILES = new Map([
   ['/commercial/app.js', 'apps/commercial/app.js'],
   ['/showcase/', 'apps/commercial/showcase.html'],
   ['/showcase/index.html', 'apps/commercial/showcase.html'],
-  ['/showcase/app.js', 'apps/commercial/showcase.js']
+  ['/showcase/app.js', 'apps/commercial/showcase.js'],
+  ['/proposal/', 'apps/commercial/proposal.html'],
+  ['/proposal/index.html', 'apps/commercial/proposal.html'],
+  ['/proposal/app.js', 'apps/commercial/proposal.js']
 ]);
 
 function sendJSON(response, status, payload) {
@@ -230,7 +234,7 @@ function sendStatic(response, pathname) {
     '.js': 'text/javascript; charset=utf-8',
     '.svg': 'image/svg+xml'
   }[extname(path)] || 'application/octet-stream';
-  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/commercial/') || pathname.startsWith('/showcase/')) {
+  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/commercial/') || pathname.startsWith('/showcase/') || pathname.startsWith('/proposal/')) {
     response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
   }
   response.writeHead(200, {
@@ -283,6 +287,7 @@ export function createApp({
   const handleExperiments = createExperimentRouter({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
   const commercial = createWorkspaces({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
   const campaigns = createCampaigns({ db, now, workspaces: commercial, ApiError, jsonBody, sendJSON });
+  const proposals = createProposals({ db, now, workspaces: commercial, campaigns, ApiError, jsonBody, sendJSON });
   const aiAvailable = Boolean(aiKey && aiModel);
   const finalizing = new Set();
   const server = createServer(async (request, response) => {
@@ -302,6 +307,7 @@ export function createApp({
         if (await handleExperiments(request, response, pathname)) return;
         if (await commercial.handle(request, response, pathname)) return;
         if (await campaigns.handle(request, response, pathname)) return;
+        if (await proposals.handle(request, response, pathname)) return;
         if (pathname === '/api/v1/missions' && request.method === 'POST') {
           const body = await jsonBody(request);
           const host = {
