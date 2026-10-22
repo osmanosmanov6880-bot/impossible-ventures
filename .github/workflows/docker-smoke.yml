@@ -32,7 +32,7 @@ jobs:
             -e DB_PATH=/data/missions.sqlite \
             dead-drop-smoke
           curl --retry 30 --retry-all-errors --retry-delay 1 --connect-timeout 3 --max-time 5 -fsS \
-            http://127.0.0.1:3017/api/v1/health
+            http://127.0.0.1:3017/api/v1/ready
       - name: Verify app process dropped root privileges
         run: |
           docker exec dead-drop-ci sh -c \
@@ -65,7 +65,7 @@ jobs:
             -e DB_PATH=/data/missions.sqlite \
             dead-drop-smoke
           curl --retry 30 --retry-all-errors --retry-delay 1 --connect-timeout 3 --max-time 5 -fsS \
-            http://127.0.0.1:3017/api/v1/health
+            http://127.0.0.1:3017/api/v1/ready
           node --input-type=module <<'JS'
           import { readFileSync } from 'node:fs';
           const { code, token } = JSON.parse(readFileSync('/tmp/dead-drop-ci-room.json', 'utf8'));
@@ -76,10 +76,45 @@ jobs:
           const data = await response.json();
           if (data.mission.brand !== 'Smoke Test Studio') throw new Error('Wrong mission restored');
           JS
+      - name: Backup and restore a live SQLite WAL volume
+        run: |
+          docker exec -u node dead-drop-ci-restart node scripts/db-recovery.mjs inspect \
+            --db /data/missions.sqlite
+          docker exec -u node dead-drop-ci-restart node scripts/db-recovery.mjs backup \
+            --db /data/missions.sqlite \
+            --out /data/ci-snapshot.sqlite
+          docker exec -u node dead-drop-ci-restart node scripts/db-recovery.mjs restore \
+            --from /data/ci-snapshot.sqlite \
+            --out /data/ci-recovered.sqlite
+          docker exec -u node dead-drop-ci-restart node scripts/db-recovery.mjs inspect \
+            --db /data/ci-recovered.sqlite
+          docker exec -u node dead-drop-ci-restart node --input-type=module -e \
+            "import {statSync} from 'node:fs'; if ((statSync('/data/ci-snapshot.sqlite').mode & 0o777)!==0o600) process.exit(1); if ((statSync('/data/ci-recovered.sqlite').mode & 0o777)!==0o600) process.exit(1);"
+      - name: Boot a recovered database in a separate test container
+        run: |
+          docker run -d --rm --name dead-drop-ci-recovered \
+            -p 127.0.0.1:3018:3000 \
+            -v dead-drop-ci-data:/data \
+            -e PORT=3000 \
+            -e DB_PATH=/data/ci-recovered.sqlite \
+            dead-drop-smoke
+          curl --retry 30 --retry-all-errors --retry-delay 1 --connect-timeout 3 --max-time 5 -fsS \
+            http://127.0.0.1:3018/api/v1/ready
+          node --input-type=module <<'JS'
+          import { readFileSync } from 'node:fs';
+          const { code, token } = JSON.parse(readFileSync('/tmp/dead-drop-ci-room.json', 'utf8'));
+          const response = await fetch('http://127.0.0.1:3018/api/v1/missions/' + code, {
+            headers: { Authorization: 'Bearer ' + token }
+          });
+          if (response.status !== 200) throw new Error('Recovered container lost the mission');
+          const data = await response.json();
+          if (data.mission.brand !== 'Smoke Test Studio') throw new Error('Restored mission mismatch');
+          JS
       - name: Tear down temporary containers and test volume
         if: always()
         run: |
           docker logs dead-drop-ci || true
           docker logs dead-drop-ci-restart || true
-          docker rm -f dead-drop-ci dead-drop-ci-restart || true
+          docker logs dead-drop-ci-recovered || true
+          docker rm -f dead-drop-ci dead-drop-ci-restart dead-drop-ci-recovered || true
           docker volume rm dead-drop-ci-data || true
