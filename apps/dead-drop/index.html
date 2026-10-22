@@ -62,6 +62,22 @@
     </aside>
   </div>
 
+  <dialog id="deleteDialog" class="delete-dialog" aria-labelledby="deleteDialogTitle" aria-describedby="deleteDialogDescription">
+    <form id="deleteMissionForm" novalidate>
+      <div class="eyebrow">DATA CONTROL / MISSION ERASURE</div>
+      <h2 id="deleteDialogTitle">DELETE MISSION PERMANENTLY</h2>
+      <p id="deleteDialogDescription">Both agents will lose access to the room, messages, private intelligence and dossier. This cannot be undone.</p>
+      <label class="confirmation-label" for="deleteConfirmCode">TYPE THIS ROOM CODE TO CONFIRM</label>
+      <div class="confirmation-code" id="deleteExpectedCode" data-no-translate></div>
+      <input id="deleteConfirmCode" name="roomCode" maxlength="8" spellcheck="false" autocomplete="off" autocapitalize="characters" required placeholder="ROOM CODE">
+      <p class="confirmation-error" id="deleteError" role="alert"></p>
+      <div class="form-footer">
+        <button type="button" class="btn btn-ghost" id="cancelDeleteButton">CANCEL</button>
+        <button type="submit" class="btn btn-danger" id="confirmDeleteButton">DELETE ON SERVER</button>
+      </div>
+    </form>
+  </dialog>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <footer class="legal-strip">
     <span>DEAD DROP AGENCY © 2026 · AN IMPOSSIBLE VENTURES EXPERIMENT</span>
