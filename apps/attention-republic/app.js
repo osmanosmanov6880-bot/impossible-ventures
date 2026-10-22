@@ -122,6 +122,12 @@ function updateCatalog(){
  updateControls();
 }
 async function loadCatalog(){
+ if(document.body.dataset.staticPreview==='true'){
+   challenges=[];
+   el('connection').textContent=t('offline');
+   updateCatalog();
+   return;
+ }
  try{
    const res=await fetch('/api/v1/republic/challenges',{cache:'no-store'});
    if(!res.ok)throw new Error('No API');
