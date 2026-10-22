@@ -42,13 +42,13 @@
         <h2 class="panel-title" data-i18n="resultsTitle">Три вопроса без компромиссов.</h2>
         <div class="steps"><span class="step active">01 / ATTACK</span><span class="step">02 / DEFEND</span><span class="step">03 / REVISE</span></div>
         <div id="challengeList" class="results"></div>
-        <form id="defenseForm" class="card" style="margin-top:22px">
+        <form id="defenseForm" class="card after-cards">
           <div class="card-top" data-i18n="defenseLabel">ВАША ОЧЕРЕДЬ / ОТВЕТИТЬ НА ОДИН ВОПРОС</div>
           <label class="field"><span data-i18n="which">Какой вопрос выбираете?</span><select id="chosenChallenge"></select></label>
           <label class="field"><span data-i18n="answer">Ваша защита идеи</span><textarea id="defense" minlength="12" maxlength="900" required placeholder="Какой конкретный факт или тест снимет сомнение?" data-placeholder="defensePlaceholder"></textarea></label>
           <button class="button wide" type="submit" data-i18n="defend">ПРОВЕРИТЬ ЗАЩИТУ ↗</button>
         </form>
-        <section id="defenseResult" class="card" style="margin-top:15px" hidden aria-live="polite">
+        <section id="defenseResult" class="card after-result" hidden aria-live="polite">
           <div class="card-top" data-i18n="revision">РЕДАКТОРСКАЯ ОБРАТНАЯ СВЯЗЬ</div>
           <div class="quote" id="responseRating"></div>
           <p id="responseAdvice"></p><p class="notice" data-i18n="notProof">Даже сильная защита — это структура аргумента, а не независимое подтверждение.</p>
