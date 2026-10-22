@@ -435,6 +435,13 @@ const proposalUI={
 };
 const proposalState={items:[],summary:null,editing:null};
 Object.assign(dict.ru,{
+ privacyToolsNote:'Владелец может выгрузить данные своей организации или удалить весь кабинет. Удаление закрывает макеты и приватные предложения.',
+ exportWorkspace:'ЭКСПОРТИРОВАТЬ ДАННЫЕ JSON ↓',deleteWorkspace:'УДАЛИТЬ ОРГАНИЗАЦИЮ',
+ workspaceExportDone:'Приватный экспорт сформирован. Храните его в безопасном месте.',
+ deleteConfirmPrompt:'Чтобы удалить всё без возможности отмены, введите точное название организации:',
+ deleteMismatch:'Название организации не совпало. Ничего не удалено.',
+ workspaceDeleted:'Рабочее пространство и связанные данные удалены из активной базы данных.',
+
  demoHeading:'Сначала просто посмотрите, как всё устроено.',
  demoExplain:'Деморежим открывает все семь творческих шаблонов и редактор без ключей, записи данных и регистрации.',
  viewDemo:'ОТКРЫТЬ ДЕМО БЕЗ РЕГИСТРАЦИИ →',demoStatus:'Открыта локальная демонстрация. Ничего не сохраняется и не публикуется.',
@@ -453,6 +460,13 @@ Object.assign(dict.ru,{
  acceptedNominal:'ПРИНЯТЫХ ПРЕДЛОЖЕНИЙ',sentNominal:'ОЖИДАЮТ РЕШЕНИЯ',realRevenue:'ПОДТВЕРЖДЁННЫХ ПЛАТЕЖЕЙ: НЕТ ИНТЕГРАЦИИ'
 });
 Object.assign(dict.en,{
+ privacyToolsNote:'Owners may export workspace data or delete the entire account. Deletion disables previews and private proposal links.',
+ exportWorkspace:'EXPORT PRIVATE JSON ↓',deleteWorkspace:'DELETE WORKSPACE',
+ workspaceExportDone:'Private export created. Store it securely.',
+ deleteConfirmPrompt:'To permanently delete this workspace, type its exact name:',
+ deleteMismatch:'Workspace name did not match. No changes made.',
+ workspaceDeleted:'Workspace and related data removed from active database.',
+
  demoHeading:'Explore the platform before creating an account.',
  demoExplain:'Preview seven creative worlds and the editor without credentials or server writes.',
  viewDemo:'EXPLORE WITHOUT REGISTRATION →',demoStatus:'Local preview is open. No campaign or proposal is stored.',
@@ -471,6 +485,13 @@ Object.assign(dict.en,{
  acceptedNominal:'ACCEPTED PROPOSALS',sentNominal:'AWAITING DECISION',realRevenue:'VERIFIED PAYMENTS: NOT INTEGRATED'
 });
 Object.assign(dict.zh,{
+ privacyToolsNote:'所有者可以导出工作空间数据或删除整个工作空间。删除后预览与私人报价链接立即失效。',
+ exportWorkspace:'导出私人 JSON ↓',deleteWorkspace:'删除工作空间',
+ workspaceExportDone:'私人数据导出完成，请妥善保管。',
+ deleteConfirmPrompt:'如需永久删除，请输入工作空间的完整准确名称：',
+ deleteMismatch:'名称不匹配，未删除任何数据。',
+ workspaceDeleted:'工作空间和相关记录已从活动数据库删除。',
+
  demoHeading:'无需注册，先了解平台。',
  demoExplain:'预览七种创意世界和编辑器，不需要密钥，也不会保存数据。',
  viewDemo:'免注册体验 →',demoStatus:'本地预览已打开。不会保存或发布任何活动。',
@@ -643,6 +664,30 @@ proposalUI.form.addEventListener('submit',async event=>{
  finally{save.disabled=state.role==='viewer'}
 });
 elements.logout.addEventListener('click',()=>{proposalState.items=[];proposalState.summary=null;proposalUI.receipt.replaceChildren()});
+document.getElementById('exportWorkspace').addEventListener('click',async()=>{
+ if(state.role!=='owner'||!state.workspaceId)return;
+ try{
+   const data=await api('/api/v1/workspaces/'+state.workspaceId+'/export');
+   const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+   const link=el('a');link.href=url;link.download='iv-workspace-'+state.workspaceId+'-private-export.json';
+   document.body.append(link);link.click();link.remove();URL.revokeObjectURL(url);
+   feedback(t('workspaceExportDone'));
+ }catch(err){feedback(err.message,true)}
+});
+document.getElementById('deleteWorkspace').addEventListener('click',async()=>{
+ if(state.role!=='owner'||!state.workspaceId)return;
+ const typed=window.prompt(t('deleteConfirmPrompt')+' '+state.workspaceName);
+ if(typed===null)return;
+ if(typed!==state.workspaceName){feedback(t('deleteMismatch'),true);return}
+ const id=state.workspaceId;
+ try{
+   const r=await api('/api/v1/workspaces/'+id,{method:'DELETE',body:{confirmName:typed}});
+   if(!r.deleted)throw Error('No deletion acknowledgement');
+   elements.logout.click();
+   feedback(t('workspaceDeleted'));
+ }catch(err){feedback(err.message,true)}
+});
+
 
 const staticTemplates=[
  {id:'dead-drop',name:'Dead Drop Agency',audience:'Маркетологи и основатели',concept:'Совместная секретная миссия двух рекламных агентов.',exampleHeadline:'У вас есть одно секретное задание.',exampleBody:'Один агент знает продукт, второй — аудиторию. Совместите сведения в рекламной истории.',accent:'cyan'},
