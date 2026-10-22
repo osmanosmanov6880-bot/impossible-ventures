@@ -1,4 +1,4 @@
-# Deployment playbook — Dead Drop cooperative alpha (v0.5)
+# Deployment playbook — Impossible Ventures commercial research alpha (v1.0 beta)
 
 **Status:** deployment source/configuration is prepared, but **no public Node server, Railway project, verified domain, or paid model connection is claimed**. Use a controlled staging environment with synthetic test data only. Never put API secrets in Git.
 
@@ -12,6 +12,18 @@ The Docker image also includes the Experiment Lab operator and participant workf
 - /api/v1/operator/experiments — protected API; no third-party ad networks are connected.
 
 A valid HTTPS staging domain, signed off data handling, distributed rate limits, a verified controller, backups and a threat-model review are still **required before real customer data**.
+
+## Commercial five-wave staging notes
+
+Commercial Command v1.0-beta includes: /commercial/ (public local demo and authenticated workspace), /showcase/ (approved creative only), /proposal/ (protected customer-facing proposal), /experiments/ and /pilot/.
+
+- Before starting the container, set a secret-manager-controlled OPERATOR_TOKEN of at least 32 unpredictable characters. docker compose passes OPERATOR_TOKEN from the local environment; the .env.example contains only an empty placeholder.
+- Create one synthetic organization with the system token. Save the one-time owner credential in a password manager. Do not screenshot, commit, paste or log it.
+- Workspaces are separated with application-level credential checks, not a production multi-tenant database security layer.
+- The app calculates proposal values in integer cents but **does not collect or verify money**. Do not describe accepted links as paid contracts or Stripe transactions.
+- Static GitHub Pages/Actions preview includes only a no-login seven-world creative editor, Pilot Studio scenario calculations and local untracked experiments. It does not include private proposal customer links or backend operator screens.
+- Server-side A/B receipts can connect a first CTA to a separately consented Pilot Studio form; a form submission still does not verify customer identity or a sale.
+- See [full five-wave release and strict go-live gates](five-wave-release.md).
 
 ## Local Docker smoke
 
