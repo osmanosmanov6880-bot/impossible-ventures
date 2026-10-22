@@ -1,0 +1,70 @@
+# Deployment playbook — Dead Drop cooperative alpha (v0.5)
+
+**Status:** deployment source/configuration is prepared, but **no public Node server, Railway project, verified domain, or paid model connection is claimed**. Use a controlled staging environment with synthetic test data only. Never put API secrets in Git.
+
+## Local Docker smoke
+
+```bash
+docker compose up --build -d
+curl -fsS http://localhost:3000/api/v1/health
+docker compose logs -f
+```
+
+Open http://localhost:3000/apps/dead-drop/ and create a room in one browser; join from another browser. The named volume `mission-data` holds `/data/missions.sqlite` across container restarts.
+
+```bash
+docker compose down
+```
+
+**Avoid** `docker compose down -v` if you want to retain the test database; `-v` destroys named volumes.
+
+### Container security model
+
+The `Dockerfile` installs `su-exec`. Its minimal entrypoint starts as root to make a mounted `/data` directory writable, then immediately launches Node as the unprivileged `node` account. The Node server binds to `0.0.0.0:${PORT:-3000}`; the container healthcheck uses the configured port. The app is deliberately a **single writer / single-instance SQLite deployment**.
+
+## Railway staging deployment — prepared, not executed
+
+1. Open [Railway](https://railway.com/) and create a new project.
+2. Connect the **GitHub repository** `osmanosmanov6880-bot/impossible-ventures` as the service source.
+3. Railway should detect the root `Dockerfile` automatically. The committed `railway.json` defines the health endpoint `/api/v1/health`.
+4. Attach a **persistent Railway Volume** to the service with mount path **`/data`**. This is essential. The SQLite database must not live solely in ephemeral container storage.
+5. Under service variables, set `DB_PATH=/data/missions.sqlite`. Set `RAILWAY_RUN_UID=0` if required by Railway's root-owned volume mount. The Docker entrypoint then drops privileges to `node` before launching the app. `PORT` can be supplied by Railway.
+6. **Do not enable `OPENAI_API_KEY` initially.** Keep the deterministic game functional while testing the hosting setup. If/when you add optional AI, set `OPENAI_API_KEY` and `OPENAI_MODEL` as Railway **secrets**, not source files, and enforce a provider spend limit. Both agents still must opt in.
+7. Keep **one replica**. Never scale this SQLite container horizontally or deploy into multiple regions without first migrating persistence to a shared managed database with safe transactions.
+8. In the service Networking settings, **Generate Domain** (or attach your verified domain) and confirm HTTPS is active. Copy the actual assigned URL only after deployment succeeds; do not guess it.
+9. Confirm both endpoints work:
+
+   ```bash
+   curl -fsS "https://YOUR-ASSIGNED-DOMAIN/api/v1/health"
+   ```
+
+   Open `https://YOUR-ASSIGNED-DOMAIN/apps/dead-drop/` in two browsers, check room joining, role isolation, finalization and JSON export. Test deletion and confirm both roles are revoked.
+10. Configure disk backups, monitoring, service access, domain ownership, incident response and resource budgets in the hosting account before any customer pilot. Logs must not capture private campaign payloads or bearer tokens.
+
+Official Railway documentation:
+- [Dockerfile detection](https://docs.railway.com/builds/dockerfiles)
+- [Volume creation, mounting, and non-root images](https://docs.railway.com/volumes)
+- [Public domains](https://docs.railway.com/guides/docker-compose)
+- [Deploy-time healthchecks](https://docs.railway.com/deployments/healthchecks)
+- [Config as code](https://docs.railway.com/config-as-code)
+
+## GitHub Pages (static training mode only)
+
+The `.github/workflows/pages.yml` workflow packages the portfolio, Dead Drop static app, Appeal 2049 static app and `privacy.html` when changes reach `main`. If Pages has not been enabled with GitHub Actions as its source, an administrator must configure the repository's Pages settings. **No live Pages URL is asserted.**
+
+Static mode is intentionally training-only. GitHub Pages **cannot** run the Node mission API, SQLite, or optional AI.
+
+## Operational release checklist
+
+- [ ] GitHub Actions quality gates and Chromium tests green on the release commit
+- [ ] Docker build and restart/persistence smoke test green
+- [ ] Persistent volume attached at `/data`
+- [ ] HTTPS and assigned public domain verified
+- [ ] Role isolation tested on the deployed staging URL
+- [ ] JSON export, confirmation-based deletion, restart and expiry tested
+- [ ] AI disabled by default; provider keys not in repo/logs
+- [ ] Login/abuse/bot controls, rate-limits and audit requirements reviewed
+- [ ] Restore backup and deletion/privacy impact documented
+- [ ] Privacy controller, legal basis and supplier transfer assessment completed for any real data
+
+A green staging demo is **not** enough to describe this as a production, GDPR-certified or commercially scaled platform.
