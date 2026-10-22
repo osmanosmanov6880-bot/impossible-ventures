@@ -31,6 +31,10 @@ const localeCopy = {
   scoreNotice:'Игровые баллы: только эвристика сценария, не клики и не статистика.',
   disclaimer:'ЛОКАЛЬНЫЙ ТВОРЧЕСКИЙ ТРЕНАЖЁР / НЕТ ТРЕКИНГА',
   reportWarning:'Это художественный сценарий и гипотезы, а не настоящие показы, продажи, аудитория или платформа размещения.',
+  privacyBanner:'ПРИВАТНОСТЬ / Вводимые сведения используются только здесь, в браузере. Мы не отправляем тексты игры серверу и не сохраняем их автоматически.',
+  stageTitle:'ВАШИ РЕШЕНИЯ.',
+  stageIntro:'Каждое решение меняет дальнейший рассказ и итоговый креатив. Баллы — игровая эвристика, не настоящая рекламная аналитика.',
+  footerWarning:'НЕ СОБИРАЕМ ПОЛЬЗОВАТЕЛЬСКИЕ СОБЫТИЯ • НЕ ИМИТИРУЕМ РЕАЛЬНЫЕ ПРОДАЖИ',
   stageDone:'Принято. Следующая глава открыта.',success:'Ваша творческая работа готова к экспорту.',
   count:'из',line:'Ваша реплика',withoutLine:'Без авторской реплики',metric:'ИГРОВЫЕ ПОКАЗАТЕЛИ',
   finalAct:'ИТОГИ ВЫБОРА',control:'Контроль',world:'Вселенная'
@@ -48,6 +52,10 @@ const localeCopy = {
   scoreNotice:'Game scores are design heuristics, never clicks or real performance.',
   disclaimer:'BROWSER-ONLY CREATIVE WORKSHOP / NO TRACKING',
   reportWarning:'An authored simulation and hypotheses, not actual impressions, customers, sales or a live ad network.',
+  privacyBanner:'PRIVACY / Your input stays inside this browser experience. Nothing is automatically saved or submitted to our business APIs.',
+  stageTitle:'YOUR DECISIONS.',
+  stageIntro:'Each decision changes the narrative and resulting creative artifact. Game scores are heuristics, not advertising analytics.',
+  footerWarning:'NO PARTICIPANT TRACKING • NO SIMULATED REAL SALES',
   stageDone:'Decision recorded. Next chapter opened.',success:'Your creative artifact is ready to export.',
   count:'of',line:'Your authored line',withoutLine:'No authored line',metric:'ILLUSTRATIVE METRICS',
   finalAct:'YOUR DECISIONS',control:'Control',world:'World'
@@ -65,6 +73,10 @@ const localeCopy = {
   scoreNotice:'游戏分数只是设计启发，不代表真实点击或效果。',
   disclaimer:'仅浏览器本地创作 / 不跟踪',
   reportWarning:'这是创意模拟与假设，并非真实展示、客户、销售或广告网络。',
+  privacyBanner:'隐私说明 / 您输入的信息仅在当前浏览器体验中使用，不会自动保存或发送至业务API。',
+  stageTitle:'您的选择。',
+  stageIntro:'每个决定都会改变故事与最终创意。游戏分数仅是启发式模型，不代表真实广告数据。',
+  footerWarning:'不追踪参与者 • 不虚构真实销售',
   stageDone:'选择已记录。下一章已开启。',success:'您的创意成果可以下载。',
   count:'共',line:'您的原创台词',withoutLine:'无原创台词',metric:'示意指标',
   finalAct:'您的选择',control:'控制',world:'世界'
@@ -98,6 +110,11 @@ function renderIntro() {
  ui.heroDescription.textContent=info.introduction;
  ui.heroGoal.textContent=info.objective;
  ui.heroDisclaimer.textContent=tr('disclaimer');
+ document.getElementById('privacyBanner').textContent=tr('privacyBanner');
+ document.getElementById('asideExplain').textContent=info.objective;
+ document.getElementById('stageTitle').textContent=tr('stageTitle');
+ document.getElementById('stageIntro').textContent=tr('stageIntro');
+ document.getElementById('footerWarning').textContent=tr('footerWarning');
  const submit=ui.projectForm.querySelector('button[type="submit"]');
  submit.textContent=tr('start');
  ui.demoProject.textContent=tr('demo');

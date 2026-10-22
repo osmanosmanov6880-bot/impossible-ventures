@@ -66,7 +66,7 @@
       <div class="panel setup-panel">
         <div class="panel-header"><span>START / DEFINE THE BRIEF</span><span>LOCAL INPUT ONLY</span></div>
         <div class="panel-content">
-          <div class="privacy-banner">INPUT PRIVACY / Данные используются только для этого сценария в браузере. Не отправляются на сервер и не сохраняются автоматически.</div>
+          <div class="privacy-banner" id="privacyBanner">INPUT PRIVACY / Данные используются только для этого сценария в браузере. Не отправляются на сервер и не сохраняются автоматически.</div>
           <form id="projectForm">
             <label class="field" for="brand"><span>БРЕНД / КОМАНДА</span>
               <input id="brand" name="brand" type="text" minlength="2" maxlength="90" required autocomplete="organization" placeholder="Aurora Creative Lab">
@@ -89,7 +89,7 @@
         <div class="aside-stage">
           <small>INDIVIDUAL WORLD / THE COUNCIL SIMULATION</small>
           <strong>Attention Republic</strong>
-          <p>Пять игровых решений об участии, доверии и ответственном спонсорстве. Ваши решения определяют итоговый творческий материал, а не виртуальные продажи.</p>
+          <p id="asideExplain">Пять игровых решений об участии, доверии и ответственном спонсорстве. Ваши решения определяют итоговый творческий материал, а не виртуальные продажи.</p>
           <span class="tiny">01 → CREATIVE INPUT &nbsp; 02 → INTERACTIVE CHOICE &nbsp; 03 → EXPORT</span>
         </div>
       </aside>
@@ -98,8 +98,8 @@
 
   <section class="section shell experience" id="sessionPanel" hidden>
     <div class="section-intro">
-      <div><div class="eyebrow">02 / INTERACTIVE JOURNEY</div><h2>CREATIVE <span>DECISIONS.</span></h2></div>
-      <p>Каждый выбор меняет стратегические приоритеты и текст итогового сценария. Никакие оценки не являются настоящей конверсией.</p>
+      <div><div class="eyebrow">02 / INTERACTIVE JOURNEY</div><h2 id="stageTitle">CREATIVE DECISIONS.</h2></div>
+      <p id="stageIntro">Каждое решение меняет игровую историю. Это не реальные конверсии.</p>
     </div>
     <div class="progress-head"><span id="progressText">ГЛАВА 01</span><span>LOCAL / UNTRACKED</span></div>
     <progress id="progress" value="0" max="5" aria-label="Stage progress"></progress>
@@ -159,7 +159,7 @@
 </main>
 <footer class="footer shell">
   <span>© 2026 IMPOSSIBLE VENTURES / ATTENTION REPUBLIC</span>
-  <span>NO FAKE ANALYTICS • NO PERSONAL TRACKING • NO AD DELIVERY</span>
+  <span id="footerWarning">NO FAKE ANALYTICS • NO PERSONAL TRACKING • NO AD DELIVERY</span>
   <a href="../../commercial/">COMMERCIAL COMMAND ↗</a>
   <a href="../../privacy.html">DATA & PRIVACY ↗</a>
 </footer>
