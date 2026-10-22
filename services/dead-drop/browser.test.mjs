@@ -356,3 +356,46 @@ test('browser exports only one agent view, confirms erasure and revokes both ses
   );
   assert.deepEqual(errors.filter(message => !message.includes('404 (Not Found)')), []);
 });
+
+
+test('status dashboard verifies live SQLite writes, multilingual copy and degraded recovery on mobile', async t => {
+  const { app, context, base } = await setup(t, 390, 844);
+  const page = await context.newPage();
+  const exceptions = [];
+  const failedRequests = [];
+  page.on('pageerror', e => exceptions.push(e.message));
+  page.on('response', response => {
+    if (response.status >= 400) failedRequests.push({
+      url: new URL(response.url()).pathname, status: response.status()
+    });
+  });
+  await page.goto(base + '/status/');
+  await page.waitForFunction(() => document.getElementById('statusPlate')?.dataset.state === 'ok');
+  assert.match(await page.locator('#overallStatus').textContent(), /Система отвечает/);
+  assert.match(await page.locator('#storageStatus').textContent(), /Запись подтверждена/);
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false);
+  mkdirSync('artifacts', { recursive: true });
+  await page.screenshot({ path: 'artifacts/status-ru-mobile.png', fullPage: true });
+
+  await page.locator('#statusLocale').selectOption('en');
+  assert.equal(await page.locator('#overallStatus').textContent(), 'Service is responding');
+  assert.equal(await page.locator('#modeValue').textContent(), 'Single Node.js server');
+  await page.locator('#statusLocale').selectOption('zh');
+  assert.equal(await page.locator('#overallStatus').textContent(), '服务响应正常');
+
+  // A failed SQLite write must cause a visibly DEGRADED state, not green.
+  app.db.exec('DROP TABLE runtime_healthcheck');
+  await page.locator('#refreshStatus').click();
+  await page.waitForFunction(() => document.getElementById('statusPlate')?.dataset.state === 'error');
+  assert.equal(await page.locator('#overallStatus').textContent(), '需要处理');
+  assert.equal(await page.locator('#processMetric').getAttribute('data-state'), 'ok');
+  assert.equal(await page.locator('#storageMetric').getAttribute('data-state'), 'error');
+  assert.deepEqual(failedRequests, [{ url: '/api/v1/ready', status: 503 }]);
+  await page.screenshot({ path: 'artifacts/status-degraded-mobile.png', fullPage: true });
+
+  app.db.exec('CREATE TABLE runtime_healthcheck (id INTEGER PRIMARY KEY, touched_at INTEGER NOT NULL)');
+  await page.locator('#refreshStatus').click();
+  await page.waitForFunction(() => document.getElementById('statusPlate')?.dataset.state === 'ok');
+  assert.equal(await page.locator('#overallStatus').textContent(), '服务响应正常');
+  assert.deepEqual(exceptions, []);
+});
