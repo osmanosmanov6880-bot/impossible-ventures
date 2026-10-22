@@ -30,7 +30,7 @@ function digestMatches(value, digestHex) {
 
 function bearer(request) {
   const value = request.headers.authorization || '';
-  return /^Bearer [A-Za-z0-9_-]+$/.test(value) ? value.slice(7) : '';
+  return /^Bearer [A-Za-z0-9._~+/-]+=*$/.test(value) ? value.slice(7) : '';
 }
 
 function field(value, label, ApiError, min = 3, max = 180) {
@@ -87,6 +87,9 @@ function operatorView(row) {
     hypothesis: row.hypothesis,
     controlHeadline: row.control_headline, controlBody: row.control_body,
     variantHeadline: row.variant_headline, variantBody: row.variant_body,
+    decisionPrompt: row.decision_prompt,
+    choiceOneLabel: row.choice_one_label, choiceOneReveal: row.choice_one_reveal,
+    choiceTwoLabel: row.choice_two_label, choiceTwoReveal: row.choice_two_reveal,
     ctaLabel: row.cta_label, status: row.status,
     createdAt: row.created_at, updatedAt: row.updated_at
   };
@@ -98,7 +101,10 @@ export function createExperimentRouter({ db, now = Date.now, operatorToken = '',
     'id TEXT PRIMARY KEY, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, ' +
     'title TEXT NOT NULL, audience TEXT NOT NULL, offer TEXT NOT NULL, hypothesis TEXT NOT NULL, ' +
     'control_headline TEXT NOT NULL, control_body TEXT NOT NULL, ' +
-    'variant_headline TEXT NOT NULL, variant_body TEXT NOT NULL, cta_label TEXT NOT NULL, status TEXT NOT NULL);' +
+    'variant_headline TEXT NOT NULL, variant_body TEXT NOT NULL, ' +
+    'decision_prompt TEXT NOT NULL, choice_one_label TEXT NOT NULL, choice_one_reveal TEXT NOT NULL, ' +
+    'choice_two_label TEXT NOT NULL, choice_two_reveal TEXT NOT NULL, ' +
+    'cta_label TEXT NOT NULL, status TEXT NOT NULL);' +
     'CREATE TABLE IF NOT EXISTS ab_sessions (' +
     'id TEXT PRIMARY KEY, experiment_id TEXT NOT NULL, arm TEXT NOT NULL, token_hash TEXT NOT NULL, ' +
     'created_at INTEGER NOT NULL, cohort_day INTEGER NOT NULL, cta_recorded INTEGER NOT NULL DEFAULT 0);' +
@@ -206,8 +212,16 @@ export function createExperimentRouter({ db, now = Date.now, operatorToken = '',
         controlBody: field(body.controlBody, 'Control copy', ApiError, 10, 450),
         variantHeadline: field(body.variantHeadline, 'Variant headline', ApiError, 5, 125),
         variantBody: field(body.variantBody, 'Variant copy', ApiError, 10, 450),
+        decisionPrompt: field(body.decisionPrompt, 'Decision prompt', ApiError, 8, 220),
+        choiceOneLabel: field(body.choiceOneLabel, 'First choice', ApiError, 3, 70),
+        choiceOneReveal: field(body.choiceOneReveal, 'First story outcome', ApiError, 8, 280),
+        choiceTwoLabel: field(body.choiceTwoLabel, 'Second choice', ApiError, 3, 70),
+        choiceTwoReveal: field(body.choiceTwoReveal, 'Second story outcome', ApiError, 8, 280),
         ctaLabel: field(body.ctaLabel, 'CTA label', ApiError, 3, 45)
       };
+      if (data.choiceOneLabel === data.choiceTwoLabel) {
+        throw new ApiError(422, 'Interactive choices must be distinct');
+      }
       if (data.controlHeadline === data.variantHeadline && data.controlBody === data.variantBody) {
         throw new ApiError(422, 'The control and interactive variant must differ');
       }
@@ -215,11 +229,13 @@ export function createExperimentRouter({ db, now = Date.now, operatorToken = '',
       const createdAt = now();
       db.prepare(
         'INSERT INTO ab_experiments (id,created_at,updated_at,title,audience,offer,hypothesis,' +
-        'control_headline,control_body,variant_headline,variant_body,cta_label,status) ' +
-        'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)'
+        'control_headline,control_body,variant_headline,variant_body,' +
+        'decision_prompt,choice_one_label,choice_one_reveal,choice_two_label,choice_two_reveal,cta_label,status) ' +
+        'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
       ).run(id, createdAt, createdAt, data.title, data.audience, data.offer, data.hypothesis,
         data.controlHeadline, data.controlBody, data.variantHeadline, data.variantBody,
-        data.ctaLabel, 'draft');
+        data.decisionPrompt, data.choiceOneLabel, data.choiceOneReveal, data.choiceTwoLabel,
+        data.choiceTwoReveal, data.ctaLabel, 'draft');
       sendJSON(response, 201, { created: true, id, status: 'draft', sharePath: '/experiments/?id=' + id });
       return true;
     }
@@ -264,7 +280,14 @@ export function createExperimentRouter({ db, now = Date.now, operatorToken = '',
         creative: {
           headline: arm === 'A' ? exp.control_headline : exp.variant_headline,
           body: arm === 'A' ? exp.control_body : exp.variant_body,
-          offer: exp.offer, ctaLabel: exp.cta_label
+          offer: exp.offer, ctaLabel: exp.cta_label,
+          interaction: arm === 'B' ? {
+            prompt: exp.decision_prompt,
+            choices: [
+              { label: exp.choice_one_label, reveal: exp.choice_one_reveal },
+              { label: exp.choice_two_label, reveal: exp.choice_two_reveal }
+            ]
+          } : null
         },
         disclaimer: 'Random first-party research assignment. A session start is not a verified human impression. No cookies, ad network or personal identity tracking.'
       });
