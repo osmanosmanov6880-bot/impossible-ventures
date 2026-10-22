@@ -121,7 +121,11 @@ async function api(path, method = 'GET', body) {
       signal: abort.signal
     });
     const result = await response.json();
-    if (!response.ok) throw new Error(result.error || 'Request failed');
+    if (!response.ok) {
+      const error = new Error(result.error || 'Request failed');
+      error.status = response.status;
+      throw error;
+    }
     return result;
   } finally {
     clearTimeout(timeout);
@@ -138,6 +142,11 @@ async function syncMission(silent = false) {
       render();
     }
   } catch (error) {
+    if (error.status === 404 || error.status === 410) {
+      clearMission();
+      showToast(t('This mission was deleted or has expired.'));
+      return;
+    }
     if (!silent) showToast('Could not restore mission: ' + error.message);
   }
 }
@@ -277,6 +286,58 @@ function buildTrainingDossier(mission) {
   }, state.locale);
 }
 
+function renderPrivacyPanel(mission) {
+  if (state.mode === 'training') {
+    return '<section class="privacy-panel" aria-label="Mission privacy"><div class="eyebrow">YOUR DATA / TRAINING</div>' +
+      '<h2>Training data stays in this browser session.</h2>' +
+      '<p>No training data has been sent to our mission server. Leaving the session discards this local simulation.</p></section>';
+  }
+  if (!mission) return '';
+  const readableDate = new Date(mission.expiresAt).toLocaleString(
+    { ru: 'ru-RU', en: 'en-GB', zh: 'zh-CN' }[state.locale] || 'en-GB',
+    { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
+  );
+  return '<section class="privacy-panel" aria-label="Mission privacy">' +
+    '<div class="privacy-panel-head"><div><div class="eyebrow">YOUR DATA / MISSION CONTROL</div>' +
+    '<h2>Export or erase this mission.</h2></div><span class="badge signal">AGENT ACCESS</span></div>' +
+    '<p>Export contains only the data your role is authorized to view. Deletion removes the shared mission for BOTH agents.</p>' +
+    '<div class="privacy-expiry"><span>ROOM EXPIRY</span><strong data-no-translate>' + safe(readableDate) + '</strong></div>' +
+    '<div class="privacy-actions"><button type="button" class="btn btn-ghost" data-action="export-my-data">EXPORT MY DATA .JSON ↓</button>' +
+    '<button type="button" class="btn btn-danger-outline" data-action="delete-mission">DELETE MISSION</button></div>' +
+    '<a class="privacy-notice-link" href="../../privacy.html" target="_blank" rel="noopener noreferrer">READ THE DATA HANDLING NOTICE ↗</a>' +
+    '</section>';
+}
+
+function downloadJSON(value, filename) {
+  const blob = new Blob([JSON.stringify(value, null, 2)], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function leaveSession() {
+  if (state.mode === 'live' && state.room) {
+    if (!window.confirm(t('Leaving only removes this browser session. The shared room remains on the server until deleted or expired. Leave anyway?'))) return;
+  }
+  clearMission();
+}
+
+function openDeleteDialog() {
+  if (state.mode !== 'live' || !state.room) return;
+  const dialog = document.getElementById('deleteDialog');
+  document.getElementById('deleteConfirmCode').value = '';
+  document.getElementById('deleteExpectedCode').textContent = state.room;
+  document.getElementById('deleteError').textContent = '';
+  if (window.DeadDropLocale) window.DeadDropLocale.apply(dialog);
+  dialog.showModal();
+  document.getElementById('deleteConfirmCode').focus();
+}
+
 function renderRoom() {
   const mission = state.mode === 'training' ? localView() : state.mission;
   if (!mission) return renderIntro();
@@ -338,7 +399,8 @@ function renderRoom() {
     '<div class="room-actions"><button type="button" class="btn btn-primary" data-action="finalize"' +
     (canFinalize ? '' : ' disabled') + '>DECODE THE CREATIVE DOSSIER ↗</button><small>' +
     (canFinalize ? 'Both agents have transmitted. Your dossier is ready.' :
-      'Each agent must send at least one transmission before decoding.') + '</small></div>';
+      'Each agent must send at least one transmission before decoding.') + '</small></div>' +
+    renderPrivacyPanel(mission);
 }
 
 function resultCard(label, heading, body, wide = false) {
@@ -372,7 +434,8 @@ function renderDossier(dossier) {
     '<div class="callout warning"><strong>Editorial note:</strong> ' + safe(dossier.disclosure) + '</div>' +
     '<div class="form-footer"><button class="btn btn-primary" data-action="copy-dossier" type="button">COPY DOSSIER ↗</button>' +
     '<button class="btn btn-ghost" data-action="download-dossier" type="button">EXPORT .TXT ↓</button>' +
-    '<button class="btn btn-ghost" data-action="new-operation" type="button">NEW OPERATION</button></div>';
+    '<button class="btn btn-ghost" data-action="new-operation" type="button">LEAVE SESSION</button></div>' +
+    renderPrivacyPanel(state.mode === 'training' ? localView() : state.mission);
 }
 
 function render() {
@@ -468,7 +531,14 @@ root.addEventListener('click', event => {
   if (action === 'new-join' && state.online) { state.mode = 'live'; state.view = 'join'; render(); }
   if (action === 'new-training') { state.mode = 'training'; state.view = 'training-host'; render(); }
   if (action === 'back') { state.view = 'intro'; render(); }
-  if (action === 'new-operation') clearMission();
+  if (action === 'new-operation') leaveSession();
+  if (action === 'delete-mission') openDeleteDialog();
+  if (action === 'export-my-data') withBusy(async () => {
+    if (state.mode !== 'live' || !state.room) return;
+    const exported = await api('/missions/' + state.room + '/export');
+    downloadJSON(exported, 'dead-drop-' + state.room.toLowerCase() + '-' + exported.mission.role + '-data.json');
+    showToast(t('Your role-scoped data was exported.'));
+  });
   if (action === 'switch-role' && state.training) {
     state.training.currentRole = state.training.currentRole === 'product' ? 'audience' : 'product';
     render();
@@ -529,7 +599,44 @@ root.addEventListener('change', event => {
   }
 });
 
-document.getElementById('resetButton').addEventListener('click', clearMission);
+document.getElementById('resetButton').addEventListener('click', leaveSession);
+
+const deleteDialog = document.getElementById('deleteDialog');
+document.getElementById('cancelDeleteButton').addEventListener('click', () => deleteDialog.close());
+deleteDialog.addEventListener('click', event => {
+  if (event.target === deleteDialog) deleteDialog.close();
+});
+document.getElementById('deleteConfirmCode').addEventListener('input', () => {
+  document.getElementById('deleteError').textContent = '';
+});
+document.getElementById('deleteMissionForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const errorNode = document.getElementById('deleteError');
+  const input = document.getElementById('deleteConfirmCode');
+  const confirmButton = document.getElementById('confirmDeleteButton');
+  if (state.mode !== 'live' || !state.room || state.busy) return;
+  const code = state.room;
+  if (input.value.trim().toUpperCase() !== code) {
+    errorNode.textContent = t('The room code does not match.');
+    input.focus();
+    return;
+  }
+  state.busy = true;
+  confirmButton.disabled = true;
+  errorNode.textContent = '';
+  try {
+    const result = await api('/missions/' + code, 'DELETE', { confirmCode: code });
+    if (result.deleted !== true) throw new Error('Deletion was not confirmed by the server');
+    deleteDialog.close();
+    clearMission();
+    showToast(t('Mission deleted from the server. Both agents lost access.'));
+  } catch (error) {
+    errorNode.textContent = error.message || t('Deletion failed. Please retry.');
+  } finally {
+    state.busy = false;
+    confirmButton.disabled = false;
+  }
+});
 document.getElementById('languageSelect').addEventListener('change', event => {
   if (!window.DeadDropLocale) return;
   // Preserve unfinished brief fields and transmissions while changing language.
