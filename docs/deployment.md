@@ -1,5 +1,18 @@
 # Deployment playbook — Impossible Ventures staged deployment (v0.8)
 
+## Five-WAVE v1.0 commercial staging additions
+
+This code branch adds **/commercial/** (seven-world creative demo and operator-provisioned workspaces), **/showcase/** (approved public creative), and **/proposal/** (private commercial offer and recorded customer decision), alongside /experiments/, /pilot/ and the existing /status/ diagnostics.
+
+- Set a cryptographically strong **OPERATOR_TOKEN** through the hosting secret manager. This shared token provisions workspaces; owner/editor/viewer credentials are separate, expiring, one-time displayed capabilities.
+- Use an HTTPS staging domain and synthetic companies only. Do not submit real payment data, secrets, or confidential customer information to a non-reviewed alpha.
+- A/B CTA attribution connects only to separately consented Pilot Studio forms, not payment confirmations.
+- Pricing is stored in integer cents but no billing gateway, legally binding electronic signature or revenue recognition is implemented.
+- Static build offers **local templates and estimates without registration**; it cannot accept authenticated company actions, leads or private proposal decisions. No operator or private customer data is packaged.
+- The original v0.8 **/api/v1/ready**, **/api/v1/live**, multilingual status and consistent SQLite backup/restore routines remain required deployment gates.
+- Detailed source, API, privacy and release gates: [Five-WAVE release](five-wave-release.md).
+
+
 **Status:** deployment source/configuration is prepared, but **no public Node server, Railway project, verified domain, or paid model connection is claimed**. Use a controlled staging environment with synthetic test data only. Never put API secrets in Git.
 
 ## v0.7 — Experiment Lab staging (not a production advertising network)
