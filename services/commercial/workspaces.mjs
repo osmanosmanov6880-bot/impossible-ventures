@@ -138,6 +138,14 @@ export function createWorkspaces({ db, now = Date.now, operatorToken = '', ApiEr
         'months,total_cents,status,revision,created_at,updated_at,decided_at ' +
         'FROM commercial_proposals WHERE workspace_id = ? ORDER BY created_at DESC'
       ).all(workspace.id);
+      const launches = db.prepare(
+        'SELECT id,campaign_id,source_revision,creative_json,status,created_at,updated_at '+
+        'FROM commercial_launches WHERE workspace_id = ? ORDER BY created_at DESC'
+      ).all(workspace.id);
+      const launchAggregates = db.prepare(
+        'SELECT d.launch_id,d.day,d.starts,d.completions,d.cta FROM launch_daily d '+
+        'JOIN commercial_launches l ON l.id=d.launch_id WHERE l.workspace_id=? ORDER BY d.day ASC'
+      ).all(workspace.id);
       const tokens = db.prepare(
         'SELECT id,label,role,created_at,expires_at,revoked_at FROM commercial_tokens WHERE workspace_id = ?'
       ).all(workspace.id);
@@ -145,7 +153,7 @@ export function createWorkspaces({ db, now = Date.now, operatorToken = '', ApiEr
         'SELECT id,action,actor_token_id,subject_id,at FROM commercial_audit WHERE workspace_id = ? ORDER BY at DESC'
       ).all(workspace.id);
       sendJSON(res, 200, {
-        exportedAt: now(), workspace: workspacePublic(workspace), campaigns, proposals, tokenMetadata: tokens, audit: auditRows,
+        exportedAt: now(), workspace: workspacePublic(workspace), campaigns, proposals, launches, launchAggregates, tokenMetadata: tokens, audit: auditRows,
         note: 'Contains contact email data. Protect this local export; no original plaintext access credentials are included.'
       });
       return true;
@@ -159,6 +167,16 @@ export function createWorkspaces({ db, now = Date.now, operatorToken = '', ApiEr
       // outstanding proposals and all tenant credentials cease to work immediately.
       db.exec('BEGIN IMMEDIATE');
       try {
+        // Global Pilot Studio retains separately consented contact forms,
+        // but we sever their link to this deleted tenant and erase every
+        // pseudonymous session/aggregate and immutable launch snapshot.
+        db.prepare('UPDATE pilot_leads SET launch_id=NULL WHERE launch_id IN '+
+          '(SELECT id FROM commercial_launches WHERE workspace_id=?)').run(workspace.id);
+        db.prepare('DELETE FROM launch_sessions WHERE launch_id IN '+
+          '(SELECT id FROM commercial_launches WHERE workspace_id=?)').run(workspace.id);
+        db.prepare('DELETE FROM launch_daily WHERE launch_id IN '+
+          '(SELECT id FROM commercial_launches WHERE workspace_id=?)').run(workspace.id);
+        db.prepare('DELETE FROM commercial_launches WHERE workspace_id=?').run(workspace.id);
         db.prepare('DELETE FROM commercial_proposals WHERE workspace_id = ?').run(workspace.id);
         db.prepare('DELETE FROM commercial_campaigns WHERE workspace_id = ?').run(workspace.id);
         db.prepare('DELETE FROM commercial_audit WHERE workspace_id = ?').run(workspace.id);

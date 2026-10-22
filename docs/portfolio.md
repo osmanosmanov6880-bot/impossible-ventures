@@ -15,6 +15,9 @@ Build seven distinct brands with separate value propositions and customer experi
 | Attention Republic | Creative communities | Challenges and peer collaboration | Sponsored challenges | Browser workshop |
 
 
+## v1.2: First-party Launch Studio
+
+Source code now contains owner-governed campaign publication, seven mobile interactive end-user story paths, opt-in event signals, one-time CTA-to-lead attribution, tenant metrics and CSV reporting. This is a first-party hosted microsite product, not an ad-network integration, verified third-party impression tracker, unique visitor attestation or confirmed revenue source. [v1.2 release guide](launch-studio-v12.md).
 ## v1.1: five distinct playable creative worlds
 
 AntiPersona, Brief Theatre, AdBiome, Museum of Attention and Attention Republic have individual browser experiences with real decision mechanics, localized scripts and local export. The mechanics are authored deterministic games, **not verified commercial software products, actual audience measurements or ad distribution**. Dead Drop cooperative MVP and Appeal 2049 existing browser prototype remain separate. See [release and explicit status](five-playable-worlds-v11.md).

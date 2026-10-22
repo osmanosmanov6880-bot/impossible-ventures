@@ -23,7 +23,7 @@ const translations = {
     required:'Please check all required fields and consent.',unavailable:'The live pilot API is not available on this host. Use the full Node server instead of a static preview.',
     sent:'Request stored. Keep the request ID and deletion token somewhere private. These allow you to delete the request.',
     failed:'Request could not be saved. Please retry only after checking the live API.',invalid:'Enter valid model values to export the plan.',
-    saving:'SENDING REQUEST…',attributedConfirmation:'The form was linked to the previous opt-in A/B experiment. This does not verify a sale.',deleteNote:'Delete your stored request via DELETE /api/v1/pilots/{ID} with Authorization: Bearer {DELETION TOKEN}.'
+    saving:'SENDING REQUEST…',attributedConfirmation:'The form was linked to the previous opt-in A/B experiment. This does not verify a sale.',launchAttributedConfirmation:'This form was attributed to an optional first-party story CTA. It is a lead request, not a verified payment.',deleteNote:'Delete your stored request via DELETE /api/v1/pilots/{ID} with Authorization: Bearer {DELETION TOKEN}.'
   },
   ru: {
     topline:'НОВОЕ ПОКОЛЕНИЕ РЕКЛАМЫ',headline1:'Реклама, с которой',headline2:'хочется взаимодействовать.',
@@ -50,7 +50,7 @@ const translations = {
     sent:'Заявка сохранена. Сохраните ID и ключ удаления в приватном месте — они понадобятся для удаления.',
     failed:'Не удалось сохранить заявку. Проверьте подключение к API и попробуйте снова.',
     invalid:'Введите корректные параметры расчёта перед экспортом.',
-    saving:'ОТПРАВКА…',attributedConfirmation:'Заявка связана с предыдущим добровольным A/B-экспериментом. Это ещё не продажа.',deleteNote:'Для удаления отправьте DELETE /api/v1/pilots/{ID} с заголовком Authorization: Bearer {КЛЮЧ УДАЛЕНИЯ}.'
+    saving:'ОТПРАВКА…',attributedConfirmation:'Заявка связана с предыдущим добровольным A/B-экспериментом. Это ещё не продажа.',launchAttributedConfirmation:'Заявка связана с добровольным CTA интерактивной истории. Это обращение, а не подтверждённая покупка.',deleteNote:'Для удаления отправьте DELETE /api/v1/pilots/{ID} с заголовком Authorization: Bearer {КЛЮЧ УДАЛЕНИЯ}.'
   },
   zh: {
     topline:'新一代互动广告',headline1:'值得参与的',headline2:'广告体验。',
@@ -74,7 +74,7 @@ const translations = {
     footer:'目前不宣称具备支付、在线AI、已验证业绩或全球部署。',
     required:'请检查必填字段和同意项。',unavailable:'此站点未启用申请服务器。请使用Node服务而非静态预览。',
     sent:'申请已保存。请妥善保管申请编号和删除密钥。',failed:'无法保存申请。请检查API连接后重试。',
-    invalid:'请填写有效的参数后导出。',saving:'发送中…',attributedConfirmation:'申请已关联至之前自愿参与的 A/B 实验，这不代表销售。',deleteNote:'如需删除，请向 DELETE /api/v1/pilots/{ID} 发送 Authorization: Bearer {删除密钥}。'
+    invalid:'请填写有效的参数后导出。',saving:'发送中…',attributedConfirmation:'申请已关联至之前自愿参与的 A/B 实验，这不代表销售。',launchAttributedConfirmation:'此申请与先前自愿的互动故事按钮关联，不代表已经付款。',deleteNote:'如需删除，请向 DELETE /api/v1/pilots/{ID} 发送 Authorization: Bearer {删除密钥}。'
   }
 };
 
@@ -159,6 +159,23 @@ leadForm.addEventListener('submit',async event=>{
       }
     }
   } catch { /* Browser storage can be disabled; ordinary submission still works. */ }
+  // A first-party story stores its one-time CTA receipt only in same-tab
+  // sessionStorage after opting into technical event measurement. Attaching
+  // it to a contact form requires this form's separate explicit consent.
+  try {
+    const raw=sessionStorage.getItem('iv_launch_attribution');
+    if(raw){
+      const link=JSON.parse(raw);
+      if(link && Number.isFinite(link.createdAt) && Date.now()-link.createdAt>=0 &&
+         Date.now()-link.createdAt<7*86400000 &&
+         /^[a-f0-9]{32}$/.test(link.sessionId) &&
+         /^ivl_[A-Za-z0-9_-]{32}$/.test(link.receipt)){
+        // A launch receipt has priority over an older experiment receipt.
+        delete body.attribution;
+        body.launchAttribution={sessionId:link.sessionId,receipt:link.receipt};
+      }else sessionStorage.removeItem('iv_launch_attribution');
+    }
+  }catch{ /* Storage unavailable: the standalone pilot request still works. */ }
   const oldText=sendButton.textContent;
   sendButton.disabled=true;sendButton.textContent=labels().saving;
   try{
@@ -169,10 +186,13 @@ leadForm.addEventListener('submit',async event=>{
     if(body.attribution) {
       try { sessionStorage.removeItem('iv_pilot_attribution'); } catch {}
     }
+    if(body.launchAttribution) {
+      try { sessionStorage.removeItem('iv_launch_attribution'); } catch {}
+    }
     showMessage(labels().sent);
     if(result.attributed) {
       const linked=document.createElement('span');
-      linked.textContent=' '+labels().attributedConfirmation;
+      linked.textContent=' '+(result.attributionSource==='first-party-launch'?labels().launchAttributedConfirmation:labels().attributedConfirmation);
       feedback.appendChild(linked);
     }
     const receipt=document.createElement('code');

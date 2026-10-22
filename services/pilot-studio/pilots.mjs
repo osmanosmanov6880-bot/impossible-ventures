@@ -67,6 +67,7 @@ function visibleLead(row) {
     status: row.status,
     experimentId: row.experiment_id ?? null,
     experimentArm: row.experiment_arm ?? null,
+    launchId: row.launch_id ?? null,
     consentVersion: row.consent_version,
     createdAt: row.created_at
   };
@@ -79,7 +80,7 @@ export function createPilotRouter({ db, now, operatorToken = '', ApiError, jsonB
     'contact TEXT NOT NULL, email TEXT NOT NULL, website TEXT NOT NULL, ' +
     'goal TEXT NOT NULL, budget TEXT NOT NULL, locale TEXT NOT NULL, ' +
     'status TEXT NOT NULL, consent_version TEXT NOT NULL, delete_token_hash TEXT NOT NULL, ' +
-    'experiment_id TEXT, experiment_arm TEXT);' +
+    'experiment_id TEXT, experiment_arm TEXT, launch_id TEXT);' +
     'CREATE INDEX IF NOT EXISTS pilot_leads_created ON pilot_leads(created_at);'
   );
   // Existing pilot leads remain intact on upgraded databases.
@@ -87,6 +88,8 @@ export function createPilotRouter({ db, now, operatorToken = '', ApiError, jsonB
   if (!leadColumns.has('experiment_id')) db.exec('ALTER TABLE pilot_leads ADD COLUMN experiment_id TEXT');
   if (!leadColumns.has('experiment_arm')) db.exec('ALTER TABLE pilot_leads ADD COLUMN experiment_arm TEXT');
   db.exec('CREATE INDEX IF NOT EXISTS pilot_leads_experiment ON pilot_leads(experiment_id,experiment_arm);');
+  if (!leadColumns.has('launch_id')) db.exec('ALTER TABLE pilot_leads ADD COLUMN launch_id TEXT');
+  db.exec('CREATE INDEX IF NOT EXISTS pilot_leads_launch ON pilot_leads(launch_id,created_at);');
   const byAddress = new Map();
   const operatorAttemptsByAddress = new Map();
 
@@ -162,6 +165,8 @@ export function createPilotRouter({ db, now, operatorToken = '', ApiError, jsonB
       const deleteToken = randomBytes(32).toString('base64url');
       let attributedSession = null;
       const a = body.attribution;
+      const l = body.launchAttribution;
+      if (a && l) throw new ApiError(422, 'Only one attribution source may be claimed');
       if (a !== undefined && a !== null) {
         if (!a || typeof a !== 'object' || Array.isArray(a) ||
             !/^[a-f0-9]{32}$/.test(a.sessionId || '') ||
@@ -180,6 +185,25 @@ export function createPilotRouter({ db, now, operatorToken = '', ApiError, jsonB
           throw new ApiError(422, 'Experiment attribution receipt is invalid, expired or already claimed');
         }
       }
+      let attributedLaunch = null;
+      if (l !== undefined && l !== null) {
+        if (!l || typeof l !== 'object' || Array.isArray(l) ||
+            !/^[a-f0-9]{32}$/.test(l.sessionId || '') ||
+            !/^ivl_[A-Za-z0-9_-]{32}$/.test(l.receipt || '')) {
+          throw new ApiError(422, 'Invalid launch attribution receipt');
+        }
+        attributedLaunch=db.prepare(
+          'SELECT id,launch_id,created_at,receipt_hash,cta_recorded,claimed_lead_id ' +
+          'FROM launch_sessions WHERE id=?'
+        ).get(l.sessionId);
+        const age=attributedLaunch ? now()-attributedLaunch.created_at : -1;
+        if (!attributedLaunch || age<0 || age>7*86_400_000 ||
+            attributedLaunch.cta_recorded!==1 || attributedLaunch.claimed_lead_id!==null ||
+            !attributedLaunch.receipt_hash ||
+            !safeEquals(digest(l.receipt).toString('hex'), attributedLaunch.receipt_hash)) {
+          throw new ApiError(422,'Launch attribution receipt is invalid, expired or already used');
+        }
+      }
       db.exec('BEGIN IMMEDIATE');
       try {
         if (attributedSession) {
@@ -189,12 +213,20 @@ export function createPilotRouter({ db, now, operatorToken = '', ApiError, jsonB
           ).run(id, attributedSession.id, digest(a.receipt).toString('hex'));
           if (!claimed.changes) throw new ApiError(409, 'Experiment attribution has already been claimed');
         }
+        if (attributedLaunch) {
+          const claimed=db.prepare(
+            'UPDATE launch_sessions SET claimed_lead_id=? WHERE id=? AND cta_recorded=1 '+
+            'AND receipt_hash=? AND claimed_lead_id IS NULL'
+          ).run(id,attributedLaunch.id,digest(l.receipt).toString('hex'));
+          if (!claimed.changes) throw new ApiError(409,'Launch receipt has already been claimed');
+        }
         db.prepare(
-          'INSERT INTO pilot_leads (id,created_at,company,contact,email,website,goal,budget,locale,status,consent_version,delete_token_hash,experiment_id,experiment_arm) ' +
-          'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+          'INSERT INTO pilot_leads (id,created_at,company,contact,email,website,goal,budget,locale,status,consent_version,delete_token_hash,experiment_id,experiment_arm,launch_id) ' +
+          'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
         ).run(id, now(), company, contact, email, website, goal, budget, locale,
           'new', CONSENT_VERSION, digest(deleteToken).toString('hex'),
-          attributedSession?.experiment_id ?? null, attributedSession?.arm ?? null);
+          attributedSession?.experiment_id ?? null, attributedSession?.arm ?? null,
+          attributedLaunch?.launch_id ?? null);
         db.exec('COMMIT');
       } catch (error) {
         db.exec('ROLLBACK');
@@ -202,7 +234,8 @@ export function createPilotRouter({ db, now, operatorToken = '', ApiError, jsonB
       }
       sendJSON(response, 201, {
         received: true, requestId: id, deleteToken, retentionDays: RETENTION_DAYS,
-        attributed: Boolean(attributedSession),
+        attributed: Boolean(attributedSession || attributedLaunch),
+        attributionSource: attributedLaunch?'first-party-launch':attributedSession?'experiment':null,
         note: 'Submission is not a qualified lead or verified paid customer.'
       });
       return true;
@@ -225,7 +258,7 @@ export function createPilotRouter({ db, now, operatorToken = '', ApiError, jsonB
       requireOperator(request);
       cleanup();
       const rows = db.prepare(
-        'SELECT id,created_at,company,contact,email,website,goal,budget,locale,status,consent_version,experiment_id,experiment_arm ' +
+        'SELECT id,created_at,company,contact,email,website,goal,budget,locale,status,consent_version,experiment_id,experiment_arm,launch_id ' +
         'FROM pilot_leads ORDER BY created_at DESC, id DESC LIMIT 100'
       ).all();
       const counts = { new: 0, contacted: 0, qualified: 0, won: 0, lost: 0 };

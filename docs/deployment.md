@@ -1,5 +1,17 @@
 # Deployment playbook — Impossible Ventures staged deployment (v0.8)
 
+## First-party Launch Studio v1.2 — deployment requirements
+
+The new /play/?id=LAUNCH_ID requires a live, protected Node and SQLite host. Unlike the seven browser creative training apps, the customer microsite cannot function on a static-only GitHub Pages preview.
+
+1. Back up the existing database with npm run db:backup before upgrading. Startup safely creates commercial_launches, launch_sessions, launch_daily and adds missing pilot_leads.launch_id.
+2. Use HTTPS and secure, rotated OPERATOR_TOKEN and workspace capability tokens. Only owner can publish, pause, resume and retire a launch.
+3. Same-origin iframe only. X-Frame-Options SAMEORIGIN plus Content-Security-Policy frame-ancestors self are applied only to the public story; other protected screens remain DENY.
+4. Consent is optional for story play. Counts are opt-in technical signals, not attested impressions or revenue. Random session secrets are hashed, and separate consent is required to link a CTA receipt to a contact form.
+5. Monitor /api/v1/ready, keep encrypted off-host backups, confirm data retention and verify a restore before inviting actual customers.
+6. Run npm run check, the pinned Chromium browser test and Docker storage smoke. Static preview intentionally excludes protected /play/ public-server features.
+
+See [v1.2 deployment and privacy runbook](launch-studio-v12.md).
 ## v1.1 creative worlds: no-account static products
 
 Five new worlds are served from /apps/anti-persona/, /apps/brief-theatre/, /apps/ad-biome/, /apps/museum-of-attention/ and /apps/attention-republic/. Their static runner is common under /apps/creative-worlds/. They do not invoke a backend API or require OPERATOR_TOKEN, but normal HTTP delivery of ES modules is required. The .mjs response MIME must be JavaScript; a wrong MIME blocks these apps in Chromium.
