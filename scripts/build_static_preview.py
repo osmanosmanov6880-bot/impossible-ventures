@@ -89,8 +89,7 @@ def build() -> None:
         "status/index.html",
         "status/app.js",
         "status/style.css",
-        "pilot/index.html
-t
+        "pilot/index.html",
         "pilot/app.js",
         "pilot/style.css",
         "apps/dead-drop/index.html",
