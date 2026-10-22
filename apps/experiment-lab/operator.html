@@ -38,6 +38,12 @@
           <div class="operator-annotation">EXPERIMENT / B — альтернативная подача того же продукта с историей или дилеммой.</div>
           <label class="operator-field">Заголовок B<input name="variantHeadline" type="text" minlength="5" maxlength="125" required></label>
           <label class="operator-field">Описание B<textarea name="variantBody" minlength="10" maxlength="450" required></textarea></label>
+          <div class="operator-annotation">INTERACTIVE SCENE / B — создайте точку выбора, два разных ответа и два последствия. При выборе посетитель увидит результат и тот же CTA.</div>
+          <label class="operator-field">Вопрос / точка выбора B<textarea name="decisionPrompt" minlength="8" maxlength="220" required placeholder="Вы выбираете между двумя путями…"></textarea></label>
+          <label class="operator-field">Вариант решения B.1<input name="choiceOneLabel" type="text" minlength="3" maxlength="70" required placeholder="Выбрать скорость"></label>
+          <label class="operator-field">Последствие B.1<textarea name="choiceOneReveal" minlength="8" maxlength="280" required placeholder="Что меняется в истории после выбора"></textarea></label>
+          <label class="operator-field">Вариант решения B.2<input name="choiceTwoLabel" type="text" minlength="3" maxlength="70" required placeholder="Выбрать качество"></label>
+          <label class="operator-field">Последствие B.2<textarea name="choiceTwoReveal" minlength="8" maxlength="280" required placeholder="Что меняется после второго выбора"></textarea></label>
           <label class="operator-field">Общий текст кнопки CTA<input name="ctaLabel" type="text" minlength="3" maxlength="45" required placeholder="Открыть пилот"></label>
           <div class="operator-mini"><button class="btn btn-outline" type="button" id="sample">ЗАПОЛНИТЬ ПРИМЕР</button><button class="btn btn-primary" type="submit" id="create">СОХРАНИТЬ ЧЕРНОВИК ↗</button></div>
         </form>
