@@ -237,3 +237,21 @@ input::placeholder,textarea::placeholder{color:#8196aa}
  min-height:47px;font:11px/1.4 monospace;letter-spacing:.045em;padding:11px 12px}
 .venture-play:hover{border-color:#c7ffe9;color:#fff;box-shadow:0 6px 22px #9fe8df25}
 .venture-play:focus-visible{outline:3px solid #d2fff2;outline-offset:3px}
+
+/* WAVE 10 — local creative deliverable → editable, UNSAVED commercial draft */
+.creative-import{display:grid;grid-template-columns:1.3fr .7fr;gap:25px;align-items:center;
+ background:radial-gradient(ellipse at 92% 10%,#7cd7bf22,transparent 54%),#142738;
+ border:1px solid #668f91;border-radius:15px;margin:0 0 24px;
+ padding:clamp(23px,2.8vw,37px)}
+.creative-import-heading{display:flex;flex-direction:column;align-items:flex-start;gap:9px}
+.creative-import-heading strong{font-size:clamp(20px,2.4vw,29px);line-height:1.2;letter-spacing:-.04em}
+.creative-import-heading p{margin:0;font-size:13px;max-width:710px;color:#c8dee8;line-height:1.75}
+.creative-import-control label{display:block;margin-bottom:11px;font:11px monospace;letter-spacing:.07em;color:#c6fae0}
+.creative-import-control input{background:#0e2131;border:1px dashed #92b5bb;color:#e7f5fc;line-height:1.5;
+ min-height:54px;padding:12px}
+.creative-import-control input::file-selector-button{font:12px monospace;border-radius:6px;
+ border:1px solid #94e1c8;color:#071b22;background:#c8f2db;padding:9px 12px;margin-right:15px;cursor:pointer}
+.creative-import-control input:disabled{opacity:.45}
+.creative-import-control p{margin:9px 0 0;overflow-wrap:anywhere}
+.creative-import-control p.error{color:#ffb8bd}
+@media(max-width:860px){.creative-import{grid-template-columns:1fr}}
