@@ -29,6 +29,7 @@ jobs:
               pass
           files = [
               'index.html',
+              'privacy.html',
               'apps/dead-drop/index.html',
               'apps/appeal-2049/index.html',
           ]
