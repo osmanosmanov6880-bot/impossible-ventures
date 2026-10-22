@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#080f1b">
+  <meta name="description" content="Интерактивный сценарный театр, четыре действия и авторские реплики. Творческий инструмент, не подтверждённая реклама.">
+  <meta name="robots" content="index,follow">
+  <title>Brief Theatre — IMPOSSIBLE VENTURES</title>
+  <link rel="stylesheet" href="../creative-worlds/style.css">
+  <script type="module" src="../creative-worlds/runner.mjs"></script>
+</head>
+<body data-world="brief-theatre">
+<div class="ambient" aria-hidden="true"></div>
+<header class="topbar shell">
+  <a href="../../" class="brand" aria-label="IMPOSSIBLE VENTURES">
+    <span class="brand-mark">I<em>V</em></span>
+    <span>IMPOSSIBLE VENTURES<small id="navWorld">ТВОРЧЕСКИЕ ВСЕЛЕННЫЕ</small></span>
+  </a>
+  <nav class="world-nav" aria-label="Product navigation">
+    <a href="../../commercial/">COMMERCIAL OS →</a>
+    <a href="../../experiments/">EXPERIMENT LAB →</a>
+  </nav>
+  <label for="locale" class="sr-only">Язык / Language / 语言</label>
+  <select id="locale" aria-label="Язык / Language / 语言">
+    <option value="ru">РУ</option><option value="en">EN</option><option value="zh">中文</option>
+  </select>
+</header>
+<main>
+  <section class="world-hero shell" aria-labelledby="heroTitle">
+    <div class="hero-copy">
+      <div class="eyebrow"><span id="worldMode">FOUR ACT SCRIPT STUDIO</span></div>
+      <h1 id="heroTitle">Рекламный сценарий в четырёх актах</h1>
+      <p id="heroDescription">Четыре или пять решений с настоящими развилками, разными последствиями и готовым к экспорту творческим документом.</p>
+      <p id="heroGoal">Соберите собственную стратегию и проверьте факты перед публикацией.</p>
+      <div class="hero-pills">
+        <span>LOCAL INTERACTIVE PROTOTYPE</span>
+        <span>RU / EN / 中文</span>
+        <span>NO SIGN-UP / NO TRACKING</span>
+      </div>
+    </div>
+    <div class="art-space" aria-hidden="true">
+      <div class="ring"></div><div class="ring secondary"></div>
+      <div class="orb"><span class="orb-letter" id="heroSymbol">◇</span></div>
+      <div class="art-frame"><small>FOUR ACT SCRIPT STUDIO</small><strong>BRANCH → CONSEQUENCE</strong></div>
+      <div class="art-frame bottom"><small>PRIVATE BY DESIGN</small><strong>CREATIVE OUTPUT / JSON</strong></div>
+    </div>
+    <div class="hero-bottom">
+      <span id="heroDisclaimer">ЛОКАЛЬНЫЙ ТВОРЧЕСКИЙ ТРЕНАЖЁР / НЕТ ТРЕКИНГА</span>
+      <span>IMPOSSIBLE VENTURES / INTERACTIVE EDITION 2026</span>
+    </div>
+  </section>
+  <div class="marquee">
+    <span>STORY ARCHITECTURE</span><span class="star">✦</span>
+    <span>HUMAN CHOICE</span><span class="star">✦</span>
+    <span>RESPONSIBLE CREATIVITY</span><span class="star">✦</span>
+    <span>TRANSPARENT OUTPUT</span>
+  </div>
+
+  <section class="section shell" id="setupPanel">
+    <div class="section-intro">
+      <div><div class="eyebrow">01 / CREATIVE BRIEF</div><h2 id="projectTitle">Настройте вашу историю.</h2></div>
+      <p id="projectIntro">Введите сведения о продукте или откройте безопасный демонстрационный пример.</p>
+    </div>
+    <div class="split">
+      <div class="panel setup-panel">
+        <div class="panel-header"><span>START / DEFINE THE BRIEF</span><span>LOCAL INPUT ONLY</span></div>
+        <div class="panel-content">
+          <div class="privacy-banner">INPUT PRIVACY / Данные используются только для этого сценария в браузере. Не отправляются на сервер и не сохраняются автоматически.</div>
+          <form id="projectForm">
+            <label class="field" for="brand"><span>БРЕНД / КОМАНДА</span>
+              <input id="brand" name="brand" type="text" minlength="2" maxlength="90" required autocomplete="organization" placeholder="Aurora Creative Lab">
+            </label>
+            <label class="field" for="product"><span>ПРОДУКТ / ПРЕДЛОЖЕНИЕ</span>
+              <textarea id="product" name="product" minlength="3" maxlength="180" rows="2" required placeholder="Что делает продукт и какие у него ограничения?"></textarea>
+            </label>
+            <label class="field" for="audience"><span>КОМУ ЭТО НУЖНО</span>
+              <textarea id="audience" name="audience" minlength="3" maxlength="180" rows="2" required placeholder="Кому реально нужен ваш продукт?"></textarea>
+            </label>
+            <div class="controls">
+              <button type="submit" class="primary">ЗАПУСТИТЬ СЦЕНАРИЙ ↗</button>
+              <button id="demoProject" type="button" class="outline">ЗАПОЛНИТЬ ПРИМЕРОМ</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <aside class="panel aside-panel" aria-label="Creative mechanics">
+        <div class="panel-header"><span>WORLD ENGINE</span><span>NO AI / NO TRACKERS</span></div>
+        <div class="aside-stage">
+          <small>INDIVIDUAL WORLD / FOUR ACT SCRIPT STUDIO</small>
+          <strong>Brief Theatre</strong>
+          <p>Интерактивный сценарный театр, четыре действия и авторские реплики. Ваши решения определяют итоговый творческий материал, а не виртуальные продажи.</p>
+          <span class="tiny">01 → CREATIVE INPUT &nbsp; 02 → INTERACTIVE CHOICE &nbsp; 03 → EXPORT</span>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section shell experience" id="sessionPanel" hidden>
+    <div class="section-intro">
+      <div><div class="eyebrow">02 / INTERACTIVE JOURNEY</div><h2>CREATIVE <span>DECISIONS.</span></h2></div>
+      <p>Каждый выбор меняет стратегические приоритеты и текст итогового сценария. Никакие оценки не являются настоящей конверсией.</p>
+    </div>
+    <div class="progress-head"><span id="progressText">ГЛАВА 01</span><span>LOCAL / UNTRACKED</span></div>
+    <progress id="progress" value="0" max="5" aria-label="Stage progress"></progress>
+    <div class="split experience">
+      <section class="panel" aria-labelledby="currentChapter">
+        <div class="panel-header"><span>CHAPTER / STRATEGY</span><span>YOUR CHOICE MATTERS</span></div>
+        <div class="panel-content">
+          <h2 id="currentChapter">ПЕРВАЯ ГЛАВА</h2>
+          <p id="currentQuestion">Что изменится в вашей рекламной истории?</p>
+          <p id="currentContext">Контекст предыдущего решения.</p>
+          <form id="decisionForm">
+            <div id="choices" class="options" role="group" aria-label="Choose one creative direction"></div>
+            <div id="selectedPreview" class="selected-preview" role="status" aria-live="polite" hidden></div>
+            <label class="field" for="note"><span id="noteLabel">АВТОРСКАЯ МЫСЛЬ / РЕПЛИКА</span>
+              <textarea id="note" maxlength="600" rows="3" placeholder="Ваш текст"></textarea>
+            </label>
+            <p class="hint" id="noteHint">Необязательно, кроме сценарных актов.</p>
+            <div class="controls experience-actions">
+              <button id="backButton" type="button" class="outline">НАЗАД</button>
+              <button id="continueButton" class="primary" type="submit" disabled>ПРИНЯТЬ РЕШЕНИЕ →</button>
+            </div>
+          </form>
+        </div>
+      </section>
+      <aside class="panel" aria-label="Simulated scorecard">
+        <div class="panel-header"><span id="scoreTitle">ИГРОВЫЕ ПОКАЗАТЕЛИ</span><span>HEURISTIC / NOT REAL CTR</span></div>
+        <div id="scoreboard" class="metrics-grid"></div>
+        <small class="metric-caveat" id="scoreCaveat">Игровые баллы, не результаты рекламы.</small>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section shell" id="finishPanel" hidden>
+    <div class="eyebrow">03 / DOWNLOADABLE CREATIVE ARTIFACT</div>
+    <div class="finish-hero">
+      <h2 id="finishHeading">ИСТОРИЯ СОБРАНА.</h2>
+      <p id="finishCopy">Ваши творческие решения превратились в структурированный материал.</p>
+      <p id="resultNotice">Прежде чем запустить рекламу, проверьте фактические утверждения.</p>
+      <div class="result-controls">
+        <button id="download" class="primary" type="button">СКАЧАТЬ РЕЗУЛЬТАТ JSON ↓</button>
+        <button id="restart" class="outline" type="button">НАЧАТЬ ЗАНОВО</button>
+      </div>
+    </div>
+    <div class="finish-layout">
+      <aside class="panel">
+        <div class="panel-header"><span>ILLUSTRATIVE METRICS</span><span>NOT PERFORMANCE</span></div>
+        <div id="finishMetrics" class="metrics-grid"></div>
+        <div class="metric-caveat" id="resultWarning">Это не реальные продажи или рекламные показы.</div>
+      </aside>
+      <div class="panel">
+        <div class="panel-header"><span id="decisionHeading">ИТОГИ ВЫБОРА</span><span>AUTHORED JOURNEY</span></div>
+        <div id="finishDecisions"></div>
+      </div>
+    </div>
+  </section>
+  <div class="shell"><p id="feedback" class="feedback" role="status" aria-live="polite"></p></div>
+</main>
+<footer class="footer shell">
+  <span>© 2026 IMPOSSIBLE VENTURES / BRIEF THEATRE</span>
+  <span>NO FAKE ANALYTICS • NO PERSONAL TRACKING • NO AD DELIVERY</span>
+  <a href="../../commercial/">COMMERCIAL COMMAND ↗</a>
+  <a href="../../privacy.html">DATA & PRIVACY ↗</a>
+</footer>
+</body>
+</html>
