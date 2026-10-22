@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#09111e">
+  <meta name="description" content="First-party interactive creative story. Optional consented research signals. No paid ad network or personal profiling.">
+  <title>IMMERSIVE STORY / IMPOSSIBLE VENTURES</title>
+  <link rel="stylesheet" href="/play/style.css">
+  <script type="module" src="/play/app.mjs"></script>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"></div>
+<header class="nav-shell shell">
+  <a class="logo" href="/" aria-label="Impossible Ventures home"><span class="mark">IV</span><span>IMPOSSIBLE VENTURES<small>INTERACTIVE STORY / FIRST-PARTY</small></span></a>
+  <div class="nav-links"><a href="/commercial/" id="studioLink">COMMERCIAL OS ↗</a>
+    <label for="locale" class="sr">Language</label>
+    <select id="locale" aria-label="Language"><option value="ru">РУ</option><option value="en">EN</option><option value="zh">中文</option></select>
+  </div>
+</header>
+<main class="shell">
+  <section class="hero" aria-labelledby="heroTitle">
+    <div class="intro">
+      <div class="eyebrow"><span class="line"></span><span id="worldLabel">FIRST-PARTY EXPERIMENT / 07 WORLDS</span></div>
+      <span class="status-tag" id="storyStatus">STORY / OPTIONAL PARTICIPATION</span>
+      <h1 id="heroTitle">Интерактивная рекламная история.</h1>
+      <p id="creativeBody">Этот сценарий станет доступен после публикации рекламной кампании владельцем.</p>
+      <div class="offer-card"><span id="offerLabel">ПРЕДЛОЖЕНИЕ</span><strong id="offer">—</strong></div>
+    </div>
+    <div class="art-area" aria-hidden="true">
+      <div class="light-wheel"></div>
+      <div class="light-core" id="worldGlyph">IV</div>
+      <div class="orbit orbit-a"></div>
+      <div class="orbit orbit-b"></div>
+      <div class="art-tag"><small>OBSIDIAN INTELLIGENCE</small><strong>CHOOSE YOUR STORY</strong></div>
+    </div>
+  </section>
+
+  <section class="panel intro-panel" id="preflight">
+    <div class="panel-top"><span>01 / CONSENT & CONTROL</span><span>NO COOKIES / NO PROFILE</span></div>
+    <div class="panel-inner">
+      <h2 id="introTitle">Ваш выбор изменит историю.</h2>
+      <p id="storyIntro">Три решения, которые не требуют регистрации.</p>
+      <div class="consent-field">
+        <label for="consentAnalytics">
+          <input type="checkbox" id="consentAnalytics">
+          <span id="consentLabel">Добровольно разрешаю учитывать один анонимный запуск истории, завершение и нажатие кнопки. Без согласия игра всё равно работает, никакие игровые ответы не отправляются.</span>
+        </label>
+        <p id="consentDetail">Можно продолжить без галочки. Отказ не ограничивает контент. В течение 7 дней хранится случайный технический идентификатор; сводные количества удаляются через 90 дней.</p>
+      </div>
+      <button id="start" class="primary" type="button" disabled>НАЧАТЬ ИСТОРИЮ →</button>
+    </div>
+  </section>
+
+  <section id="storyPanel" class="story-layout" hidden>
+    <div class="panel chapter-panel">
+      <div class="panel-top"><span id="chapterNo">CHAPTER 01 / 03</span><span>REAL CHOICE / NO FAKE METRICS</span></div>
+      <div class="panel-inner">
+        <progress id="progress" value="0" max="3" aria-label="Story progress"></progress>
+        <h2 id="chapterTitle">Первая сцена</h2>
+        <p id="chapterPrompt">Выберите одно из двух направлений.</p>
+        <div id="answers" class="choices" role="group" aria-label="Story directions"></div>
+        <div class="consequence" id="consequence" role="status" aria-live="polite" hidden></div>
+        <button type="button" id="next" class="primary" disabled>ПРОДОЛЖИТЬ →</button>
+      </div>
+    </div>
+    <aside class="panel narrative-aside">
+      <div class="panel-top"><span>CREATIVE TRANSPARENCY</span><span>●</span></div>
+      <div class="panel-inner">
+        <span class="aside-kicker" id="journalLabel">ВАШ ИГРОВОЙ МАРШРУТ</span>
+        <ol id="journal"></ol>
+        <p class="aside-warning" id="sidebarDisclaimer">Ваш выбор влияет на сценарий, но не создаёт рекламные просмотры, продажи и данные реальных людей.</p>
+      </div>
+    </aside>
+  </section>
+
+  <section id="finishPanel" class="panel completion" hidden>
+    <div class="panel-top"><span>03 / FINAL DECISION</span><span>OPTIONAL NEXT STEP</span></div>
+    <div class="panel-inner">
+      <span class="finish-symbol">✦</span>
+      <h2 id="finishTitle">История завершена.</h2>
+      <p id="finishDescription">Вы приняли три решения и сформировали собственный вариант интерактивной истории.</p>
+      <div id="pathSummary"></div>
+      <div class="finish-actions">
+        <button class="primary" id="ctaButton" type="button">ОБСУДИТЬ ПИЛОТ ↗</button>
+        <button class="secondary" id="restart" type="button">ПРОЙТИ ЗАНОВО</button>
+      </div>
+      <p id="ctaDisclosure">Переход в Pilot Studio доброволен. Для отправки контактной формы потребуется отдельное согласие. Здесь ничего не оплачивается.</p>
+    </div>
+  </section>
+
+  <div id="message" class="message shell" role="status" aria-live="polite"></div>
+</main>
+<footer class="footer shell">
+  <span>© 2026 IMPOSSIBLE VENTURES / FIRST-PARTY EXPERIENCE</span>
+  <span id="footerDisclaimer">НЕТ ПЛАТНОЙ ЗАКУПКИ РЕКЛАМЫ И ПОДТВЕРЖДЁННЫХ ПРОДАЖ</span>
+  <a href="/privacy.html" id="privacy">ПРИВАТНОСТЬ ↗</a>
+</footer>
+</body>
+</html>
