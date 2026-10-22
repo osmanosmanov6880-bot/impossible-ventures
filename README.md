@@ -165,3 +165,19 @@ GitHub Actions additionally runs Chromium end-to-end tests for two agents, langu
 - Live model use requires a server key, two agents' consent and a funded API account.
 - Never commit secrets or customer data. `.env` and the local mission database are ignored by Git.
 - Brand names/domains are unverified. Commercial pricing and revenue are hypotheses.
+
+
+## Wave 1 / Appeal 2049 Creative Tribunal (v0.9)
+
+**A genuinely working new client-side review studio**, not a static render:
+
+- Separate pure deterministic review engine with five 0–4 *editorial writing signals* (clarity, audience, evidence hints, next step, specificity).
+- A maximum of 20 is **not** a quality certification or probability of sales; evidence is always marked **unverified** until independently checked by a human.
+- Flags risky guarantee, #1 and artificial urgency language for review, never validates them as true.
+- RU/EN/Simplified Chinese interface, accessible large text, responsive layout and privacy-first client-side file processing.
+- Imports final Dead Drop dossier JSON from a local file, including role-scoped mission exports, **without importing bearer tokens, room identifiers or private role fields**.
+- Downloads JSON or TXT editorial reports; can copy the report locally. No API is called with ad concept data.
+- Dead Drop now offers an intentional **Export for Appeal** action after finalizing a dossier; the user controls this private local transfer.
+- Node, browser, source and static-page test paths cover validation, CSP, translations, private import and report export.
+
+Open \`http://localhost:3000/apps/appeal-2049/\`. For static previews, the same page works with no server. This is **not an AI judge**, legal clearance, brand fact-check or prediction of campaign ROI.
