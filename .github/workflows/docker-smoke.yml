@@ -32,7 +32,7 @@ jobs:
             -e DB_PATH=/data/missions.sqlite \
             dead-drop-smoke
           curl --retry 30 --retry-all-errors --retry-delay 1 --connect-timeout 3 --max-time 5 -fsS \
-            http://127.0.0.1:3017/api/v1/health
+            http://127.0.0.1:3017/api/v1/ready
       - name: Verify app process dropped root privileges
         run: |
           docker exec dead-drop-ci sh -c \
@@ -65,7 +65,7 @@ jobs:
             -e DB_PATH=/data/missions.sqlite \
             dead-drop-smoke
           curl --retry 30 --retry-all-errors --retry-delay 1 --connect-timeout 3 --max-time 5 -fsS \
-            http://127.0.0.1:3017/api/v1/health
+            http://127.0.0.1:3017/api/v1/ready
           node --input-type=module <<'JS'
           import { readFileSync } from 'node:fs';
           const { code, token } = JSON.parse(readFileSync('/tmp/dead-drop-ci-room.json', 'utf8'));
