@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0a1020"><meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Impossible Ventures — commercial workspaces and campaign creation for seven original advertising worlds.">
+  <title>IMPOSSIBLE VENTURES / COMMERCIAL COMMAND</title>
+  <link rel="stylesheet" href="/commercial/style.css">
+  <script src="/commercial/app.js" defer></script>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"></div>
+<header class="nav-shell shell">
+  <a class="logo" href="/" aria-label="Impossible Ventures"><span class="logomark">I<span>V</span></span><span>IMPOSSIBLE <em>VENTURES</em><small>CREATIVE COMMERCE / OPERATING SYSTEM</small></span></a>
+  <nav class="top-nav"><a href="/experiments/" data-i18n="experiments">ЭКСПЕРИМЕНТЫ</a><a href="/pilot/" data-i18n="pilots">ПИЛОТЫ</a></nav>
+  <div class="nav-right"><span class="online"><i></i> SOURCE ALPHA / V1.0</span><label class="sr" for="lang">Language</label><select id="lang" aria-label="Language"><option value="ru">РУ</option><option value="en">EN</option><option value="zh">中文</option></select></div>
+</header>
+
+<main>
+  <section class="hero shell">
+    <div>
+      <div class="eyebrow"><span class="line"></span> IV / GLOBAL CREATIVE COMMERCE</div>
+      <h1 data-i18n="headline">Большие рекламные идеи.<span class="gradient"> Реальные рабочие инструменты.</span></h1>
+      <p data-i18n="lead">Семь творческих направлений, отдельные рабочие пространства, версия каждой кампании и проверяемый путь до настоящего рекламного эксперимента. Без фиктивных продаж и обещаний заработка.</p>
+      <div class="actions"><a class="primary" href="#access" data-i18n="openStudio">ОТКРЫТЬ СТУДИЮ ↗</a><a class="secondary" href="/experiments/" data-i18n="tryExperiment">ПОПРОБОВАТЬ A/B-ТЕСТ →</a></div>
+      <div class="hero-foot"><div><strong>07</strong><span data-i18n="worlds">НАПРАВЛЕНИЙ КРЕАТИВА</span></div><div><strong>03</strong><span data-i18n="roles">УРОВНЯ ДОСТУПА</span></div><div><strong>00</strong><span data-i18n="revenue">НЕПОДТВЕРЖДЁННЫХ ПРОДАЖ</span></div></div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="rings r1"></div><div class="rings r2"></div><div class="rings r3"></div>
+      <div class="prism"><div class="prism-core">IV</div></div>
+      <div class="hudcard hud1"><small>CREATIVE DNA / 07</small><strong>IDEA → EXPERIMENT</strong><span>Seven distinct systems</span></div>
+      <div class="hudcard hud2"><small>COMMERCIAL OS / 01</small><strong>WORKSPACE → CAMPAIGN</strong><span>Server-persisted data</span></div>
+      <div class="visual-base">ART DIRECTION / OBSIDIAN AURORA</div>
+    </div>
+  </section>
+
+  <div class="ticker"><span>CREATIVE STRATEGY</span><b>✦</b><span>EXPERIMENTAL MARKETING</span><b>✦</b><span>BUSINESS OPERATIONS</span><b>✦</b><span>HUMAN-VERIFIED RESULTS</span></div>
+
+  <section class="section shell" id="access">
+    <div class="section-heading"><div><div class="eyebrow"><span class="line"></span> 01 / IDENTITY & ACCESS</div><h2 data-i18n="accessTitle">Ваше рекламное пространство.</h2><p data-i18n="accessExplain">Создайте организацию с системным токеном или войдите по выданному ключу. Ключи не сохраняются браузером: запишите их безопасно.</p></div><span class="section-no">01 / 04</span></div>
+    <div class="access-grid">
+      <form class="access-panel" id="bootstrapForm">
+        <div class="step-head"><span class="step">01A</span><span data-i18n="newWorkspace">СОЗДАТЬ ОРГАНИЗАЦИЮ</span></div>
+        <label><span data-i18n="workspaceName">НАЗВАНИЕ КОМПАНИИ</span><input name="name" minlength="3" maxlength="110" required placeholder="Your creative group" autocomplete="organization"></label>
+        <label><span data-i18n="systemToken">СИСТЕМНЫЙ ТОКЕН OPERATOR_TOKEN</span><input name="systemToken" type="password" minlength="32" required autocomplete="off" placeholder="Секрет из серверных настроек"></label>
+        <button class="primary full" type="submit" data-i18n="createWorkspace">СОЗДАТЬ ПРОСТРАНСТВО ↗</button>
+        <p class="small" data-i18n="bootstrapNotice">Создание доступно только оператору сервера; публичная регистрация отключена.</p>
+      </form>
+      <form class="access-panel" id="loginForm">
+        <div class="step-head"><span class="step">01B</span><span data-i18n="existingWorkspace">ВОЙТИ В СУЩЕСТВУЮЩЕЕ</span></div>
+        <label><span data-i18n="workspaceId">ИДЕНТИФИКАТОР ПРОСТРАНСТВА</span><input name="workspaceId" minlength="24" maxlength="24" pattern="[0-9a-f]{24}" required autocomplete="off" placeholder="24 символа"></label>
+        <label><span data-i18n="workspaceToken">КЛЮЧ ВЛАДЕЛЬЦА / РЕДАКТОРА / НАБЛЮДАТЕЛЯ</span><input name="workspaceToken" type="password" minlength="52" required autocomplete="off" placeholder="ivw_..."></label>
+        <button class="secondary full" type="submit" data-i18n="openWorkspace">ВОЙТИ В КАБИНЕТ →</button>
+        <p class="small" data-i18n="noLocalStore">Секрет находится только в памяти этой вкладки до закрытия.</p>
+      </form>
+    </div>
+    <div id="receipt" class="receipt" aria-live="polite"></div>
+    <p id="accessMessage" class="feedback" role="status" aria-live="polite"></p>
+  </section>
+
+  <div id="workspaceApp" hidden>
+    <section class="section shell workspace-section">
+      <div class="workspace-head"><div><span class="eyebrow"><span class="line"></span> COMMERCIAL CONTROL / CONNECTED</span><h2 id="currentWorkspace">—</h2><p class="small" id="workspaceMeta">—</p></div><button class="secondary" type="button" id="logout" data-i18n="signout">ВЫЙТИ И УДАЛИТЬ КЛЮЧ ИЗ ПАМЯТИ</button></div>
+      <div class="scoreboard">
+        <div class="score"><span data-i18n="campaigns">КАМПАНИИ</span><strong id="countTotal">0</strong><small data-i18n="storedRecords">РЕАЛЬНЫЕ ЗАПИСИ</small></div>
+        <div class="score"><span data-i18n="drafts">ЧЕРНОВИКИ</span><strong id="countDraft">0</strong><small data-i18n="notPublished">НЕ ОПУБЛИКОВАНЫ</small></div>
+        <div class="score"><span data-i18n="approved">ОДОБРЕНО</span><strong id="countApproved">0</strong><small data-i18n="publicPreviews">ПУБЛИЧНЫЙ ПРЕДПРОСМОТР</small></div>
+        <div class="score"><span data-i18n="archived">В АРХИВЕ</span><strong id="countArchived">0</strong><small data-i18n="hiddenPreviews">СКРЫТО ОТ ПУБЛИКИ</small></div>
+      </div>
+    </section>
+
+    <section class="section shell" id="worlds">
+      <div class="section-heading"><div><div class="eyebrow"><span class="line"></span> 02 / CREATIVE UNIVERSES</div><h2 data-i18n="chooseWorld">Выберите рекламную вселенную.</h2><p data-i18n="worldExplain">Каждая карточка — исходный творческий шаблон, не отдельная запущенная компания. Выбор заполняет редактор кампании.</p></div><span class="section-no">02 / 04</span></div>
+      <div id="ventureGrid" class="venture-grid" aria-live="polite"></div>
+    </section>
+
+    <section class="section shell" id="builder">
+      <div class="section-heading"><div><div class="eyebrow"><span class="line"></span> 03 / CAMPAIGN BUILDER</div><h2 data-i18n="buildTitle">От идеи к рекламному макету.</h2><p data-i18n="buildExplain">Редактируйте материал, сохраните версию и отправьте на проверку владельцу. Одобрение публикует лишь предпросмотр, не запускает реальную рекламу.</p></div><span class="section-no">03 / 04</span></div>
+      <div class="builder-grid">
+        <form id="campaignForm" class="surface">
+          <div class="panel-bar"><span data-i18n="editorTitle">РЕДАКТОР КРЕАТИВА</span><span id="editingRevision">NEW / DRAFT</span></div>
+          <div class="form-stack">
+            <div class="two-col">
+              <label><span data-i18n="campaignName">НАЗВАНИЕ КАМПАНИИ</span><input name="title" minlength="3" maxlength="100" required placeholder="Campaign / 001"></label>
+              <label><span data-i18n="universe">ВСЕЛЕННАЯ</span><select name="venture" id="venture" required></select></label>
+              <label><span data-i18n="goal">ЦЕЛЬ</span><select name="goal"><option value="leads">Заявки / Leads</option><option value="awareness">Узнаваемость / Awareness</option><option value="sales">Продажи / Sales</option><option value="validation">Проверка / Validation</option></select></label>
+              <label><span data-i18n="channel">КАНАЛ</span><select name="channel"><option value="landing">Landing page</option><option value="social">Social media</option><option value="video">Video</option><option value="email">Email</option><option value="display">Display</option></select></label>
+            </div>
+            <label><span data-i18n="audience">АУДИТОРИЯ</span><textarea name="audience" rows="2" minlength="3" maxlength="300" required placeholder="Кому адресовано сообщение"></textarea></label>
+            <label><span data-i18n="offer">ПРЕДЛОЖЕНИЕ</span><textarea name="offer" rows="2" minlength="3" maxlength="240" required placeholder="Реальное проверяемое предложение"></textarea></label>
+            <label><span data-i18n="headlineLabel">ЗАГОЛОВОК</span><textarea name="headline" rows="2" minlength="5" maxlength="180" required placeholder="Заголовок рекламного макета"></textarea></label>
+            <label><span data-i18n="bodyLabel">ТЕКСТ РЕКЛАМЫ</span><textarea name="body" rows="4" minlength="10" maxlength="700" required placeholder="Текст без неподтверждённых обещаний"></textarea></label>
+            <label><span data-i18n="ctaLabel">ТЕКСТ КНОПКИ</span><input name="ctaLabel" minlength="3" maxlength="60" required placeholder="Обсудить пилот"></label>
+          </div>
+          <div class="form-actions"><button type="submit" class="primary" id="saveCampaign" data-i18n="saveDraft">СОХРАНИТЬ ЧЕРНОВИК ↗</button><button type="button" class="secondary" id="newCampaign" data-i18n="reset">НОВАЯ КАМПАНИЯ</button></div>
+          <p class="small" data-i18n="revisionNote">Сохранение выполняется на сервере. При конфликте изменений редактор попросит обновить запись.</p>
+        </form>
+        <div class="preview-surface">
+          <div class="panel-bar"><span data-i18n="previewTitle">ЖИВОЙ ПРЕДПРОСМОТР</span><span>IV / CREATIVE</span></div>
+          <div class="ad-preview" id="adPreview"><span class="preview-kicker" id="previewVenture">CREATIVE WORLD / IV</span><div class="preview-symbol">✦</div><h3 id="previewHeadline" data-i18n="previewEmpty">Ваш заголовок появится здесь.</h3><p id="previewBody" data-i18n="previewBodyEmpty">Заполните форму слева, чтобы увидеть рекламный макет.</p><button class="fake-cta" type="button" disabled id="previewCTA">YOUR CTA ↗</button></div>
+          <div class="preview-bottom" data-i18n="previewNotice">Это макет. Кнопка отключена, реальные показы и клики не имитируются.</div>
+          <div class="preview-detail"><span data-i18n="offer">ПРЕДЛОЖЕНИЕ</span><p id="previewOffer">—</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section shell" id="pipeline">
+      <div class="section-heading"><div><div class="eyebrow"><span class="line"></span> 04 / CAMPAIGN OPERATIONS</div><h2 data-i18n="pipelineTitle">Рабочий журнал кампаний.</h2><p data-i18n="pipelineExplain">Каждая карточка — запись из базы. Владелец может одобрить публичный предпросмотр или убрать его в архив.</p></div><span class="section-no">04 / 04</span></div>
+      <div class="list-toolbar"><button id="reload" type="button" class="secondary" data-i18n="reload">ОБНОВИТЬ ↻</button><span class="small" id="listStatus">—</span></div>
+      <div id="campaignList" class="campaign-list"></div>
+      <div id="ownerTools" class="owner-tools" hidden>
+        <section class="surface key-panel">
+          <div class="panel-bar"><span data-i18n="team">УПРАВЛЕНИЕ ДОСТУПОМ</span><span>OWNER ONLY</span></div>
+          <form id="tokenForm" class="key-form">
+            <label><span data-i18n="memberLabel">МЕТКА КЛЮЧА</span><input name="label" minlength="3" maxlength="80" required placeholder="Analyst / Team member"></label>
+            <label><span data-i18n="memberRole">РОЛЬ</span><select name="role"><option value="editor">Редактор / Editor</option><option value="viewer">Наблюдатель / Viewer</option></select></label>
+            <label><span data-i18n="days">СРОК (ДНИ)</span><input name="ttlDays" type="number" min="1" max="90" step="1" value="30" required></label>
+            <button type="submit" class="primary" data-i18n="issue">ВЫДАТЬ КЛЮЧ ↗</button>
+          </form>
+          <div id="tokenList" class="token-list"></div>
+          <div id="auditLog" class="audit-log"></div>
+        </section>
+      </div>
+    </section>
+  </div>
+</main>
+<footer class="footer shell"><span>© 2026 IMPOSSIBLE VENTURES / BUILD 1.0 BETA</span><span data-i18n="footnote">Черновики и публичные макеты не являются закупленными рекламными размещениями.</span><a href="/privacy.html" data-i18n="privacy">ПРИВАТНОСТЬ ↗</a></footer>
+</body></html>
