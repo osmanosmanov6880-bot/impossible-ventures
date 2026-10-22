@@ -267,7 +267,7 @@ test('Pilot Studio mobile form, three-language localization, real application an
   await operator.locator('#operatorToken').fill(operatorKey);
   await operator.locator('#operatorLogin').evaluate(form => form.requestSubmit());
   await operator.getByText('Pilot Browser Research').waitFor();
-  assert.match(await operator.locator('#operatorStats').innerText(), /TOTAL/);
+  assert.match(await operator.locator('#operatorStats').innerText(), /ВСЕГО|TOTAL/);
   await operator.locator('.operator-controls select').selectOption('qualified');
   await operator.getByRole('button', { name: 'SAVE STATUS' }).click();
   await operator.getByText('QUALIFIED').first().waitFor();
@@ -469,7 +469,8 @@ test('FIVE WAVES: premium commercial mobile demo -> owner workspace -> approved 
   await page.locator('#bootstrapForm input[name="systemToken"]').fill(systemToken);
   await page.locator('#bootstrapForm').evaluate(f=>f.requestSubmit());
   await page.locator('#receipt code').first().waitFor();
-  await page.waitForFunction(()=>document.querySelector('#workspaceMeta')?.textContent.includes('owner'));
+  await page.locator('#workspaceApp').waitFor({state:'visible'});
+  assert.match(await page.locator('#workspaceMeta').textContent(),/Владелец|Owner/);
   assert.equal(await page.locator('#saveCampaign').isEnabled(),true);
 
   await page.locator('#campaignForm').evaluate(f=>f.requestSubmit());
