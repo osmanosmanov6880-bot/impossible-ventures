@@ -516,7 +516,16 @@ test('Appeal 2049 premium mobile tribunal reviews ideas, imports finalized Dead 
   await page.locator('#scorecards .score-item').first().waitFor();
   assert.equal(await page.locator('#scorecards .score-item').count(),5);
   assert.match(await page.locator('#reviewContent').innerText(),/ПРОВЕРИТЬ ПЕРЕД ПУБЛИКАЦИЕЙ/);
-  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+  const layout = await page.evaluate(() => ({
+    viewport: innerWidth, htmlScrollWidth: document.documentElement.scrollWidth,
+    bodyScrollWidth: document.body.scrollWidth,
+    offenders: Array.from(document.querySelectorAll('body *')).map(el => {
+      const box=el.getBoundingClientRect();
+      return { tag:el.tagName.toLowerCase(),className:String(el.className).slice(0,90),
+        width:Math.round(box.width), left:Math.round(box.left),right:Math.round(box.right) };
+    }).filter(item=>item.right>innerWidth+2||item.left < -2).slice(0,12)
+  }));
+  assert.ok(layout.htmlScrollWidth<=layout.viewport+2,'Mobile overflow: '+JSON.stringify(layout));
   mkdirSync('artifacts',{recursive:true});
   await page.screenshot({path:'artifacts/appeal-2049-ru-mobile.png',fullPage:true});
 
