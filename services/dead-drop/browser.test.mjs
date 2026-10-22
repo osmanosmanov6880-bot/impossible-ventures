@@ -1006,10 +1006,10 @@ test('Attention Republic operator publishes real question; two independently con
  await operator.locator('#challengeList .card').first().waitFor();
  assert.equal(await operator.locator('#challengeList .card').count(),1);
  await operator.locator('#challengeList [data-status="active"]').click();
- await operator.locator('#challengeList .card').first().waitFor();
+ await operator.locator('#challengeList [data-status="paused"]').waitFor();
 
  await first.reload();
- await first.locator('#challenge option').first().waitFor();
+ await first.waitForFunction(() => { const select=document.getElementById('challenge'); return !!select && !select.disabled && select.options.length>0 && /^[a-f0-9]{24}$/.test(select.options[0].value); });
  await first.locator('#consent').check();
  await first.locator('#startVote').click();
  await first.locator('#ballot').waitFor({state:'visible'});
@@ -1023,7 +1023,7 @@ test('Attention Republic operator publishes real question; two independently con
  await first.screenshot({path:'artifacts/attention-republic-mobile-real-vote.png',fullPage:true});
 
  await second.goto(base+'/apps/attention-republic-live/');
- await second.locator('#challenge option').first().waitFor();
+ await second.waitForFunction(() => { const select=document.getElementById('challenge'); return !!select && !select.disabled && select.options.length>0 && /^[a-f0-9]{24}$/.test(select.options[0].value); });
  await second.locator('#consent').check();
  await second.locator('#startVote').click();
  await second.locator('#ballot').waitFor({state:'visible'});
