@@ -17,6 +17,8 @@ Five independent interactive world workshops have moved beyond placeholder cards
 
 **Browser paths:** /apps/anti-persona/, /apps/brief-theatre/, /apps/ad-biome/, /apps/museum-of-attention/, /apps/attention-republic/.
 
+**Real workflow bridge:** Download a finished world’s JSON, open /commercial/, choose the local file under Creative World import and review the prepared draft. Import does not automatically save, send private inputs or publish an ad. A separately authorized Save Draft action is required.
+
 **Evidence and limits:** [Five playable worlds — release guide](docs/five-playable-worlds-v11.md). All five are scripted creative workshops, **not** ad-delivery networks, production AI services, real audience panels or paying customers. Scores are fictional design heuristics and must not be mistaken for CTR or conversion lift.
 
 ## Five-WAVE Commercial Command v1.0 beta — implemented in source
