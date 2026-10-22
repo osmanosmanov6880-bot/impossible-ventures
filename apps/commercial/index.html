@@ -122,6 +122,40 @@
         </section>
       </div>
     </section>
+    <section class="section shell" id="proposals">
+      <div class="section-heading"><div><div class="eyebrow"><span class="line"></span> 05 / COMMERCIAL REVENUE READINESS</div>
+        <h2 data-i18n="proposalTitle">Предложения, которые можно принять.</h2>
+        <p data-i18n="proposalExplain">Создайте предложение по конкретной кампании, определите стоимость и передайте приватную ссылку заказчику. Принятие предложения не считается подтверждением оплаты.</p>
+      </div><span class="section-no">05 / 05</span></div>
+      <div class="proposal-summary" id="proposalSummary"><div class="score"><span>PROPOSALS</span><strong>0</strong><small>NO FABRICATED REVENUE</small></div></div>
+      <div class="builder-grid">
+        <form class="surface" id="proposalForm">
+          <div class="panel-bar"><span data-i18n="proposalEditor">РЕДАКТОР ПРЕДЛОЖЕНИЯ</span><span id="proposalRevision">NEW / DRAFT</span></div>
+          <div class="form-stack">
+            <label><span data-i18n="linkedCampaign">СВЯЗАННАЯ КАМПАНИЯ</span><select name="campaignId" id="proposalCampaign" required></select></label>
+            <div class="two-col">
+              <label><span data-i18n="clientName">КОМПАНИЯ ЗАКАЗЧИКА</span><input name="clientName" minlength="2" maxlength="120" required placeholder="Client company"></label>
+              <label><span data-i18n="contactEmail">ПОЧТА ДЛЯ СВЯЗИ</span><input name="contactEmail" type="email" maxlength="160" required placeholder="client@company.com"></label>
+            </div>
+            <label><span data-i18n="serviceScope">ОПИСАНИЕ ОБЪЁМА РАБОТ</span><textarea name="description" rows="4" minlength="10" maxlength="650" required placeholder="Deliverables, boundaries, timeline; paid media spend excluded"></textarea></label>
+            <div class="two-col">
+              <label><span data-i18n="currency">ВАЛЮТА</span><select name="currency"><option value="USD">USD / $</option><option value="EUR">EUR / €</option></select></label>
+              <label><span data-i18n="months">МЕСЯЦЕВ</span><input name="months" type="number" min="1" max="24" step="1" value="3" required></label>
+              <label><span data-i18n="setup">РАЗОВАЯ РАБОТА (ВАЛЮТА)</span><input name="setup" type="number" min="0" max="5000000" step="0.01" value="900" required></label>
+              <label><span data-i18n="monthly">ЕЖЕМЕСЯЧНАЯ УСЛУГА (ВАЛЮТА)</span><input name="monthly" type="number" min="0" max="5000000" step="0.01" value="350" required></label>
+            </div>
+            <div class="proposal-estimate"><span data-i18n="totalEstimate">ОБЩАЯ СУММА ПРЕДЛОЖЕНИЯ</span><strong id="estimateTotal">—</strong><small data-i18n="quoteCaveat">Это расчётная сумма, а не оплаченный доход.</small></div>
+          </div>
+          <div class="form-actions"><button id="saveProposal" class="primary" type="submit" data-i18n="saveProposal">СОХРАНИТЬ ПРЕДЛОЖЕНИЕ ↗</button><button type="button" class="secondary" id="clearProposal" data-i18n="newProposal">НОВОЕ ПРЕДЛОЖЕНИЕ</button></div>
+          <p class="small" data-i18n="quoteTerms">Система не отправляет email автоматически, не выставляет счёт-фактуру и не проводит оплату. Ссылка передаётся клиенту отдельно.</p>
+        </form>
+        <div class="preview-surface proposal-pipeline">
+          <div class="panel-bar"><span data-i18n="proposalJournal">ЖУРНАЛ ПРЕДЛОЖЕНИЙ</span><span>NO PAID REVENUE CLAIMS</span></div>
+          <div class="proposal-list" id="proposalList"><p class="small" data-i18n="proposalEmpty">Пока нет коммерческих предложений.</p></div>
+          <div class="proposal-link" id="proposalReceipt" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
   </div>
 </main>
 <footer class="footer shell"><span>© 2026 IMPOSSIBLE VENTURES / BUILD 1.0 BETA</span><span data-i18n="footnote">Черновики и публичные макеты не являются закупленными рекламными размещениями.</span><a href="/privacy.html" data-i18n="privacy">ПРИВАТНОСТЬ ↗</a></footer>
