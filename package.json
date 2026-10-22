@@ -1,17 +1,17 @@
 {
   "name": "impossible-ventures",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
-  "description": "Seven creative technology ventures, with Dead Drop cooperative missions and optional AI refinement.",
+  "description": "Dead Drop v0.5 cooperative missions with role-scoped data export, explicit erasure, scheduled retention and optional consent-gated AI.",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "start": "node services/dead-drop/server.mjs",
     "dev": "node services/dead-drop/server.mjs",
-    "test": "node --test services/dead-drop/server.test.mjs services/dead-drop/creative-engine.test.mjs",
-    "check": "node --check services/dead-drop/server.mjs && node --check services/dead-drop/creative-engine.mjs && node --check apps/dead-drop/app.js && npm test",
+    "test": "node --test services/dead-drop/server.test.mjs services/dead-drop/creative-engine.test.mjs services/dead-drop/privacy.test.mjs",
+    "check": "node --check services/dead-drop/server.mjs && node --check services/dead-drop/creative-engine.mjs && node --check services/dead-drop/dossier-locales.mjs && node --check apps/dead-drop/app.js && node --check apps/dead-drop/i18n.js && npm test",
     "start:ai": "node --env-file=.env services/dead-drop/server.mjs"
   }
 }
