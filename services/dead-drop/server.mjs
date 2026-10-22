@@ -264,7 +264,11 @@ function sendStatic(response, pathname) {
       pathname.startsWith('/apps/creative-worlds/') ||
       ['anti-persona','brief-theatre','ad-biome','museum-of-attention','attention-republic']
         .some(id => pathname.startsWith('/apps/' + id + '/'))) {
-    response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
+    // Only first-party interactive stories may be framed on this same origin.
+    // Protected business and operator routes remain non-frameable.
+    const ancestors=pathname.startsWith('/play/') ? "'self'" : "'none'";
+    response.setHeader('Content-Security-Policy',
+      "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors "+ancestors);
   }
   response.writeHead(200, {
     'Content-Type': mime,
