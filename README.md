@@ -1,5 +1,15 @@
 # Impossible Ventures
 
+## NEW / v1.8 — First-party Launch Studio (five full WAVE 11–15)
+
+Launch Studio links an approved campaign to a **real first-party interactive microsite**. A workspace owner freezes an approved revision, activates or pauses a public link and can permanently retire it. Seven authored RU/EN/ZH interactive story paths play on mobile without login or analytics consent.
+
+Optional opt-in event collection counts session starts, single completion and CTA signals. A cryptographically random one-time CTA receipt may be linked to an actual Pilot Studio form only after **separate contact consent**. The workspace board shows real technical event aggregates, submitted leads and manually qualified leads, with CSV export.
+
+**Commercial boundary:** This is not third-party paid ad placement, independently attested impressions, unique real human reach, verified sales or collected revenue. No external ad network, financial gateway, cookie tracker or behavioral profile is connected. GitHub Pages static preview cannot host live launches; use the Node backend.
+
+Open the protected /commercial/ Launch Studio, then a live first-party page /play/?id=LAUNCH_ID. [v1.8 release guide](docs/launch-studio-v12.md).
+
 ## FIVE DEVELOPMENT WAVES — v1.6 experimental release
 
 The code now includes a premium **Russian / English / Chinese** portal with **seven individually branded interactive research experiences**, plus all previously developed **Commercial Command**, Pilot Studio, Experiment Lab, operational recovery tools and earlier creative-world prototypes. The premium studio routes are separate, so no older product is overwritten.
@@ -21,7 +31,7 @@ Real server-only voting, commercial and pilot actions require a running Node.js 
 - Run all source and server regression tests: `npm run check`.
 
 ---
-**Platform v1.1 beta — seven browser creative worlds plus Commercial Command v1.0 and v0.8 Operations & Recovery.** Dead Drop, Pilot Studio and Experiment Lab now share writable SQLite diagnostics, a backup/restore tool and a multilingual server status page. This is source-level staging readiness, **not a confirmed public deployment**.
+**Platform v1.8 beta — v1.7 premium seven-world studios plus first-party Launch Studio, Commercial Command and v0.8 recovery.** Dead Drop, Pilot Studio and Experiment Lab now share writable SQLite diagnostics, a backup/restore tool and a multilingual server status page. This is source-level staging readiness, **not a confirmed public deployment**.
 
 
 ## NEW — Five fully playable worlds / v1.1 beta
@@ -227,6 +237,7 @@ GitHub Actions additionally runs Chromium end-to-end tests for two agents, langu
 - [Operations & Recovery Runbook](docs/operations-runbook.md)
 - [Five-WAVE commercial beta specification](docs/five-wave-release.md)
 - [Five playable-world game releases](docs/five-playable-worlds-v11.md)
+- [Launch Studio first-party advertising lifecycle — five WAVE](docs/launch-studio-v12.md)
 
 ## Operational and legal limitations
 

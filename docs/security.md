@@ -75,3 +75,16 @@ Production gates: threat model, authorization review, automated accessibility/br
 - A/B-to-Pilot Studio attribution is based on a cryptographically random, one-use server-verified CTA receipt held temporarily in sessionStorage, and a **separate contact form consent**. The API rejects reused, invalid or expired receipts and links only the actual submitted form to the recorded experiment arm.
 - Proposal contact records are purged after 180 days of alpha retention (startup/hourly/normal API read); other workspace content remains until owner-driven export/delete. Runtime deletion does not remove backups, proxy logs or screenshots.
 - Commercial Command is still a **single Node server and SQLite store**. Rate limits are process-local, shared system operator key is not least-privilege IAM, tenant isolation is application-enforced rather than PostgreSQL row-level policy. An independent security review, TLS, WAF, DPA and authorized data controller information are required before external production traffic.
+
+## v1.2 / First-party Launch Studio security
+
+- Owner-only publication of an immutable approved revision; public 404 for draft, paused, retired or archived-source creative. Public response omits internal audience, workspace IDs and credentials.
+- Same-origin frame policy only for /play/. Protected financial, contact and operator pages stay non-frameable with strict CSP.
+- Untracked story always available; deliberate analytics opt-in issues a random hash-backed session, never sends story choices, stores no cookies or remote pixels.
+- A session may record at most one completion signal and one CTA. They are **technical signals**, not proof of unique people, ad impressions or verified lead quality.
+- CTA one-time cryptographic proof is retained only as a digest. A separate contact-form consent is required for an atomic attribution claim; wrong, stale or repeated proofs fail.
+- Raw session data expires after seven days; daily aggregate counts after ninety. CSV is numeric-only, while owner organization exports and global Pilot Studio submissions have separate privacy handling.
+- Deleting a workspace removes its launch snapshots and event data from the active DB and unlinks globally consented contact forms. Backups and host logs require separate deletion controls.
+- Remaining gaps: SSO/MFA, real ad-verification and anti-fraud, payments, legal compliance assurance, distributed event collection and deletion of externally managed backups.
+
+Further details: [v1.2 release specification](launch-studio-v12.md).
