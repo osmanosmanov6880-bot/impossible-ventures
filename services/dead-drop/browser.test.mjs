@@ -804,3 +804,36 @@ test('Attention Republic operator publishes real question; two independently con
  assert.equal(await operator.locator('#operatorPanel').isHidden(),true);
  assert.deepEqual(errors,[]);
 });
+
+
+test('global seven-world portfolio routes, RU/EN/ZH translation and category filters work on mobile',async t=>{
+ const {context,base}=await setup(t,390,844);
+ const page=await context.newPage(),errors=[];attachErrors(page,errors);
+ await page.goto(base+'/');
+ await page.locator('#worldGrid .world-card').first().waitFor();
+ assert.equal(await page.locator('#worldGrid .world-card').count(),7);
+ assert.equal(await page.locator('#worldGrid .world-card:visible').count(),7);
+ for(const [filter,count] of [['creative',3],['review',2],['community',2],['all',7]]){
+   await page.locator('[data-filter="'+filter+'"]').click();
+   assert.equal(await page.locator('#worldGrid .world-card:visible').count(),count,filter);
+   assert.equal(await page.locator('[data-filter="'+filter+'"]').getAttribute('aria-pressed'),'true');
+ }
+ await page.locator('#language').selectOption('en');
+ assert.match(await page.locator('#heroTitle').innerText(),/Impossible/);
+ assert.match(await page.locator('#worlds').innerText(),/Seven creative worlds/);
+ await page.locator('#language').selectOption('zh');
+ assert.match(await page.locator('#heroTitle').innerText(),/不可能/);
+ await page.locator('#language').selectOption('ru');
+ assert.match(await page.locator('#heroTitle').innerText(),/Невозможное/);
+ const routes=await page.locator('#worldGrid .world-link').evaluateAll(items=>items.map(a=>a.getAttribute('href')));
+ assert.equal(new Set(routes).size,7);
+ for(const href of routes){
+   const response=await page.request.get(new URL(href,base).toString());
+   assert.equal(response.status(),200,href);
+   assert.match(response.headers()['content-security-policy']||'',/script-src 'self'/);
+ }
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+ mkdirSync('artifacts',{recursive:true});
+ await page.screenshot({path:'artifacts/impossible-ventures-seven-worlds-mobile.png',fullPage:true});
+ assert.deepEqual(errors,[]);
+});
