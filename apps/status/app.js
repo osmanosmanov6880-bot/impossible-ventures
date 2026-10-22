@@ -171,6 +171,15 @@ function render(snapshot) {
 
 async function refresh() {
   if (busy) return;
+  if (document.body.dataset.staticPreview === 'true') {
+    lastProbe = {
+      live: { status: 404, ok: false },
+      ready: { status: 404, ok: false },
+      checkedAt: Date.now()
+    };
+    render(lastProbe);
+    return;
+  }
   busy = true;
   refreshButton.disabled = true;
   try {
