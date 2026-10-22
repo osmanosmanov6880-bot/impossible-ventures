@@ -85,6 +85,10 @@ export function createPilotRouter({ db, now, operatorToken = '', ApiError, jsonB
     db.prepare('DELETE FROM pilot_leads WHERE created_at < ?').run(now() - RETENTION_MS);
   }
 
+  cleanup();
+  const purgeTimer = setInterval(cleanup, 60_000);
+  purgeTimer.unref();
+
   function limitIntake(request) {
     const address = request.socket.remoteAddress || 'unknown';
     const current = now();
@@ -188,5 +192,6 @@ export function createPilotRouter({ db, now, operatorToken = '', ApiError, jsonB
     }
     return false;
   }
+  handle.stop = () => clearInterval(purgeTimer);
   return handle;
 }
