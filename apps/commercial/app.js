@@ -730,7 +730,7 @@ Object.assign(dict.ru, {
  importDisclaimer:'Локальный JSON из одного из пяти новых миров превратится в редактируемый черновик. Данные файла не отправляются в API. Сохранение в организации — только по отдельному действию.',
  importLabel:'ВЫБРАТЬ JSON-ФАЙЛ',
  importSuccess:'Творческий результат загружен в редактор. Проверьте реальные утверждения, внесите исправления и сохраните черновик отдельно.',
- importError:'Не удалось импортировать игровой отчёт. Файл должен быть создан одним из пяти миров и иметь корректную структуру.',
+ importError:'Не удалось импортировать отчёт. Используйте корректный JSON игрового мира или премиальной студии.',
  importReadOnly:'Только владелец, редактор или демонстрационный режим могут заполнять рекламный черновик.'
 });
 Object.assign(dict.en, {
@@ -738,7 +738,7 @@ Object.assign(dict.en, {
  importDisclaimer:'Import a local JSON file from one of five worlds into an editable draft. The file content is not uploaded by importing. Server saving always requires a separate action.',
  importLabel:'CHOOSE A LOCAL JSON FILE',
  importSuccess:'Creative report loaded into the editor. Verify all claims, refine the copy and save deliberately.',
- importError:'Could not import this creative report. It must have a valid five-world format.',
+ importError:'Could not import this creative report. Use a valid five-world or premium studio JSON file.',
  importReadOnly:'Only owners, editors or local demo mode can prepare a campaign draft.'
 });
 Object.assign(dict.zh, {
@@ -768,7 +768,11 @@ worldImport.addEventListener('change',async()=>{
    const text=await file.text();
    const source=JSON.parse(text);
    const {toCampaignDraft}=await import('../apps/creative-worlds/bridge.mjs');
-   const draft=toCampaignDraft(source,elements.lang.value);
+   const {toPremiumCampaignDraft}=await import('../apps/creative-worlds/studio-bridge.mjs');
+   // Source data stays client-side until an authorized, separate Save Draft.
+   const draft=source?.schema==='iv-creative-deliverable-v1'
+     ? toCampaignDraft(source,elements.lang.value)
+     : toPremiumCampaignDraft(source,elements.lang.value);
    emptyForm();
    for(const key of ['title','venture','goal','channel','audience','offer','headline','body','ctaLabel']){
      if(elements.campaignForm.elements[key])elements.campaignForm.elements[key].value=draft[key];
