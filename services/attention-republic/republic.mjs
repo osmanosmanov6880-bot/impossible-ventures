@@ -19,7 +19,7 @@ function secureMatch(value,storedHex){
  const expected=Buffer.from(storedHex,'hex'),actual=digest(value);
  return expected.length===actual.length&&timingSafeEqual(expected,actual);
 }
-function text(value,label,max=180,min=3){
+function text(value,label,ApiError,max=180,min=3){
  if(typeof value!=='string')throw new ApiError(400,label+' is required');
  const v=value.trim().replace(/\s+/gu,' ');
  if(v.length<min||v.length>max||/[\u0000-\u001f\u007f]/u.test(v))throw new ApiError(400,label+' has invalid length or characters');
@@ -108,10 +108,10 @@ export function createRepublicRouter({db,now,operatorToken='',ApiError,jsonBody,
   if(pathname==='/api/v1/operator/republic/challenges'&&method==='POST'){
    requireOperator(request);
    const body=await jsonBody(request);
-   const title=text(body.title,'Title',120);
-   const question=text(body.question,'Question',220);
-   const a=text(body.choiceA,'Choice A',130);
-   const b=text(body.choiceB,'Choice B',130);
+   const title=text(body.title,'Title',ApiError,120);
+   const question=text(body.question,'Question',ApiError,220);
+   const a=text(body.choiceA,'Choice A',ApiError,130);
+   const b=text(body.choiceB,'Choice B',ApiError,130);
    if(a.toLowerCase()===b.toLowerCase())throw new ApiError(400,'Choices must differ');
    if(!LANGS.includes(body.locale))throw new ApiError(400,'Invalid locale');
    const id=randomBytes(12).toString('hex'),current=now();
