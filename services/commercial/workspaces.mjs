@@ -124,6 +124,58 @@ export function createWorkspaces({ db, now = Date.now, operatorToken = '', ApiEr
       return true;
     }
 
+    // An owner can export tenant-owned data, including proposal contact details.
+    // Secrets are NEVER included: only metadata about issued credentials.
+    const exportRoute = /^\/api\/v1\/workspaces\/([a-f0-9]{24})\/export$/.exec(path);
+    if (exportRoute && req.method === 'GET') {
+      const { workspace } = requireRole(req, exportRoute[1], ['owner']);
+      const campaigns = db.prepare(
+        'SELECT id,title,venture,goal,channel,audience,offer,headline,body,cta_label,status,revision,created_at,updated_at ' +
+        'FROM commercial_campaigns WHERE workspace_id = ? ORDER BY created_at DESC'
+      ).all(workspace.id);
+      const proposals = db.prepare(
+        'SELECT id,campaign_id,client_name,contact_email,description,currency,setup_cents,monthly_cents,' +
+        'months,total_cents,status,revision,created_at,updated_at,decided_at ' +
+        'FROM commercial_proposals WHERE workspace_id = ? ORDER BY created_at DESC'
+      ).all(workspace.id);
+      const tokens = db.prepare(
+        'SELECT id,label,role,created_at,expires_at,revoked_at FROM commercial_tokens WHERE workspace_id = ?'
+      ).all(workspace.id);
+      const auditRows = db.prepare(
+        'SELECT id,action,actor_token_id,subject_id,at FROM commercial_audit WHERE workspace_id = ? ORDER BY at DESC'
+      ).all(workspace.id);
+      sendJSON(res, 200, {
+        exportedAt: now(), workspace: workspacePublic(workspace), campaigns, proposals, tokenMetadata: tokens, audit: auditRows,
+        note: 'Contains contact email data. Protect this local export; no original plaintext access credentials are included.'
+      });
+      return true;
+    }
+
+    if (workspaceRoute && req.method === 'DELETE') {
+      const { workspace } = requireRole(req, workspaceRoute[1], ['owner']);
+      const input = await jsonBody(req);
+      if (input.confirmName !== workspace.name) throw new ApiError(422, 'Type the exact organization name to delete');
+      // Scope every mutation to the authenticated tenant. Public creative links,
+      // outstanding proposals and all tenant credentials cease to work immediately.
+      db.exec('BEGIN IMMEDIATE');
+      try {
+        db.prepare('DELETE FROM commercial_proposals WHERE workspace_id = ?').run(workspace.id);
+        db.prepare('DELETE FROM commercial_campaigns WHERE workspace_id = ?').run(workspace.id);
+        db.prepare('DELETE FROM commercial_audit WHERE workspace_id = ?').run(workspace.id);
+        db.prepare('DELETE FROM commercial_tokens WHERE workspace_id = ?').run(workspace.id);
+        db.prepare('DELETE FROM commercial_workspaces WHERE id = ?').run(workspace.id);
+        db.exec('COMMIT');
+      } catch (error) {
+        db.exec('ROLLBACK');
+        throw error;
+      }
+      sendJSON(res, 200, {
+        deleted: true, workspaceId: workspace.id,
+        note: 'Tenant data removed from active SQLite tables; physical media, server backups and logs require separate deletion controls. Global Pilot Studio submissions are separate from workspace data.'
+      });
+      return true;
+    }
+
     const tokensRoute = /^\/api\/v1\/workspaces\/([a-f0-9]{24})\/tokens$/.exec(path);
     if (tokensRoute && req.method === 'GET') {
       requireRole(req, tokensRoute[1], ['owner']);
