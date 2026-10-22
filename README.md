@@ -1,6 +1,6 @@
 # Impossible Ventures
 
-Seven experimental creative-technology products. **Dead Drop Agency v0.4** is the flagship multiplayer alpha. **Appeal 2049** is a separate browser prototype. Five further concepts are documented but not commercially launched.
+Seven experimental creative-technology products. **Dead Drop Agency v0.5** is the flagship multiplayer alpha. **Appeal 2049** is a separate browser prototype. Five further concepts are documented but not commercially launched.
 
 > These are not seven registered businesses. There is no confirmed product-market fit, production cloud deployment, licensed AI usage or payments.
 
@@ -11,6 +11,7 @@ Seven experimental creative-technology products. **Dead Drop Agency v0.4** is th
 3. Each operative gets **three messages**. Their private fields are hidden from the other role until the dossier is completed.
 4. Both must send at least one message; the dossier combines the two perspectives.
 5. The dossier is downloadable and identifies unverified claims as user-supplied.
+6. Either role can export their authorized JSON view or permanently delete the room for both agents, after confirming the exact code.
 
 **No sign-up is necessary for this experimental alpha.** A local training mode works without a running backend. The interactive workspace is translated into **Russian, English, and Simplified Chinese**; deterministic dossier copy supports the same languages.
 
@@ -29,8 +30,17 @@ Other routes:
 - Portfolio: http://localhost:3000/
 - Appeal 2049: http://localhost:3000/apps/appeal-2049/
 - Health: http://localhost:3000/api/v1/health
+- Transparent privacy/retention notice: http://localhost:3000/privacy.html
 
 The server uses SQLite at `data/missions.sqlite` by default. This is a **single-instance demonstration**, not a distributed production cluster.
+
+## Mission lifecycle and privacy controls
+
+- The dedicated **Your Data** panel shows the scheduled expiry time and offers role-scoped JSON export. Raw agent access tokens, hashes and the other agent's pre-finalization private fields are excluded.
+- **Delete Mission** requires typing the exact room code. Either authorized agent can delete the shared mission, immediately revoking both roles. Leaving a session only clears the local token and does **not** delete server data.
+- SQLite stores missions for at most seven days from creation, subject to up to one hour of scheduled cleanup delay while the process is running. Expired rooms are purged at startup, hourly, and on access; if the server is offline, cleanup resumes when it restarts.
+- SQLite secure_delete and WAL truncation are best-effort local cleanup; neither guarantees data removal from backups, disk snapshots or physical storage. No production backup/delete policy is implemented.
+- See the multilingual [data handling notice](privacy.html) for exact limitations.
 
 ## Optional real AI editing (mutual opt-in only)
 
@@ -99,7 +109,7 @@ GitHub Actions additionally runs Chromium end-to-end tests for two agents, langu
 
 - No confirmed public multiplayer host, production user identity service, payments, formal backups, distributed deployment or legal company registrations.
 - SQLite is local to one process. Rate limiting is basic and in-memory.
-- Missions expire after seven days upon access, without a scheduled privacy purge.
+- Missions expire after seven days and are cleared on server startup and hourly, with cleanup upon access. Actual physical erasure beyond the SQLite host is not guaranteed.
 - Live model use requires a server key, two agents' consent and a funded API account.
 - Never commit secrets or customer data. `.env` and the local mission database are ignored by Git.
 - Brand names/domains are unverified. Commercial pricing and revenue are hypotheses.
