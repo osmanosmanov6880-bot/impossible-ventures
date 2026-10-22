@@ -202,7 +202,9 @@ export function createWorkspaces({ db, now = Date.now, operatorToken = '', ApiEr
       return true;
     }
 
-    if (path.startsWith('/api/v1/workspaces/') || path.startsWith('/api/v1/operator/workspaces')) {
+    // Campaign, finance and other tenant-scoped modules share this URL prefix.
+    // Let downstream routers decide whether they own the remaining path.
+    if (path.startsWith('/api/v1/operator/workspaces')) {
       throw new ApiError(404, 'Workspace API route not found');
     }
     return false;
