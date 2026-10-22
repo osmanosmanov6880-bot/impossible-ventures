@@ -214,7 +214,21 @@ const STATIC_FILES = new Map([
   ['/showcase/app.js', 'apps/commercial/showcase.js'],
   ['/proposal/', 'apps/commercial/proposal.html'],
   ['/proposal/index.html', 'apps/commercial/proposal.html'],
-  ['/proposal/app.js', 'apps/commercial/proposal.js']
+  ['/proposal/app.js', 'apps/commercial/proposal.js'],
+  ['/apps/creative-worlds/style.css', 'apps/creative-worlds/style.css'],
+  ['/apps/creative-worlds/worlds.mjs', 'apps/creative-worlds/worlds.mjs'],
+  ['/apps/creative-worlds/engine.mjs', 'apps/creative-worlds/engine.mjs'],
+  ['/apps/creative-worlds/runner.mjs', 'apps/creative-worlds/runner.mjs'],
+  ['/apps/anti-persona/', 'apps/anti-persona/index.html'],
+  ['/apps/anti-persona/index.html', 'apps/anti-persona/index.html'],
+  ['/apps/brief-theatre/', 'apps/brief-theatre/index.html'],
+  ['/apps/brief-theatre/index.html', 'apps/brief-theatre/index.html'],
+  ['/apps/ad-biome/', 'apps/ad-biome/index.html'],
+  ['/apps/ad-biome/index.html', 'apps/ad-biome/index.html'],
+  ['/apps/museum-of-attention/', 'apps/museum-of-attention/index.html'],
+  ['/apps/museum-of-attention/index.html', 'apps/museum-of-attention/index.html'],
+  ['/apps/attention-republic/', 'apps/attention-republic/index.html'],
+  ['/apps/attention-republic/index.html', 'apps/attention-republic/index.html']
 ]);
 
 function sendJSON(response, status, payload) {
@@ -236,9 +250,13 @@ function sendStatic(response, pathname) {
     '.html': 'text/html; charset=utf-8',
     '.css': 'text/css; charset=utf-8',
     '.js': 'text/javascript; charset=utf-8',
+    '.mjs': 'text/javascript; charset=utf-8',
     '.svg': 'image/svg+xml'
   }[extname(path)] || 'application/octet-stream';
-  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/status/') || pathname.startsWith('/commercial/') || pathname.startsWith('/showcase/') || pathname.startsWith('/proposal/')) {
+  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/status/') || pathname.startsWith('/commercial/') || pathname.startsWith('/showcase/') || pathname.startsWith('/proposal/') ||
+      pathname.startsWith('/apps/creative-worlds/') ||
+      ['anti-persona','brief-theatre','ad-biome','museum-of-attention','attention-republic']
+        .some(id => pathname.startsWith('/apps/' + id + '/'))) {
     response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
   }
   response.writeHead(200, {
