@@ -1,0 +1,85 @@
+name: Docker runtime and storage smoke
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Node 22 test client
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build release container
+        run: docker build -t dead-drop-smoke .
+      - name: Run with root-owned persistent volume
+        run: |
+          docker volume create dead-drop-ci-data
+          docker run -d --rm --name dead-drop-ci \
+            -p 127.0.0.1:3017:3000 \
+            -v dead-drop-ci-data:/data \
+            -e PORT=3000 \
+            -e DB_PATH=/data/missions.sqlite \
+            dead-drop-smoke
+          curl --retry 15 --retry-connrefused --retry-delay 2 -fsS \
+            http://127.0.0.1:3017/api/v1/health
+      - name: Verify app process dropped root privileges
+        run: |
+          docker exec dead-drop-ci sh -c \
+            'grep -Eq "^Uid:[[:space:]]+1000" /proc/1/status'
+      - name: Create a mission with durable storage
+        run: |
+          node --input-type=module <<'JS'
+          import { writeFileSync } from 'node:fs';
+          const response = await fetch('http://127.0.0.1:3017/api/v1/missions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              brand: 'Smoke Test Studio',
+              product: 'Persistent integration test',
+              proof: 'A test fixture with no personal data',
+              objective: 'awareness'
+            })
+          });
+          if (response.status !== 201) throw new Error('Could not create test mission');
+          const { code, token } = await response.json();
+          writeFileSync('/tmp/dead-drop-ci-room.json', JSON.stringify({ code, token }), { mode: 0o600 });
+          JS
+      - name: Restart container on same volume
+        run: |
+          docker stop dead-drop-ci
+          docker run -d --rm --name dead-drop-ci-restart \
+            -p 127.0.0.1:3017:3000 \
+            -v dead-drop-ci-data:/data \
+            -e PORT=3000 \
+            -e DB_PATH=/data/missions.sqlite \
+            dead-drop-smoke
+          curl --retry 15 --retry-connrefused --retry-delay 2 -fsS \
+            http://127.0.0.1:3017/api/v1/health
+          node --input-type=module <<'JS'
+          import { readFileSync } from 'node:fs';
+          const { code, token } = JSON.parse(readFileSync('/tmp/dead-drop-ci-room.json', 'utf8'));
+          const response = await fetch('http://127.0.0.1:3017/api/v1/missions/' + code, {
+            headers: { Authorization: 'Bearer ' + token }
+          });
+          if (response.status !== 200) throw new Error('Mission not persisted across restart');
+          const data = await response.json();
+          if (data.mission.brand !== 'Smoke Test Studio') throw new Error('Wrong mission restored');
+          JS
+      - name: Tear down temporary containers and test volume
+        if: always()
+        run: |
+          docker logs dead-drop-ci || true
+          docker logs dead-drop-ci-restart || true
+          docker rm -f dead-drop-ci dead-drop-ci-restart || true
+          docker volume rm dead-drop-ci-data || true
