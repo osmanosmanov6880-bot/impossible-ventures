@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 import { createApp } from './server.mjs';
 
@@ -76,6 +76,7 @@ test('two actual browser agents join, exchange signals, preserve secrets, finali
 
   await agentA.getByRole('button', { name: /DECODE THE CREATIVE DOSSIER/i }).click();
   await agentA.getByText('Signal decoded.').waitFor();
+  assert.equal(await agentA.locator('[data-action="delete-mission"]').count(), 1);
   const result = await agentA.locator('body').innerText();
   assert.match(result, /Fresh roasted subscription coffee/);
   assert.match(result, /Independent creative directors/);
@@ -226,5 +227,76 @@ test('both agents consent independently before model assistance is available', a
   await hostPage.locator('[data-action="finalize"]').click();
   await hostPage.getByText('AI-ASSISTED CREATIVE DRAFT').waitFor();
   assert.equal(modelCalls, 1);
+  assert.deepEqual(errors, []);
+});
+
+
+test('browser exports only one agent view, confirms erasure and revokes both sessions', async t => {
+  const { browser, context, base } = await setup(t);
+  const host = await context.newPage();
+  const guestContext = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    reducedMotion: 'reduce'
+  });
+  t.after(() => guestContext.close());
+  const guest = await guestContext.newPage();
+  const errors = [];
+  attachErrors(host, errors);
+  attachErrors(guest, errors);
+
+  await host.goto(base + '/apps/dead-drop/');
+  await host.getByRole('button', { name: /Create a mission/i }).click();
+  await host.locator('#brand').fill('Aurora Studio');
+  await host.locator('#product').fill('PRIVATE PRODUCT: subscription learning toolkit');
+  await host.locator('#proof').fill('PRIVATE EVIDENCE: documented demo classes');
+  await host.locator('#hostForm').evaluate(form => form.requestSubmit());
+  await host.locator('.room-code strong').waitFor();
+  const code = (await host.locator('.room-code strong').textContent()).trim();
+
+  await guest.goto(base + '/apps/dead-drop/');
+  await guest.getByRole('button', { name: /Join as Agent Echo/i }).click();
+  await guest.locator('#roomCode').fill(code);
+  await guest.locator('#audience').fill('Independent creative agencies');
+  await guest.locator('#friction').fill('Clients send confusing briefs');
+  await guest.locator('#channel').selectOption('social');
+  await guest.locator('#guestForm').evaluate(form => form.requestSubmit());
+  await guest.locator('[data-action="export-my-data"]').waitFor();
+
+  mkdirSync('artifacts', { recursive: true });
+  await guest.screenshot({ path: 'artifacts/dead-drop-mobile-privacy.png', fullPage: true });
+  assert.equal(await guest.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false);
+
+  const downloadPromise = guest.waitForEvent('download');
+  await guest.locator('[data-action="export-my-data"]').click();
+  const download = await downloadPromise;
+  assert.match(download.suggestedFilename(), /dead-drop-[a-z2-9]{8}-audience-data\.json/);
+  const exportJSON = JSON.parse(readFileSync(await download.path(), 'utf8'));
+  assert.equal(exportJSON.kind, 'dead-drop-agent-export');
+  assert.equal(exportJSON.mission.role, 'audience');
+  const serialized = JSON.stringify(exportJSON);
+  assert.ok(!serialized.includes('PRIVATE PRODUCT:'));
+  assert.ok(!serialized.includes('PRIVATE EVIDENCE:'));
+  assert.ok(!serialized.includes('hostTokenHash'));
+  assert.ok(!serialized.includes('guestTokenHash'));
+
+  await guest.locator('[data-action="delete-mission"]').click();
+  const dialog = guest.locator('#deleteDialog');
+  await dialog.waitFor({ state: 'visible' });
+  await guest.locator('#deleteConfirmCode').fill('BADCODE');
+  await guest.locator('#confirmDeleteButton').click();
+  await guest.getByText('The room code does not match.').waitFor();
+  assert.equal(await dialog.isVisible(), true);
+
+  await guest.locator('#deleteConfirmCode').fill(code);
+  await guest.screenshot({ path: 'artifacts/dead-drop-delete-confirm-mobile.png', fullPage: true });
+  await guest.locator('#confirmDeleteButton').click();
+  await dialog.waitFor({ state: 'hidden' });
+  await guest.getByRole('button', { name: /Create a mission/i }).waitFor();
+
+  // The other role is revoked on its next refresh, not only in the
+  // deleting participant's session.
+  await host.getByRole('button', { name: /Create a mission/i }).waitFor({ timeout: 12000 });
+  await host.reload();
+  await host.getByRole('button', { name: /Create a mission/i }).waitFor();
   assert.deepEqual(errors, []);
 });
