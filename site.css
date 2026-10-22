@@ -12,3 +12,40 @@
 .section-intro,.section-intro>div,.section-intro h2,.section-intro p{min-width:0;max-width:100%}
 @media(max-width:850px){.section-intro{align-items:stretch}.section-intro>div{width:100%}}
 @media(max-width:620px){.section-intro h2{font-size:clamp(33px,9vw,40px);overflow-wrap:anywhere}.section-intro .overline{overflow-wrap:anywhere}.ticker{overflow:clip}}
+
+
+/* THE SIGNAL — no-video interactive cinema feature */
+.cinema-promo{
+ position:relative;isolation:isolate;overflow:hidden;min-height:520px;margin-top:55px;
+ display:flex;align-items:center;padding-top:65px;padding-bottom:65px;
+ border-block:1px solid #6e8b9e72;
+}
+.cinema-promo-image{
+ position:absolute;inset:0;z-index:-2;
+ background-image:linear-gradient(90deg,#06101dfa 0%,#08131eea 29%,#0c182b9b 55%,#0a122524 100%),
+ url('./cinema/assets/scenes/scene_01.svg');
+ background-repeat:no-repeat;background-size:cover;background-position:center;
+}
+.cinema-promo:after{
+ content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+ background:linear-gradient(0deg,#08111cdb 0%,transparent 45%,#09152422 100%);
+}
+.cinema-promo-copy{max-width:810px;position:relative;z-index:1}
+.cinema-promo h2{
+ font-family:Georgia,"Times New Roman",serif;letter-spacing:-.057em;
+ font-size:clamp(49px,6.5vw,89px);font-weight:450;line-height:1.04;
+ margin:23px 0;max-width:780px;color:#f6eddf;text-wrap:balance
+}
+.cinema-promo-copy>p{font-size:17px;line-height:1.8;color:#d2dfec;max-width:650px}
+.cinema-promo-buttons{display:flex;flex-wrap:wrap;gap:12px;margin:31px 0 22px}
+.cinema-promo small{font-size:12px;line-height:1.75;color:#b6cad5;display:block;max-width:650px}
+.cinema-promo-meta{position:absolute;right:5%;bottom:24px;color:#c0d4e0;font:11px monospace;letter-spacing:.1em}
+.cinema-promo-meta span{margin-left:20px;color:#f6d8a8}
+@media(max-width:700px){
+ .cinema-promo{margin-top:22px;min-height:490px;padding-block:54px}
+ .cinema-promo h2{font-size:clamp(42px,10vw,61px)}
+ .cinema-promo-copy>p{font-size:14px}
+ .cinema-promo-buttons{flex-direction:column;align-items:stretch}
+ .cinema-promo-buttons>a{width:100%;justify-content:center}
+ .cinema-promo-meta{position:relative;right:auto;bottom:auto;margin-top:16px;display:none}
+}
