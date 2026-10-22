@@ -154,7 +154,7 @@ def build() -> None:
         "adbiome", "museum-of-attention-studio"
     ):
         copytree(ROOT / "apps" / name, DIST / "apps" / name)
-    copytree(ROOT / "apps" / "shared", DIST / "apps" / "shared")
+    copytree(ROOT / "apps" / "shared", DIST / "apps" / "shared", dirs_exist_ok=True)
     republic = DIST / "apps" / "attention-republic-live"
     republic.mkdir()
     for asset in ("index.html", "app.js"):
