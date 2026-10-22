@@ -264,6 +264,7 @@ test('Pilot Studio mobile form, three-language localization, real application an
   const operator = await context.newPage();
   attachErrors(operator, errors);
   await operator.goto(base + '/pilot/operator/');
+  await operator.locator('#operatorLocale').selectOption('en');
   await operator.locator('#operatorToken').fill(operatorKey);
   await operator.locator('#operatorLogin').evaluate(form => form.requestSubmit());
   await operator.getByText('Pilot Browser Research').waitFor();
@@ -271,6 +272,14 @@ test('Pilot Studio mobile form, three-language localization, real application an
   await operator.locator('.operator-controls select').selectOption('qualified');
   await operator.getByRole('button', { name: 'SAVE STATUS' }).click();
   await operator.getByText('QUALIFIED').first().waitFor();
+  await operator.locator('#operatorLocale').selectOption('ru');
+  assert.match(await operator.locator('#operatorStats').innerText(), /ВСЕГО/);
+  await operator.getByRole('button', { name: /ВЫЙТИ/i }).click();
+  assert.equal(await operator.locator('#operatorList').locator('article').count(), 0);
+  assert.equal(await operator.locator('#operatorStats').locator('.operator-stat').count(), 0);
+  assert.equal(await operator.locator('#refreshOperator').isDisabled(), true);
+  await operator.locator('#operatorLocale').selectOption('zh');
+  assert.match(await operator.locator('.operator-heading').innerText(), /控制台/);
   assert.deepEqual(errors, []);
 });
 
