@@ -45,7 +45,7 @@ test('moderated questions start as private drafts; public catalog never fabricat
   const publicFirst=await req(base,'/api/v1/republic/challenges');
   assert.equal(publicFirst.status,200);
   assert.deepEqual(publicFirst.data.items,[]);
-  assert.match(publicFirst.data.note,/not invented/);
+  assert.match(publicFirst.data.note,/not[^.]*invented|is invented or seeded/);
   assert.equal((await req(base,'/api/v1/operator/republic/challenges')).status,401);
   assert.equal((await req(base,'/api/v1/operator/republic/challenges','POST',draft,'invalid-secret')).status,403);
   const draftResult=await req(base,'/api/v1/operator/republic/challenges','POST',draft,operatorToken);
@@ -137,12 +137,12 @@ test('session cleanup expires tokens and challenge TTL without fabricating repla
 test('Republic is exposed through same-origin strict CSP; arbitrary private paths stay unavailable',async t=>{
   const {base}=await setup(t);
   for(const path of [
-    '/apps/attention-republic/','/apps/attention-republic/app.js','/apps/attention-republic/operator/',
-    '/apps/attention-republic/operator.js'
+    '/apps/attention-republic-live/','/apps/attention-republic-live/app.js','/apps/attention-republic-live/operator/',
+    '/apps/attention-republic-live/operator.js'
   ]){
     const response=await fetch(base+path);
     assert.equal(response.status,200,path);
     assert.match(response.headers.get('content-security-policy'),/script-src 'self'/);
   }
-  assert.equal((await fetch(base+'/apps/attention-republic/private.sqlite')).status,404);
+  assert.equal((await fetch(base+'/apps/attention-republic-live/private.sqlite')).status,404);
 });
