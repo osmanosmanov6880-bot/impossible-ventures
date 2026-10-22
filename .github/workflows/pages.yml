@@ -1,4 +1,4 @@
-name: Publish static portfolio preview
+name: Static preview package and optional Pages deployment
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 15
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,14 +31,28 @@ jobs:
           node-version: '22'
       - name: Verify runtime and API source
         run: npm run check
-      - name: Prepare public static preview
+      - name: Prepare public static preview without operator backend
         run: python3 scripts/build_static_preview.py
-      - name: Configure GitHub Pages
+      - name: Upload downloadable static preview independently of Pages settings
+        uses: actions/upload-artifact@v4
+        with:
+          name: impossible-ventures-static-preview
+          path: _site/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Configure GitHub Pages if already enabled
+        id: pages
         uses: actions/configure-pages@v5
-      - name: Upload static site
+        continue-on-error: true
+      - name: Explain unpublished state when Pages is disabled
+        if: steps.pages.outcome == 'failure'
+        run: 'echo "::notice::Static bundle built and uploaded, but GitHub Pages is not enabled. Enable it once in repository Settings -> Pages -> Build and deployment -> Source: GitHub Actions, then rerun this workflow."'
+      - name: Upload Pages deployment artifact only after successful Pages configuration
+        if: steps.pages.outcome == 'success'
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
-      - name: Deploy preview
-        id: deployment
+      - name: Deploy published preview
+        id: deploy
+        if: steps.pages.outcome == 'success'
         uses: actions/deploy-pages@v4
