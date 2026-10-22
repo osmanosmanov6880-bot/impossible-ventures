@@ -191,6 +191,11 @@ const STATIC_FILES = new Map([
   ['/apps/appeal-2049/app.js', 'apps/appeal-2049/app.js'],
   ['/apps/appeal-2049/style.css', 'apps/appeal-2049/style.css'],
   ['/apps/appeal-2049/tribunal-engine.mjs', 'apps/appeal-2049/tribunal-engine.mjs'],
+  ['/apps/shared/studio.css', 'apps/shared/studio.css'],
+  ['/apps/antipersona/', 'apps/antipersona/index.html'],
+  ['/apps/antipersona/index.html', 'apps/antipersona/index.html'],
+  ['/apps/antipersona/app.js', 'apps/antipersona/app.js'],
+  ['/apps/antipersona/engine.mjs', 'apps/antipersona/engine.mjs'],
   ['/pilot/', 'apps/pilot-studio/index.html'],
   ['/pilot/index.html', 'apps/pilot-studio/index.html'],
   ['/pilot/app.js', 'apps/pilot-studio/app.js'],
@@ -229,7 +234,7 @@ function sendStatic(response, pathname) {
     '.mjs': 'text/javascript; charset=utf-8',
     '.svg': 'image/svg+xml'
   }[extname(path)] || 'application/octet-stream';
-  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/apps/appeal-2049/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/status/')) {
+  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/apps/appeal-2049/') || pathname.startsWith('/apps/antipersona/') || pathname.startsWith('/apps/shared/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/status/')) {
     response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
   }
   response.writeHead(200, {
