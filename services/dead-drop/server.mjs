@@ -6,6 +6,7 @@ import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createPilotRouter } from '../pilot-studio/pilots.mjs';
 import { createExperimentRouter } from '../experiment-lab/experiments.mjs';
+import { createRepublicRouter } from '../attention-republic/republic.mjs';
 import { createWorkspaces } from '../commercial/workspaces.mjs';
 import { createCampaigns } from '../commercial/campaigns.mjs';
 import { createProposals } from '../commercial/proposals.mjs';
@@ -178,6 +179,36 @@ async function jsonBody(request) {
 
 const STATIC_FILES = new Map([
   ['/', 'index.html'],
+  ['/site.css', 'site.css'],
+  ['/site.js', 'site.js'],
+  ['/apps/shared/studio.css', 'apps/shared/studio.css'],
+  ['/apps/appeal-2049-studio/', 'apps/appeal-2049-studio/index.html'],
+  ['/apps/appeal-2049-studio/index.html', 'apps/appeal-2049-studio/index.html'],
+  ['/apps/appeal-2049-studio/app.js', 'apps/appeal-2049-studio/app.js'],
+  ['/apps/antipersona/', 'apps/antipersona/index.html'],
+  ['/apps/antipersona/index.html', 'apps/antipersona/index.html'],
+  ['/apps/antipersona/app.js', 'apps/antipersona/app.js'],
+  ['/apps/brief-theatre-studio/', 'apps/brief-theatre-studio/index.html'],
+  ['/apps/brief-theatre-studio/index.html', 'apps/brief-theatre-studio/index.html'],
+  ['/apps/brief-theatre-studio/app.js', 'apps/brief-theatre-studio/app.js'],
+  ['/apps/adbiome/', 'apps/adbiome/index.html'],
+  ['/apps/adbiome/index.html', 'apps/adbiome/index.html'],
+  ['/apps/adbiome/app.js', 'apps/adbiome/app.js'],
+  ['/apps/museum-of-attention-studio/', 'apps/museum-of-attention-studio/index.html'],
+  ['/apps/museum-of-attention-studio/index.html', 'apps/museum-of-attention-studio/index.html'],
+  ['/apps/museum-of-attention-studio/app.js', 'apps/museum-of-attention-studio/app.js'],
+  ['/apps/attention-republic-live/', 'apps/attention-republic-live/index.html'],
+  ['/apps/attention-republic-live/index.html', 'apps/attention-republic-live/index.html'],
+  ['/apps/attention-republic-live/app.js', 'apps/attention-republic-live/app.js'],
+  ['/apps/appeal-2049-studio/tribunal-engine.mjs', 'apps/appeal-2049-studio/tribunal-engine.mjs'],
+  ['/apps/antipersona/engine.mjs', 'apps/antipersona/engine.mjs'],
+  ['/apps/brief-theatre-studio/engine.mjs', 'apps/brief-theatre-studio/engine.mjs'],
+  ['/apps/adbiome/engine.mjs', 'apps/adbiome/engine.mjs'],
+  ['/apps/museum-of-attention-studio/engine.mjs', 'apps/museum-of-attention-studio/engine.mjs'],
+  ['/apps/appeal-2049-studio/style.css', 'apps/appeal-2049-studio/style.css'],
+  ['/apps/attention-republic-live/operator/', 'apps/attention-republic-live/operator.html'],
+  ['/apps/attention-republic-live/operator.html', 'apps/attention-republic-live/operator.html'],
+  ['/apps/attention-republic-live/operator.js', 'apps/attention-republic-live/operator.js'],
   ['/privacy.html', 'privacy.html'],
   ['/status/', 'apps/status/index.html'],
   ['/status/index.html', 'apps/status/index.html'],
@@ -254,7 +285,7 @@ function sendStatic(response, pathname) {
     '.mjs': 'text/javascript; charset=utf-8',
     '.svg': 'image/svg+xml'
   }[extname(path)] || 'application/octet-stream';
-  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/status/') || pathname.startsWith('/commercial/') || pathname.startsWith('/showcase/') || pathname.startsWith('/proposal/') ||
+  if (pathname === '/' || pathname === '/site.css' || pathname === '/site.js' || pathname.startsWith('/apps/shared/') || pathname.startsWith('/apps/appeal-2049-studio/') || pathname.startsWith('/apps/antipersona/') || pathname.startsWith('/apps/brief-theatre-studio/') || pathname.startsWith('/apps/adbiome/') || pathname.startsWith('/apps/museum-of-attention-studio/') || pathname.startsWith('/apps/attention-republic-live/') || pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/status/') || pathname.startsWith('/commercial/') || pathname.startsWith('/showcase/') || pathname.startsWith('/proposal/') ||
       pathname.startsWith('/apps/creative-worlds/') ||
       ['anti-persona','brief-theatre','ad-biome','museum-of-attention','attention-republic']
         .some(id => pathname.startsWith('/apps/' + id + '/'))) {
@@ -323,6 +354,7 @@ export function createApp({
   const requestsByIP = new Map();
   const handlePilots = createPilotRouter({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
   const handleExperiments = createExperimentRouter({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
+  const handleRepublic = createRepublicRouter({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
   const commercial = createWorkspaces({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
   const campaigns = createCampaigns({ db, now, workspaces: commercial, ApiError, jsonBody, sendJSON });
   const proposals = createProposals({ db, now, workspaces: commercial, campaigns, ApiError, jsonBody, sendJSON });
@@ -356,6 +388,7 @@ export function createApp({
         if (['POST', 'DELETE', 'PATCH'].includes(request.method)) throttle(requestsByIP, request, now);
         if (await handlePilots(request, response, pathname)) return;
         if (await handleExperiments(request, response, pathname)) return;
+        if (await handleRepublic(request, response, pathname)) return;
         if (await commercial.handle(request, response, pathname)) return;
         if (await campaigns.handle(request, response, pathname)) return;
         if (await proposals.handle(request, response, pathname)) return;
@@ -502,6 +535,7 @@ export function createApp({
   });
   server.on('close', handlePilots.stop);
   server.on('close', handleExperiments.stop);
+  server.on('close', handleRepublic.stop);
   server.on('close', proposals.stop);
   server.on('close', () => clearInterval(cleanupTimer));
   return { server, db, pruneExpired, close: () => { server.close(() => db.close()); } };
