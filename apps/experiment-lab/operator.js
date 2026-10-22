@@ -75,6 +75,8 @@ function renderItem(item) {
   summary.append(
     tile('СЕССИИ', item.metrics.totalExposures),
     tile('CTA', item.metrics.totalCTA),
+    tile('ФОРМЫ A/B', (item.metrics.attributed?.A?.submittedForms||0) + ' / ' + (item.metrics.attributed?.B?.submittedForms||0)),
+    tile('КВАЛИФ. A/B*', (item.metrics.attributed?.A?.operatorQualified||0) + ' / ' + (item.metrics.attributed?.B?.operatorQualified||0)),
     tile('B – A', pp(item.metrics.observedDifferencePP))
   );
   card.appendChild(summary);
@@ -83,7 +85,7 @@ function renderItem(item) {
   card.appendChild(arms);
 
   const warnings = [
-    'Только технические сессии и CTA. Не лиды, не продажи и не вывод о статистической значимости.'
+    'Начало сессии и CTA — технические события. Формы A/B — реально отправленные связанные заявки, но не оплаченные заказы. Квалиф.* — ручной статус оператора, не независимая проверка.'
   ];
   if (item.metrics.sampleRatioWarning) warnings.push('Возможен перекос распределения A/B: изучите тест и источники трафика.');
   if (item.metrics.totalExposures < 100) warnings.push('Малая выборка: выводы крайне ненадёжны.');
