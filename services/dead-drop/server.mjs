@@ -386,6 +386,7 @@ export function createApp({
       else response.destroy();
     }
   });
+  server.on('close', handlePilots.stop);
   return { server, db, close: () => { server.close(); db.close(); } };
 }
 
