@@ -162,6 +162,7 @@ function translate() {
   renderTemplates();
   renderPreview();
   renderProposals();
+  renderLaunches();
   estimateProposal();
 }
 function emptyForm() {
@@ -232,6 +233,7 @@ function setPermission() {
   for(const input of document.querySelectorAll('#proposalForm input,#proposalForm select,#proposalForm textarea'))input.disabled=!canEdit;
   document.getElementById('saveProposal').disabled=!canEdit || state.demo;
   document.getElementById('worldImport').disabled=!canEdit;
+  document.getElementById('launchCreate').disabled=state.role!=='owner';
   if(!canEdit && !state.demo)feedback(t('readOnly'));
 }
 function renderCampaigns() {
@@ -295,6 +297,7 @@ async function refresh() {
   state.campaigns=data.items||[];
   renderCampaigns();
   prepareProposalCampaigns();
+  prepareLaunchCampaigns();
 }
 async function loadWorkspace() {
   state.demo=false;
@@ -307,6 +310,7 @@ async function loadWorkspace() {
   setPermission();
   await refresh();
   await refreshProposals();
+  await refreshLaunches();
   if(state.role==='owner')await refreshOwner();
   feedback(t('loaded'));
 }
@@ -351,6 +355,8 @@ elements.logout.addEventListener('click',()=>{
   elements.workspaceApp.hidden=true;elements.receipt.replaceChildren();elements.bootstrapForm.reset();elements.loginForm.reset();
   proposalState.items=[];proposalState.summary=null;proposalState.editing=null;
   proposalUI.receipt.replaceChildren();proposalUI.form.reset();
+  launchState.items=[];launchUI.list.replaceChildren();launchUI.summary.replaceChildren();
+  launchUI.notice.textContent='';
   feedback('Session cleared.');emptyForm();
 });
 elements.bootstrapForm.addEventListener('submit',async e=>{
@@ -716,6 +722,8 @@ function openDemo(){
  elements.workspaceMeta.textContent='UNTRACKED LOCAL PREVIEW / NO ACCOUNT / NO DATABASE';
  elements.workspaceApp.hidden=false;
  setPermission();renderCampaigns();prepareProposalCampaigns();emptyForm();clearProposal();
+ launchState.items=[];renderLaunches();prepareLaunchCampaigns();
+ launchUI.notice.textContent=t('launchStaticNotice');
  feedback(t('demoStatus'));
  elements.workspaceApp.scrollIntoView({behavior:'smooth'});
 }
@@ -786,5 +794,246 @@ worldImport.addEventListener('change',async()=>{
 });
 
 
+
+
+/* WAVE 11–15 — First-party Launch Studio: stored, published, consent-measured
+   microsites. All stats come from SQLite. No invented impressions or revenue. */
+Object.assign(dict.ru,{
+ launchTitle:'От макета к настоящей интерактивной странице.',
+ launchDescription:'Владелец публикует одобренную версию кампании. Посетитель проходит сюжет без регистрации. Технические события считаются только с согласия.',
+ launchEditor:'ЦЕНТР ПУБЛИКАЦИЙ',launchRules:'Публиковать может только владелец. Исходная версия фиксируется и не меняется. Ссылку можно приостановить или закрыть.',
+ launchSelectLabel:'ОДОБРЕННАЯ КАМПАНИЯ',launchCreate:'СОЗДАТЬ ПУБЛИКУЕМУЮ ВЕРСИЮ ↗',
+ launchPrivateTitle:'ВАЖНО О МЕТРИКАХ',launchPrivacy:'Это собственная интерактивная страница, не закупленная реклама. Только добровольные технические события. Заявка требует отдельного согласия; оплаты нет.',
+ launchJournal:'ЖУРНАЛ ПУБЛИКАЦИЙ',launchEmpty:'Пока нет интерактивных публикаций.',
+ launchStaticNotice:'Статическая демонстрация: публикация и серверные метрики доступны только с запущенным защищённым Node-сервером.',
+ launchNoApproval:'Сначала создайте кампанию и одобрите её с правами владельца.',
+ launchCreated:'Черновик интерактивной публикации сохранён. Включите его отдельным действием.',
+ launchChanged:'Состояние публикации обновлено на сервере.',
+ launchError:'Не удалось выполнить действие с публикацией.',
+ launchActive:'РАБОТАЕТ',launchDraft:'ЧЕРНОВИК',launchPaused:'НА ПАУЗЕ',launchRetired:'ЗАКРЫТА',
+ launchActionActivate:'ОПУБЛИКОВАТЬ',launchActionPause:'ПАУЗА',launchActionResume:'ВОЗОБНОВИТЬ',
+ launchActionRetire:'ЗАКРЫТЬ НАВСЕГДА',launchOpen:'ОТКРЫТЬ ИСТОРИЮ ↗',
+ launchExport:'СКАЧАТЬ ОТЧЁТ CSV ↓',launchCopy:'КОПИРОВАТЬ EMBED ↗',launchCopied:'Код для встраивания на тот же домен скопирован.',
+ launchStarts:'ДОБРОВОЛЬНЫЕ СЕССИИ',launchCompletions:'ЗАВЕРШЕНИЯ (СИГНАЛЫ)',launchCTA:'НАЖАТИЯ CTA',launchForms:'ОТПРАВЛЕННЫЕ ЗАЯВКИ',
+ launchQualified:'РУЧНАЯ КВАЛИФИКАЦИЯ',launchMetricNote:'События и заявки не равны проверенным людям или оплатам.',
+ launchChart:'ПОСЛЕДНИЕ 7 ДНЕЙ',launchConfirmRetire:'Закрыть эту ссылку навсегда? Это действие не отменяется.',
+ launchDraftFrozen:'Снимок утверждённого текста',launchEmbedNote:'Встраивание разрешено только на этом же домене. Для других сайтов нужна отдельная безопасная настройка.'
+});
+Object.assign(dict.en,{
+ launchTitle:'Publish real first-party interactive stories.',
+ launchDescription:'Owners publish an approved creative revision. Visitors play without accounts; technical events are only collected with opt-in consent.',
+ launchEditor:'LAUNCH CONTROL',launchRules:'Owner authorization is required. Each launch freezes one approved revision and can be paused or permanently retired.',
+ launchSelectLabel:'APPROVED CAMPAIGN',launchCreate:'CREATE A LAUNCH DRAFT ↗',
+ launchPrivateTitle:'HONEST MEASUREMENT',launchPrivacy:'First-party hosted story, not paid advertising. Only optional event signals, a separately consented pilot form, and no payment integration.',
+ launchJournal:'PUBLICATION PIPELINE',launchEmpty:'No interactive launches yet.',
+ launchStaticNotice:'Static preview: launches and real event metrics require a protected Node backend.',
+ launchNoApproval:'Create a campaign and have its owner approve it first.',
+ launchCreated:'A launch draft was saved. Activate it separately to publish.',
+ launchChanged:'Launch status updated and saved.',
+ launchError:'Unable to update this launch.',
+ launchActive:'LIVE',launchDraft:'DRAFT',launchPaused:'PAUSED',launchRetired:'RETIRED',
+ launchActionActivate:'ACTIVATE',launchActionPause:'PAUSE',launchActionResume:'RESUME',
+ launchActionRetire:'PERMANENTLY RETIRE',launchOpen:'OPEN EXPERIENCE ↗',
+ launchExport:'DOWNLOAD CSV REPORT ↓',launchCopy:'COPY EMBED ↗',launchCopied:'Same-origin iframe snippet copied.',
+ launchStarts:'OPT-IN SESSION STARTS',launchCompletions:'COMPLETION SIGNALS',launchCTA:'ONE-TIME CTA SIGNALS',launchForms:'CONSENTED LEAD FORMS',
+ launchQualified:'MANUALLY QUALIFIED',launchMetricNote:'Event signals and forms do not prove unique people or payment.',
+ launchChart:'LAST 7 DAYS',launchConfirmRetire:'Retire this publication forever? This cannot be undone.',
+ launchDraftFrozen:'Approved creative snapshot',launchEmbedNote:'Framing is allowed only on this same origin; third-party embedding needs separate reviewed configuration.'
+});
+Object.assign(dict.zh,{
+ launchTitle:'发布真正的一方互动故事。',
+ launchDescription:'仅所有者可发布已批准的广告版本。无需注册即可体验；只有自愿同意后才会记录技术事件。',
+ launchEditor:'发布控制台',launchRules:'必须由所有者授权。每个发布保存一份已批准的不可修改版本，可暂停或永久结束。',
+ launchSelectLabel:'已批准的广告活动',launchCreate:'创建发布草稿 ↗',
+ launchPrivateTitle:'透明数据指标',launchPrivacy:'这是第一方互动页面，不是付费广告投放。仅可选择记录技术信号；联系表单需再次同意。没有支付集成。',
+ launchJournal:'发布管理',launchEmpty:'暂无发布记录。',
+ launchStaticNotice:'静态预览：实际发布和事件指标需要受保护的 Node 后端。',
+ launchNoApproval:'请先创建广告活动并由所有者批准。',
+ launchCreated:'发布草稿已保存，需要另行激活。',launchChanged:'发布状态已更新。',launchError:'无法更新发布状态。',
+ launchActive:'正在运行',launchDraft:'草稿',launchPaused:'已暂停',launchRetired:'已结束',
+ launchActionActivate:'发布',launchActionPause:'暂停',launchActionResume:'恢复',
+ launchActionRetire:'永久关闭',launchOpen:'打开故事 ↗',launchExport:'下载 CSV 报告 ↓',
+ launchCopy:'复制嵌入代码 ↗',launchCopied:'已复制同源网页嵌入代码。',
+ launchStarts:'自愿启动会话',launchCompletions:'完成信号',launchCTA:'一次性CTA信号',launchForms:'已同意的联系表单',
+ launchQualified:'人工标记为合格',launchMetricNote:'技术信号和表单不等于已核实的独立用户或收入。',
+ launchChart:'过去7天',launchConfirmRetire:'永久关闭此链接？无法撤销。',
+ launchDraftFrozen:'已批准创意快照',launchEmbedNote:'仅允许同源嵌入；第三方网站需要单独审查配置。'
+});
+const launchUI={
+ summary:document.getElementById('launchSummary'),
+ list:document.getElementById('launchList'),
+ campaign:document.getElementById('launchCampaign'),
+ create:document.getElementById('launchCreate'),
+ notice:document.getElementById('launchNotice')
+};
+const launchState={items:[]};
+function prepareLaunchCampaigns(){
+ const selected=launchUI.campaign.value;
+ const open=new Set(launchState.items.filter(x=>x.status!=='retired').map(x=>x.campaignId));
+ launchUI.campaign.replaceChildren();
+ const candidates=state.campaigns.filter(c=>c.status==='approved'&&!open.has(c.id));
+ for(const campaign of candidates){
+  const option=el('option','',campaign.title+' / REV '+campaign.revision);
+  option.value=campaign.id;
+  launchUI.campaign.append(option);
+ }
+ if(candidates.some(c=>c.id===selected))launchUI.campaign.value=selected;
+ launchUI.create.disabled=state.role!=='owner'||!candidates.length;
+ if(!candidates.length)launchUI.notice.textContent=state.demo?t('launchStaticNotice'):t('launchNoApproval');
+ else if(!state.demo)launchUI.notice.textContent='';
+}
+function launchStage(status){
+ const k='launch'+status.charAt(0).toUpperCase()+status.slice(1);
+ return t(k);
+}
+function launchMetricTile(label,n,detail){
+ const card=el('div','score');
+ card.append(el('span','',label),el('strong','',n),el('small','',detail));
+ return card;
+}
+function launchTinyChart(metrics){
+ const container=el('div','launch-chart');
+ container.append(el('small','',t('launchChart')));
+ const rows=metrics?.daily?.slice(-7)||[];
+ if(!rows.length){container.append(el('p','small','0 / NO OPT-IN SESSIONS'));return container}
+ const bars=el('div','launch-bars');
+ const maximum=Math.max(1,...rows.map(v=>Number(v.sessions)||0));
+ for(const row of rows){
+  const day=el('div','launch-bar-day');
+  const bar=el('div','launch-bar');
+  const num=Number(row.sessions)||0;
+  bar.style.height=Math.max(5,Math.round(num/maximum*100))+'%';
+  bar.title=row.date+': '+num+' consented starts';
+  const label=el('span','',row.date.slice(5));
+  day.append(bar,label);
+  bars.append(day);
+ }
+ container.append(bars);
+ return container;
+}
+function renderLaunches(){
+ if(!launchUI)return;
+ launchUI.summary.replaceChildren();
+ const items=launchState.items;
+ const active=items.filter(x=>x.status==='active').length;
+ const sum=selector=>items.reduce((n,x)=>n+(Number(selector(x))||0),0);
+ launchUI.summary.append(
+  launchMetricTile('FIRST-PARTY / LIVE',String(active),'NOT PAID PLACEMENTS'),
+  launchMetricTile(t('launchStarts'),String(sum(x=>x.metrics?.totals?.sessions)),'OPT-IN ONLY'),
+  launchMetricTile(t('launchCTA'),String(sum(x=>x.metrics?.totals?.cta)),'TECHNICAL SIGNALS'),
+  launchMetricTile(t('launchForms'),String(sum(x=>x.metrics?.leads?.submittedForms)),'NOT REVENUE')
+ );
+ launchUI.list.replaceChildren();
+ if(state.demo){
+  launchUI.list.append(el('p','small',t('launchStaticNotice')));
+  return;
+ }
+ if(!items.length){
+  launchUI.list.append(el('p','small',t('launchEmpty')));return;
+ }
+ for(const item of items){
+  const m=item.metrics||{};
+  const card=el('article','launch-item');
+  const top=el('div','campaign-top');
+  top.append(el('h3','',item.creative.title),el('span','stage',launchStage(item.status)));
+  card.append(top);
+  card.append(el('p','campaign-meta',item.creative.venture.toUpperCase()+' / REV '+item.sourceRevision+' / '+item.id));
+  card.append(el('p','',item.creative.headline));
+  card.append(el('p','small',t('launchDraftFrozen')+' / '+item.status));
+  const metrics=el('div','launch-metrics');
+  for(const [key,num] of [
+   ['launchStarts',m.totals?.sessions],['launchCompletions',m.totals?.completions],
+   ['launchCTA',m.totals?.cta],['launchForms',m.leads?.submittedForms],
+   ['launchQualified',m.leads?.operatorQualified]
+  ]){
+    const metric=el('div','launch-kpi');
+    metric.append(el('strong','',Number(num)||0),el('span','',t(key)));
+    metrics.append(metric);
+  }
+  card.append(metrics);
+  card.append(launchTinyChart(m));
+  card.append(el('p','small',t('launchMetricNote')));
+  const controls=el('div','launch-actions');
+  const addAction=(label,callback,style='secondary')=>{
+   const btn=el('button',style,label);btn.type='button';
+   btn.addEventListener('click',callback);
+   controls.append(btn);
+  };
+  if(item.status==='active'){
+    const a=el('a','primary',t('launchOpen'));a.href='/play/?id='+item.id;a.target='_blank';a.rel='noopener noreferrer';
+    controls.append(a);
+    addAction(t('launchCopy'),()=>copyLaunchEmbed(item));
+  }
+  const transitions={draft:'activate',active:'pause',paused:'resume'} ;
+  if(state.role==='owner'&&transitions[item.status]){
+   addAction(t('launchAction'+transitions[item.status].charAt(0).toUpperCase()+transitions[item.status].slice(1)),
+     ()=>transitionLaunch(item,transitions[item.status]),'primary');
+  }
+  if(state.role==='owner'&&item.status!=='retired'){
+   addAction(t('launchActionRetire'),()=>{
+    if(window.confirm(t('launchConfirmRetire')))transitionLaunch(item,'retire');
+   });
+  }
+  addAction(t('launchExport'),()=>exportLaunchCSV(item));
+  card.append(controls);
+  if(item.status==='active')card.append(el('p','small',t('launchEmbedNote')));
+  launchUI.list.append(card);
+ }
+}
+async function refreshLaunches(){
+ if(!state.workspaceId)return;
+ const payload=await api('/api/v1/workspaces/'+state.workspaceId+'/launches');
+ launchState.items=payload.items||[];
+ prepareLaunchCampaigns();
+ renderLaunches();
+}
+async function transitionLaunch(item,action){
+ const root='/api/v1/workspaces/'+state.workspaceId+'/launches/'+item.id;
+ try{
+  const saved=await api(root+'/'+action,{method:'POST'});
+  if(saved.launch?.status===undefined)throw Error('Missing server response');
+  await refreshLaunches();
+  await refreshOwner();
+  launchUI.notice.textContent=t('launchChanged');
+  feedback(t('launchChanged'));
+ }catch(error){launchUI.notice.textContent=error.message||t('launchError');feedback(t('launchError'),true)}
+}
+async function exportLaunchCSV(item){
+ try{
+  if(!state.workspaceId||!state.token)return;
+  const path='/api/v1/workspaces/'+state.workspaceId+'/launches/'+item.id+'/report.csv';
+  const response=await fetch(path,{headers:{Authorization:'Bearer '+state.token},cache:'no-store'});
+  if(!response.ok||!response.headers.get('content-type')?.includes('text/csv'))throw Error('CSV unavailable');
+  const blob=await response.blob();
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='iv-launch-'+item.id+'-metrics.csv';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+ }catch(error){feedback(error.message||'CSV error',true)}
+}
+async function copyLaunchEmbed(item){
+ const snippet='<iframe src="'+location.origin+'/play/?id='+item.id+
+   '" title="First-party interactive story" loading="lazy" referrerpolicy="no-referrer"></iframe>';
+ try{
+   await navigator.clipboard.writeText(snippet);
+   feedback(t('launchCopied'));
+ }catch{feedback(snippet)}
+}
+launchUI.create.addEventListener('click',async()=>{
+ if(!state.workspaceId||state.role!=='owner'||!launchUI.campaign.value)return;
+ launchUI.create.disabled=true;
+ try{
+   const r=await api('/api/v1/workspaces/'+state.workspaceId+'/launches',{
+     method:'POST',body:{campaignId:launchUI.campaign.value}
+   });
+   if(!r.launch?.id)throw Error('Launch was not stored');
+   await refreshLaunches();await refreshOwner();
+   launchUI.notice.textContent=t('launchCreated');
+   feedback(t('launchCreated'));
+ }catch(error){
+   launchUI.notice.textContent=error.message||t('launchError');
+   feedback(t('launchError'),true);
+ }finally{prepareLaunchCampaigns()}
+});
 
 init();
