@@ -1,17 +1,20 @@
 {
   "name": "impossible-ventures",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "type": "module",
-  "description": "Impossible Ventures Pilot Studio and Dead Drop cooperative alpha with agent data controls, role-private export, optional AI and scheduled expiry",
+  "description": "Dead Drop cooperative and Pilot Studio commercial alpha with recoverable SQLite, verified readiness and multilingual diagnostics.",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "start": "node services/dead-drop/server.mjs",
     "dev": "node services/dead-drop/server.mjs",
-    "test": "node --test services/dead-drop/server.test.mjs services/dead-drop/creative-engine.test.mjs services/pilot-studio/pilots.test.mjs services/dead-drop/privacy.test.mjs",
-    "check": "node --check services/dead-drop/server.mjs && node --check services/dead-drop/creative-engine.mjs && node --check services/pilot-studio/pilots.mjs && node --check apps/dead-drop/app.js && node --check apps/pilot-studio/app.js && node --check apps/pilot-studio/operator.js && node --check services/dead-drop/dossier-locales.mjs && node --check apps/dead-drop/i18n.js && npm test",
-    "start:ai": "node --env-file=.env services/dead-drop/server.mjs"
+    "test": "node --test services/dead-drop/server.test.mjs services/dead-drop/creative-engine.test.mjs services/pilot-studio/pilots.test.mjs services/dead-drop/privacy.test.mjs services/dead-drop/operations.test.mjs scripts/db-recovery.test.mjs",
+    "check": "node --check services/dead-drop/server.mjs && node --check services/dead-drop/creative-engine.mjs && node --check services/pilot-studio/pilots.mjs && node --check apps/dead-drop/app.js && node --check apps/pilot-studio/app.js && node --check apps/pilot-studio/operator.js && node --check services/dead-drop/dossier-locales.mjs && node --check apps/dead-drop/i18n.js && node --check scripts/db-recovery.mjs && node --check apps/status/app.js && npm test",
+    "start:ai": "node --env-file=.env services/dead-drop/server.mjs",
+    "db:inspect": "node scripts/db-recovery.mjs inspect",
+    "db:backup": "node scripts/db-recovery.mjs backup",
+    "db:restore": "node scripts/db-recovery.mjs restore"
   }
 }
