@@ -41,8 +41,8 @@
         <label><span data-i18n="goal">Primary goal</span><select id="goal" name="goal"><option value="leads" data-i18n="leadGoal">Qualified leads</option><option value="sales" data-i18n="salesGoal">Purchases</option><option value="awareness" data-i18n="awarenessGoal">Brand awareness</option><option value="validation" data-i18n="validationGoal">Message validation</option></select></label>
         <label><span data-i18n="spend">Total test media spend (USD)</span><input name="spend" type="number" id="spend" min="100" max="10000000" step="100" value="2000" required></label>
         <label><span data-i18n="cpm">Estimated cost per thousand impressions (USD)</span><input name="cpm" type="number" id="cpm" min="1" max="500" step="0.5" value="12" required></label>
-        <label><span data-i18n="ctr">Assumed click-through rate (%)</span><input name="ctr" type="number" id="ctr" min="0.01" max="20" step="0.1" value="1.5" required></label>
-        <label><span data-i18n="cvr">Assumed conversion from visit (%)</span><input name="cvr" type="number" id="cvr" min="0.01" max="100" step="0.5" value="5" required></label>
+        <label><span data-i18n="ctr">Assumed click-through rate (%)</span><input name="ctr" type="number" id="ctr" min="0.01" max="20" step="any" value="1.5" required></label>
+        <label><span data-i18n="cvr">Assumed conversion from visit (%)</span><input name="cvr" type="number" id="cvr" min="0.01" max="100" step="any" value="5" required></label>
         <label><span data-i18n="value">Gross value per conversion (USD)</span><input name="value" type="number" id="value" min="0" max="1000000" step="1" value="120" required></label>
         <p class="fine" data-i18n="modelCaveat">Model excludes creative production, fees, returns, taxes and attribution uncertainty. This is not an ROI or sales forecast.</p>
       </form>
