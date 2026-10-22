@@ -264,6 +264,7 @@ test('Pilot Studio mobile form, three-language localization, real application an
   const operator = await context.newPage();
   attachErrors(operator, errors);
   await operator.goto(base + '/pilot/operator/');
+  await operator.locator('#operatorLocale').selectOption('en');
   await operator.locator('#operatorToken').fill(operatorKey);
   await operator.locator('#operatorLogin').evaluate(form => form.requestSubmit());
   await operator.getByText('Pilot Browser Research').waitFor();
@@ -271,6 +272,17 @@ test('Pilot Studio mobile form, three-language localization, real application an
   await operator.locator('.operator-controls select').selectOption('qualified');
   await operator.getByRole('button', { name: 'SAVE STATUS' }).click();
   await operator.getByText('QUALIFIED').first().waitFor();
+  await operator.locator('#operatorLocale').selectOption('ru');
+  assert.match(await operator.locator('#operatorStats').innerText(), /ВСЕГО/);
+  assert.equal(await operator.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false, 'Operator page must not overflow a mobile viewport');
+  mkdirSync('artifacts', { recursive: true });
+  await operator.screenshot({ path: 'artifacts/pilot-operator-ru-mobile.png', fullPage: true });
+  await operator.getByRole('button', { name: /ВЫЙТИ/i }).click();
+  assert.equal(await operator.locator('#operatorList').locator('article').count(), 0);
+  assert.equal(await operator.locator('#operatorStats').locator('.operator-stat').count(), 0);
+  assert.equal(await operator.locator('#refreshOperator').isDisabled(), true);
+  await operator.locator('#operatorLocale').selectOption('zh');
+  assert.match(await operator.locator('.operator-heading').innerText(), /控制台/);
   assert.deepEqual(errors, []);
 });
 
@@ -436,4 +448,46 @@ test('Experiment Lab works in an actual mobile browser: untracked story, operato
   const file = await download;
   assert.equal(file.suggestedFilename(), 'iv-experiment-lab-results.csv');
   assert.deepEqual(errors, []);
+});
+
+test('status dashboard verifies live SQLite writes, multilingual copy and degraded recovery on mobile', async t => {
+  const { app, context, base } = await setup(t, 390, 844);
+  const page = await context.newPage();
+  const exceptions = [];
+  const failedRequests = [];
+  page.on('pageerror', e => exceptions.push(e.message));
+  page.on('response', response => {
+    if (response.status() >= 400) failedRequests.push({
+      url: new URL(response.url()).pathname, status: response.status()
+    });
+  });
+  await page.goto(base + '/status/');
+  await page.waitForFunction(() => document.getElementById('statusPlate')?.dataset.state === 'ok');
+  assert.match(await page.locator('#overallStatus').textContent(), /Система отвечает/);
+  assert.match(await page.locator('#storageStatus').textContent(), /Запись подтверждена/);
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false);
+  mkdirSync('artifacts', { recursive: true });
+  await page.screenshot({ path: 'artifacts/status-ru-mobile.png', fullPage: true });
+
+  await page.locator('#statusLocale').selectOption('en');
+  assert.equal(await page.locator('#overallStatus').textContent(), 'Service is responding');
+  assert.equal(await page.locator('#modeValue').textContent(), 'Single Node.js server');
+  await page.locator('#statusLocale').selectOption('zh');
+  assert.equal(await page.locator('#overallStatus').textContent(), '服务响应正常');
+
+  // A failed SQLite write must cause a visibly DEGRADED state, not green.
+  app.db.exec('DROP TABLE runtime_healthcheck');
+  await page.locator('#refreshStatus').click();
+  await page.waitForFunction(() => document.getElementById('statusPlate')?.dataset.state === 'error');
+  assert.equal(await page.locator('#overallStatus').textContent(), '需要处理');
+  assert.equal(await page.locator('#processMetric').getAttribute('data-state'), 'ok');
+  assert.equal(await page.locator('#storageMetric').getAttribute('data-state'), 'error');
+  assert.deepEqual(failedRequests, [{ url: '/api/v1/ready', status: 503 }]);
+  await page.screenshot({ path: 'artifacts/status-degraded-mobile.png', fullPage: true });
+
+  app.db.exec('CREATE TABLE runtime_healthcheck (id INTEGER PRIMARY KEY, touched_at INTEGER NOT NULL)');
+  await page.locator('#refreshStatus').click();
+  await page.waitForFunction(() => document.getElementById('statusPlate')?.dataset.state === 'ok');
+  assert.equal(await page.locator('#overallStatus').textContent(), '服务响应正常');
+  assert.deepEqual(exceptions, []);
 });
