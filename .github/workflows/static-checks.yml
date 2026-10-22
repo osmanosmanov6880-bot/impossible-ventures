@@ -38,6 +38,9 @@ jobs:
               'apps/pilot-studio/operator.html',
               'apps/experiment-lab/index.html',
               'apps/experiment-lab/operator.html',
+              'apps/commercial/index.html',
+              'apps/commercial/showcase.html',
+              'apps/commercial/proposal.html',
           ]
           for filename in files:
               path = Path(filename)
