@@ -241,8 +241,13 @@ test('browser exports only one agent view, confirms erasure and revokes both ses
   t.after(() => guestContext.close());
   const guest = await guestContext.newPage();
   const errors = [];
-  attachErrors(host, errors);
-  attachErrors(guest, errors);
+  const notFoundResponses = [];
+  for (const page of [host, guest]) {
+    attachErrors(page, errors);
+    page.on('response', response => {
+      if (response.status() === 404) notFoundResponses.push(response.url());
+    });
+  }
 
   await host.goto(base + '/apps/dead-drop/');
   await host.getByRole('button', { name: /Create a mission/i }).click();
@@ -298,5 +303,12 @@ test('browser exports only one agent view, confirms erasure and revokes both ses
   await host.getByRole('button', { name: /Create a mission/i }).waitFor({ timeout: 12000 });
   await host.reload();
   await host.getByRole('button', { name: /Create a mission/i }).waitFor();
-  assert.deepEqual(errors, []);
+  // The server MUST respond 404 to a revoked mission, which Chromium logs
+  // as a generic resource error even when the app handles it correctly.
+  assert.ok(notFoundResponses.length >= 1, 'Deleting the mission should revoke a partner request');
+  assert.ok(
+    notFoundResponses.every(url => new URL(url).pathname === '/api/v1/missions/' + code),
+    'Only the intentionally revoked API route may return HTTP 404'
+  );
+  assert.deepEqual(errors.filter(message => !message.includes('404 (Not Found)')), []);
 });
