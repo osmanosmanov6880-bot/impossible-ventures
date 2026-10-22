@@ -293,6 +293,7 @@ test('browser exports only one agent view, confirms erasure and revokes both ses
   assert.equal(await dialog.isVisible(), true);
 
   await guest.locator('#deleteConfirmCode').fill(code);
+  assert.equal(await guest.locator('#deleteError').textContent(), '', 'Stale error clears when code is corrected');
   await guest.screenshot({ path: 'artifacts/dead-drop-delete-confirm-mobile.png', fullPage: true });
   await guest.locator('#confirmDeleteButton').click();
   await dialog.waitFor({ state: 'hidden' });
