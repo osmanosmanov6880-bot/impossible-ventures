@@ -6,6 +6,7 @@ import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createPilotRouter } from '../pilot-studio/pilots.mjs';
 import { createExperimentRouter } from '../experiment-lab/experiments.mjs';
+import { createRepublicRouter } from '../attention-republic/republic.mjs';
 import { refineDossier } from './creative-engine.mjs';
 import { localizeRuleDossier } from './dossier-locales.mjs';
 
@@ -204,6 +205,16 @@ const STATIC_FILES = new Map([
   ['/apps/adbiome/index.html', 'apps/adbiome/index.html'],
   ['/apps/adbiome/app.js', 'apps/adbiome/app.js'],
   ['/apps/adbiome/engine.mjs', 'apps/adbiome/engine.mjs'],
+  ['/apps/museum-of-attention/', 'apps/museum-of-attention/index.html'],
+  ['/apps/museum-of-attention/index.html', 'apps/museum-of-attention/index.html'],
+  ['/apps/museum-of-attention/app.js', 'apps/museum-of-attention/app.js'],
+  ['/apps/museum-of-attention/engine.mjs', 'apps/museum-of-attention/engine.mjs'],
+  ['/apps/attention-republic/', 'apps/attention-republic/index.html'],
+  ['/apps/attention-republic/index.html', 'apps/attention-republic/index.html'],
+  ['/apps/attention-republic/app.js', 'apps/attention-republic/app.js'],
+  ['/apps/attention-republic/operator/', 'apps/attention-republic/operator.html'],
+  ['/apps/attention-republic/operator.html', 'apps/attention-republic/operator.html'],
+  ['/apps/attention-republic/operator.js', 'apps/attention-republic/operator.js'],
   ['/pilot/', 'apps/pilot-studio/index.html'],
   ['/pilot/index.html', 'apps/pilot-studio/index.html'],
   ['/pilot/app.js', 'apps/pilot-studio/app.js'],
@@ -242,7 +253,7 @@ function sendStatic(response, pathname) {
     '.mjs': 'text/javascript; charset=utf-8',
     '.svg': 'image/svg+xml'
   }[extname(path)] || 'application/octet-stream';
-  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/apps/appeal-2049/') || pathname.startsWith('/apps/antipersona/') || pathname.startsWith('/apps/brief-theatre/') || pathname.startsWith('/apps/adbiome/') || pathname.startsWith('/apps/shared/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/status/')) {
+  if (pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/apps/appeal-2049/') || pathname.startsWith('/apps/antipersona/') || pathname.startsWith('/apps/brief-theatre/') || pathname.startsWith('/apps/adbiome/') || pathname.startsWith('/apps/museum-of-attention/') || pathname.startsWith('/apps/attention-republic/') || pathname.startsWith('/apps/shared/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/status/')) {
     response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
   }
   response.writeHead(200, {
@@ -308,6 +319,7 @@ export function createApp({
   const requestsByIP = new Map();
   const handlePilots = createPilotRouter({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
   const handleExperiments = createExperimentRouter({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
+  const handleRepublic = createRepublicRouter({ db, now, operatorToken: process.env.OPERATOR_TOKEN || '', ApiError, jsonBody, sendJSON });
   const aiAvailable = Boolean(aiKey && aiModel);
   const finalizing = new Set();
   const server = createServer(async (request, response) => {
@@ -338,6 +350,7 @@ export function createApp({
         if (request.method === 'POST' || request.method === 'DELETE') throttle(requestsByIP, request, now);
         if (await handlePilots(request, response, pathname)) return;
         if (await handleExperiments(request, response, pathname)) return;
+        if (await handleRepublic(request, response, pathname)) return;
         if (pathname === '/api/v1/missions' && request.method === 'POST') {
           const body = await jsonBody(request);
           const host = {
@@ -481,6 +494,7 @@ export function createApp({
   });
   server.on('close', handlePilots.stop);
   server.on('close', handleExperiments.stop);
+  server.on('close', handleRepublic.stop);
   server.on('close', () => clearInterval(cleanupTimer));
   return { server, db, pruneExpired, close: () => { server.close(() => db.close()); } };
 }
