@@ -22,6 +22,7 @@ def build() -> None:
         copy2(ROOT / name, DIST / name)
     for name in ("dead-drop", "appeal-2049"):
         copytree(ROOT / "apps" / name, DIST / "apps" / name)
+    copytree(ROOT / "apps" / "status", DIST / "status")
 
     pilot = DIST / "pilot"
     pilot.mkdir()
@@ -85,7 +86,11 @@ def build() -> None:
     for name in (
         "index.html",
         "privacy.html",
-        "pilot/index.html",
+        "status/index.html",
+        "status/app.js",
+        "status/style.css",
+        "pilot/index.html
+t
         "pilot/app.js",
         "pilot/style.css",
         "apps/dead-drop/index.html",
