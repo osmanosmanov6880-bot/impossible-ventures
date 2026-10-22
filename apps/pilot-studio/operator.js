@@ -46,6 +46,12 @@ function render(data){
       block.append(node('small','',label),node('span','',value));
       details.appendChild(block);
     }
+    if(item.experimentId){
+      const attributed=node('div','');
+      attributed.append(node('small','','ATTRIBUTED EXPERIMENT'),
+        node('span','',item.experimentId+' / Group '+(item.experimentArm||'—')));
+      details.appendChild(attributed);
+    }
     const controls=node('div','operator-controls');
     const label=node('label','','STATUS ');
     const select=node('select');
