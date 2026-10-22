@@ -18,7 +18,7 @@ def build() -> None:
         rmtree(DIST)
     (DIST / "apps").mkdir(parents=True)
 
-    for name in ("index.html", "privacy.html"):
+    for name in ("index.html", "privacy.html", "site.css", "site.js"):
         copy2(ROOT / name, DIST / name)
     for name in ("dead-drop", "appeal-2049", "antipersona", "brief-theatre", "adbiome", "museum-of-attention", "shared"):
         copytree(ROOT / "apps" / name, DIST / "apps" / name)
@@ -132,6 +132,8 @@ def build() -> None:
     for name in (
         "index.html",
         "privacy.html",
+        "site.css",
+        "site.js",
         "status/index.html",
         "status/app.js",
         "status/style.css",
