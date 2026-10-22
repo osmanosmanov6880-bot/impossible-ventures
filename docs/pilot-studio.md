@@ -62,9 +62,9 @@ A proposed 50/50 split is not a running experiment. Do not conclude significance
 - HTTPS is required in production. The source app alone does **not** terminate TLS.
 - SQLite stores submitted contact details and hashed deletion tokens.
 - No advertising trackers or third-party model calls are added.
-- Data is cleaned on intake or operator listing after the 90-day threshold; a continuously running cleanup timer and deployment-level retention enforcement are required for a strict maximum retention guarantee.
+- Data is purged on startup and every minute while the server runs, and again on intake or operator listing. This provides approximate 90-day deletion during normal operation. A deployment-level retention job and documented backup retention are still required for strict retention guarantees.
 - Auth is a single shared operator bearer token, not user-level IAM.
-- Rate limits are process-memory only; distributed abuse controls, monitoring, retention job, backups, GDPR legal basis/documentation and incident procedures remain deployment blockers.
+- Rate limits are process-memory only; distributed abuse controls, monitoring, backup retention, backups, GDPR legal basis/documentation and incident procedures remain deployment blockers.
 - Do not collect customer secrets, confidential campaign information, payments, or production credentials in this alpha.
 
 ## Launch gates before real commercial exposure
