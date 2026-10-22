@@ -66,17 +66,16 @@ def build() -> None:
 
     app_file = pilot / "app.js"
     app_code = app_file.read_text(encoding="utf-8")
-    submit_anchor = "leadForm.addEventListener('submit',async event=>{\\n  event.preventDefault();"
-    # Keep source unchanged; only the generated Pages copy suppresses server POSTs.
-    submit_anchor = submit_anchor.replace("\\\\n", "\\n")
+    submit_anchor = "leadForm.addEventListener('submit',async event=>{" + chr(10) + "  event.preventDefault();"
     if submit_anchor not in app_code:
         raise RuntimeError("Pilot Studio submit handler changed; adjust static preview guard")
     app_code = app_code.replace(
         submit_anchor,
-        submit_anchor + "\\n  if (document.body.dataset.staticPreview === 'true') {"
-        + "\\n    showMessage(labels().unavailable, true);"
-        + "\\n    return;"
-        + "\\n  }",
+        submit_anchor + chr(10)
+        + "  if (document.body.dataset.staticPreview === 'true') {"
+        + chr(10) + "    showMessage(labels().unavailable, true);"
+        + chr(10) + "    return;"
+        + chr(10) + "  }",
         1,
     )
     app_file.write_text(app_code, encoding="utf-8")
