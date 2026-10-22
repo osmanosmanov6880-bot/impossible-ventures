@@ -80,6 +80,7 @@ export function createPilotRouter({ db, now, operatorToken = '', ApiError, jsonB
     'CREATE INDEX IF NOT EXISTS pilot_leads_created ON pilot_leads(created_at);'
   );
   const byAddress = new Map();
+  const operatorAttemptsByAddress = new Map();
 
   function cleanup() {
     db.prepare('DELETE FROM pilot_leads WHERE created_at < ?').run(now() - RETENTION_MS);
@@ -105,7 +106,24 @@ export function createPilotRouter({ db, now, operatorToken = '', ApiError, jsonB
     if (record.count > 5) throw new ApiError(429, 'Too many pilot requests. Try later.');
   }
 
+  function limitOperatorRequests(request) {
+    const address = request.socket.remoteAddress || 'unknown';
+    const current = now();
+    const previous = operatorAttemptsByAddress.get(address);
+    const record = previous && current - previous.at < 60_000
+      ? previous : { at: current, count: 0 };
+    record.count += 1;
+    operatorAttemptsByAddress.set(address, record);
+    if (operatorAttemptsByAddress.size > 5000) {
+      for (const [key, value] of operatorAttemptsByAddress) {
+        if (current - value.at > 60_000) operatorAttemptsByAddress.delete(key);
+      }
+    }
+    if (record.count > 30) throw new ApiError(429, 'Operator request limit exceeded; retry later');
+  }
+
   function requireOperator(request) {
+    limitOperatorRequests(request);
     if (typeof operatorToken !== 'string' || operatorToken.length < 32) {
       throw new ApiError(503, 'Operator access is not configured');
     }
