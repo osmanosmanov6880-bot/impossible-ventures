@@ -78,6 +78,14 @@ python3 -m http.server 8000
 
 Open http://localhost:8000/apps/dead-drop/ for **single-browser training only**. GitHub Pages can host the static preview, but **cannot** run the multiplayer Node API or optional AI.
 
+## Deploy a controlled staging server
+
+The repository now includes a Railway configuration (`railway.json`), a Docker runtime that drops root privileges after preparing the persistent volume, and a Docker smoke test that exercises a restart.
+
+See [the staging deployment playbook](docs/deployment.md) for the exact GitHub, volume, environment and HTTPS setup. A Railway hosting account must be connected and provisioned separately; no live server is claimed.
+
+**Do not expose this alpha to real customer campaign data.** First finish the threat model, production authentication, distributed anti-abuse controls, privacy assessment, backup/deletion procedures and operating budget.
+
 ## Test
 
 ```bash
@@ -104,6 +112,8 @@ GitHub Actions additionally runs Chromium end-to-end tests for two agents, langu
 - [Security and privacy gaps](docs/security.md)
 - [Product and commercial roadmap](docs/roadmap.md)
 - [Portfolio thesis](docs/portfolio.md)
+- [Deploy and smoke-test the staging build](docs/deployment.md)
+- [Multilingual data handling notice](privacy.html)
 
 ## Operational and legal limitations
 
