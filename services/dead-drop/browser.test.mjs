@@ -269,8 +269,13 @@ test('Pilot Studio mobile form, three-language localization, real application an
   await operator.getByText('Pilot Browser Research').waitFor();
   assert.match(await operator.locator('#operatorStats').innerText(), /ВСЕГО|TOTAL/);
   await operator.locator('.operator-controls select').selectOption('qualified');
-  await operator.getByRole('button', { name: 'SAVE STATUS' }).click();
-  await operator.getByText('QUALIFIED').first().waitFor();
+  await operator.getByRole('button', { name: /СОХРАНИТЬ|SAVE STATUS/ }).click();
+  // Verify the persisted, server-reloaded summary rather than translated labels.
+  await operator.waitForFunction(() => {
+    const cards = [...document.querySelectorAll('#operatorStats .operator-stat')];
+    return cards.length >= 4 && cards[3].querySelector('strong')?.textContent?.trim() === '1';
+  });
+  assert.equal(await operator.locator('.operator-controls select').inputValue(), 'qualified');
   assert.deepEqual(errors, []);
 });
 
