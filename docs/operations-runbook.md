@@ -1,6 +1,6 @@
 # Impossible Ventures — Operations & Recovery Runbook (v0.8 alpha)
 
-Updated 2026-10-22. Covers the single-instance Dead Drop + Pilot Studio Node.js/SQLite service. This is staging guidance, **not evidence of production hosting, certifications or external backups**.
+Updated 2026-10-22. Covers the single-instance Dead Drop + Pilot Studio + Experiment Lab Node.js/SQLite service. This is staging guidance, **not evidence of production hosting, certifications or external backups**.
 
 ## Operational checks
 
@@ -13,7 +13,7 @@ These checks assess only **this running instance**. They do not guarantee worldw
 
 ## Database snapshots
 
-**Backups are highly sensitive.** A snapshot contains both products' data: all private mission fields, messages, consent decisions, agent token hashes, Pilot Studio email addresses and contacts. It must live in encrypted, access-controlled storage with a deletion/retention policy. NEVER place a backup in GitHub, a public Pages site, issue tracker, support chat or public CI artifact.
+**Backups are highly sensitive.** A snapshot contains all three products' data: all private mission fields, messages, consent decisions, agent token hashes, Pilot Studio email addresses and contacts, and Experiment Lab anonymous session and aggregate state. It must live in encrypted, access-controlled storage with a deletion/retention policy. NEVER place a backup in GitHub, a public Pages site, issue tracker, support chat or public CI artifact.
 
 For a locally running server, create your restricted backup directory before running these commands:
 
@@ -23,7 +23,7 @@ npm run db:backup -- --db ./data/missions.sqlite --out /secure/backup-2026-10-22
 npm run db:inspect -- --db /secure/backup-2026-10-22.sqlite
 ```
 
-The backup CLI uses SQLite `VACUUM INTO` to create a **consistent standalone file**, including WAL changes. It verifies `PRAGMA quick_check`, checks the expected mission/pilot tables, sets mode **0600** and prints a SHA-256 checksum with only aggregate row counts.
+The backup CLI uses SQLite `VACUUM INTO` to create a **consistent standalone file**, including WAL changes. It verifies `PRAGMA quick_check`, checks the expected mission/pilot tables and verifies Experiment Lab's full schema when present, sets mode **0600** and prints a SHA-256 checksum with only aggregate row counts.
 
 **Do not copy the live .sqlite file on its own:** with WAL active, the latest committed data may still be in the `-wal` file.
 
