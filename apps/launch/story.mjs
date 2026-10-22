@@ -193,7 +193,7 @@ export function audit(){
       fields.push(stage.title,stage.prompt);
       for(const answer of stage.options)fields.push(answer.label,answer.after);
     }
-    if(fields.some(field=>LANGUAGE.some(locale=>typeof field[locale]!=='string'||field[locale].length<8))){
+    if(fields.some(field=>LANGUAGE.some(locale=>typeof field[locale]!=='string'||field[locale].length<(locale==='zh'?2:8)))){
       throw Error('Missing three-language story content: '+id);
     }
   }
