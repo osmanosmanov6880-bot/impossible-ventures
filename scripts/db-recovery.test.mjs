@@ -57,16 +57,30 @@ test('live WAL snapshot includes both products and restores without loss', async
     website_confirm: ''
   });
   assert.equal(pilot.status, 201);
+  // Verify that real Experiment Lab tables are protected by this recovery flow,
+  // not silently discarded while preserving only Dead Drop and Pilot Studio.
+  app.db.prepare(
+    'INSERT INTO ab_daily (experiment_id,cohort_day,arm,exposures,cta) VALUES (?,?,?,?,?)'
+  ).run('ci-test-experiment', 20261022, 'A', 5, 2);
+  app.db.prepare(
+    'INSERT INTO ab_sessions (id,experiment_id,arm,token_hash,created_at,cohort_day,cta_recorded) VALUES (?,?,?,?,?,?,?)'
+  ).run('ci-test-session', 'ci-test-experiment', 'A', 'synthetic-digest', Date.now(), 20261022, 1);
 
   const current = inspectDatabase(dbPath);
   assert.equal(current.integrity, 'ok');
   assert.equal(current.missions, 1);
   assert.equal(current.pilotApplications, 1);
+  assert.equal(current.experimentLabPresent, true);
+  assert.equal(current.experimentDailyRows, 1);
+  assert.equal(current.experimentSessions, 1);
 
   const snapshot = snapshotDatabase({ dbPath, outputPath: backupPath });
   assert.equal(snapshot.action, 'snapshot');
   assert.equal(snapshot.missions, 1);
   assert.equal(snapshot.pilotApplications, 1);
+  assert.equal(snapshot.experimentLabPresent, true);
+  assert.equal(snapshot.experimentDailyRows, 1);
+  assert.equal(snapshot.experimentSessions, 1);
   assert.match(snapshot.sha256, /^[a-f0-9]{64}$/);
   assert.ok(snapshot.bytes > 0);
   assert.equal(lstatSync(backupPath).mode & 0o777, 0o600);
@@ -90,6 +104,8 @@ test('live WAL snapshot includes both products and restores without loss', async
   assert.equal(restored.sha256, snapshot.sha256);
   assert.equal(restored.missions, 1);
   assert.equal(restored.pilotApplications, 1);
+  assert.equal(restored.experimentDailyRows, 1);
+  assert.equal(restored.experimentSessions, 1);
   assert.equal(lstatSync(restorePath).mode & 0o777, 0o600);
 
   // The restored database genuinely boots the server, not just SQLite.
@@ -139,6 +155,7 @@ test('recoverability checks refuse overwrites, corrupt files, unknown schemas an
   db.close();
   const original = snapshotDatabase({ dbPath: source, outputPath: backup });
   assert.equal(original.missions, 0);
+  assert.equal(original.experimentLabPresent, false);
   assert.throws(() => snapshotDatabase({ dbPath: source, outputPath: backup }), /already exists/);
   assert.throws(() => restoreDatabase({ backupPath: backup, outputPath: existing }), /already exists/);
   assert.throws(() => snapshotDatabase({ dbPath: source, outputPath: source }), /Source and destination/);
