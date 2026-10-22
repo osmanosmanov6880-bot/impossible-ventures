@@ -269,7 +269,31 @@ const STATIC_FILES = new Map([
   ['/apps/museum-of-attention/', 'apps/museum-of-attention/index.html'],
   ['/apps/museum-of-attention/index.html', 'apps/museum-of-attention/index.html'],
   ['/apps/attention-republic/', 'apps/attention-republic/index.html'],
-  ['/apps/attention-republic/index.html', 'apps/attention-republic/index.html']
+  ['/apps/attention-republic/index.html', 'apps/attention-republic/index.html'],
+  ['/cinema/', 'apps/cinema/index.html'],
+  ['/cinema/index.html', 'apps/cinema/index.html'],
+  ['/cinema/prototype/', 'apps/cinema/prototype/index.html'],
+  ['/cinema/prototype/index.html', 'apps/cinema/prototype/index.html'],
+  ['/cinema/cinema.css', 'apps/cinema/cinema.css'],
+  ['/cinema/app.mjs', 'apps/cinema/app.mjs'],
+  ['/cinema/story.mjs', 'apps/cinema/story.mjs'],
+  ['/cinema/engine.mjs', 'apps/cinema/engine.mjs'],
+  ['/cinema/audio.mjs', 'apps/cinema/audio.mjs'],
+  ['/cinema/assets/scenes/scene_00.svg', 'apps/cinema/assets/scenes/scene_00.svg'],
+  ['/cinema/assets/scenes/scene_01.svg', 'apps/cinema/assets/scenes/scene_01.svg'],
+  ['/cinema/assets/scenes/scene_02.svg', 'apps/cinema/assets/scenes/scene_02.svg'],
+  ['/cinema/assets/scenes/scene_03.svg', 'apps/cinema/assets/scenes/scene_03.svg'],
+  ['/cinema/assets/scenes/scene_04.svg', 'apps/cinema/assets/scenes/scene_04.svg'],
+  ['/cinema/assets/scenes/scene_05.svg', 'apps/cinema/assets/scenes/scene_05.svg'],
+  ['/cinema/assets/scenes/scene_06.svg', 'apps/cinema/assets/scenes/scene_06.svg'],
+  ['/cinema/assets/scenes/scene_07.svg', 'apps/cinema/assets/scenes/scene_07.svg'],
+  ['/cinema/assets/scenes/scene_08.svg', 'apps/cinema/assets/scenes/scene_08.svg'],
+  ['/cinema/assets/scenes/scene_09.svg', 'apps/cinema/assets/scenes/scene_09.svg'],
+  ['/cinema/assets/scenes/scene_10.svg', 'apps/cinema/assets/scenes/scene_10.svg'],
+  ['/cinema/assets/scenes/scene_11.svg', 'apps/cinema/assets/scenes/scene_11.svg'],
+  ['/cinema/assets/scenes/scene_12.svg', 'apps/cinema/assets/scenes/scene_12.svg'],
+  ['/cinema/assets/scenes/scene_13.svg', 'apps/cinema/assets/scenes/scene_13.svg'],
+  ['/cinema/assets/scenes/scene_14.svg', 'apps/cinema/assets/scenes/scene_14.svg']
 ]);
 
 function sendJSON(response, status, payload) {
@@ -295,6 +319,7 @@ function sendStatic(response, pathname) {
     '.svg': 'image/svg+xml'
   }[extname(path)] || 'application/octet-stream';
   if (pathname === '/' || pathname === '/site.css' || pathname === '/site.js' || pathname.startsWith('/apps/shared/') || pathname.startsWith('/apps/pipeline/') || pathname.startsWith('/economics/') || pathname.startsWith('/apps/appeal-2049-studio/') || pathname.startsWith('/apps/antipersona/') || pathname.startsWith('/apps/brief-theatre-studio/') || pathname.startsWith('/apps/adbiome/') || pathname.startsWith('/apps/museum-of-attention-studio/') || pathname.startsWith('/apps/attention-republic-live/') || pathname.startsWith('/apps/dead-drop/') || pathname.startsWith('/pilot/') || pathname.startsWith('/experiments/') || pathname.startsWith('/status/') || pathname.startsWith('/commercial/') || pathname.startsWith('/showcase/') || pathname.startsWith('/proposal/') ||
+      pathname.startsWith('/cinema/') ||
       pathname.startsWith('/apps/creative-worlds/') ||
       ['anti-persona','brief-theatre','ad-biome','museum-of-attention','attention-republic']
         .some(id => pathname.startsWith('/apps/' + id + '/'))) {
