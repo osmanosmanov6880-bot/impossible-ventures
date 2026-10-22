@@ -434,6 +434,8 @@ function renderDossier(dossier) {
     '<div class="callout warning"><strong>Editorial note:</strong> ' + safe(dossier.disclosure) + '</div>' +
     '<div class="form-footer"><button class="btn btn-primary" data-action="copy-dossier" type="button">COPY DOSSIER ↗</button>' +
     '<button class="btn btn-ghost" data-action="download-dossier" type="button">EXPORT .TXT ↓</button>' +
+     '<button class="btn btn-ghost" data-action="export-for-appeal" type="button">EXPORT FOR APPEAL .JSON ↓</button>' +
+     '<a class="btn btn-ghost" href="../appeal-2049/">OPEN APPEAL 2049 ↗</a>' +
     '<button class="btn btn-ghost" data-action="new-operation" type="button">LEAVE SESSION</button></div>' +
     renderPrivacyPanel(state.mode === 'training' ? localView() : state.mission);
 }
@@ -566,6 +568,12 @@ root.addEventListener('click', event => {
     stopRefresh();
     render();
   });
+  if (action === 'export-for-appeal') {
+    const dossier = state.mode === 'training' ? state.training?.dossier : state.mission?.dossier;
+    if (!dossier) return;
+    downloadJSON(dossier, 'dead-drop-for-appeal-2049.json');
+    showToast(t('Dossier JSON exported for Appeal 2049. Import it there to review. Nothing was sent to the server.'));
+  }
   if (action === 'copy-dossier' || action === 'download-dossier') {
     const dossier = state.mode === 'training' ? state.training.dossier : state.mission.dossier;
     if (!dossier) return;
