@@ -22,6 +22,15 @@ def build() -> None:
         copy2(ROOT / name, DIST / name)
     for name in ("dead-drop", "appeal-2049"):
         copytree(ROOT / "apps" / name, DIST / "apps" / name)
+    copytree(ROOT / "apps" / "status", DIST / "status")
+    status_html = DIST / "status" / "index.html"
+    status_content = status_html.read_text(encoding="utf-8")
+    if "<body>" not in status_content:
+        raise RuntimeError("Status page body tag missing")
+    status_html.write_text(
+        status_content.replace("<body>", '<body data-static-preview="true">', 1),
+        encoding="utf-8"
+    )
 
 
     experiment = DIST / "experiments"
@@ -107,6 +116,9 @@ def build() -> None:
     for name in (
         "index.html",
         "privacy.html",
+        "status/index.html",
+        "status/app.js",
+        "status/style.css",
         "pilot/index.html",
         "pilot/app.js",
         "pilot/style.css",
@@ -123,6 +135,8 @@ def build() -> None:
 
     if 'data-static-preview="true"' not in (DIST / "pilot/index.html").read_text(encoding="utf-8"):
         raise RuntimeError("Static Pilot Studio data mode not declared")
+    if 'data-static-preview="true"' not in (DIST / "status/index.html").read_text(encoding="utf-8"):
+        raise RuntimeError("Status static demo mode not enabled")
     if "disabled aria-disabled" not in (DIST / "pilot/index.html").read_text(encoding="utf-8"):
         raise RuntimeError("Static Pilot Studio application button must be disabled")
 
