@@ -3,15 +3,18 @@
   "version": "0.7.0",
   "private": true,
   "type": "module",
-  "description": "Dead Drop, Pilot Studio and first-party anonymous A/B Experiment Lab research alpha",
+  "description": "Impossible Ventures: Dead Drop, Pilot Studio and Experiment Lab with writable readiness, backup recovery and localized operators.",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "start": "node services/dead-drop/server.mjs",
     "dev": "node services/dead-drop/server.mjs",
-    "test": "node --test services/dead-drop/server.test.mjs services/dead-drop/creative-engine.test.mjs services/pilot-studio/pilots.test.mjs services/dead-drop/privacy.test.mjs services/experiment-lab/experiments.test.mjs",
-    "check": "node --check services/dead-drop/server.mjs && node --check services/dead-drop/creative-engine.mjs && node --check services/pilot-studio/pilots.mjs && node --check apps/dead-drop/app.js && node --check apps/pilot-studio/app.js && node --check apps/pilot-studio/operator.js && node --check services/dead-drop/dossier-locales.mjs && node --check apps/dead-drop/i18n.js && node --check services/experiment-lab/experiments.mjs && node --check apps/experiment-lab/app.js && node --check apps/experiment-lab/operator.js && npm test",
-    "start:ai": "node --env-file=.env services/dead-drop/server.mjs"
+    "test": "node --test services/dead-drop/server.test.mjs services/dead-drop/creative-engine.test.mjs services/pilot-studio/pilots.test.mjs services/dead-drop/privacy.test.mjs services/experiment-lab/experiments.test.mjs services/dead-drop/operations.test.mjs scripts/db-recovery.test.mjs",
+    "check": "node --check services/dead-drop/server.mjs && node --check services/dead-drop/creative-engine.mjs && node --check services/pilot-studio/pilots.mjs && node --check apps/dead-drop/app.js && node --check apps/pilot-studio/app.js && node --check apps/pilot-studio/operator.js && node --check services/dead-drop/dossier-locales.mjs && node --check apps/dead-drop/i18n.js && node --check services/experiment-lab/experiments.mjs && node --check apps/experiment-lab/app.js && node --check apps/experiment-lab/operator.js && node --check scripts/db-recovery.mjs && node --check apps/status/app.js && npm test",
+    "start:ai": "node --env-file=.env services/dead-drop/server.mjs",
+    "db:inspect": "node scripts/db-recovery.mjs inspect",
+    "db:backup": "node scripts/db-recovery.mjs backup",
+    "db:restore": "node scripts/db-recovery.mjs restore"
   }
 }
