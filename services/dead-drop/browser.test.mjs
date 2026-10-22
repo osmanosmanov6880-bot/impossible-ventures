@@ -274,6 +274,9 @@ test('Pilot Studio mobile form, three-language localization, real application an
   await operator.getByText('QUALIFIED').first().waitFor();
   await operator.locator('#operatorLocale').selectOption('ru');
   assert.match(await operator.locator('#operatorStats').innerText(), /ВСЕГО/);
+  assert.equal(await operator.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false, 'Operator page must not overflow a mobile viewport');
+  mkdirSync('artifacts', { recursive: true });
+  await operator.screenshot({ path: 'artifacts/pilot-operator-ru-mobile.png', fullPage: true });
   await operator.getByRole('button', { name: /ВЫЙТИ/i }).click();
   assert.equal(await operator.locator('#operatorList').locator('article').count(), 0);
   assert.equal(await operator.locator('#operatorStats').locator('.operator-stat').count(), 0);
