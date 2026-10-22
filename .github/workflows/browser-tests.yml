@@ -26,6 +26,8 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Test live two-agent and training experiences
         run: node --test services/dead-drop/browser.test.mjs
+      - name: Test cinematic interactive film and real 3-scene prototype
+        run: node --test services/cinema/browser.test.mjs
       - name: Upload desktop and mobile snapshots
         if: always()
         uses: actions/upload-artifact@v4
