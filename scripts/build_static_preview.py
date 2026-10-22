@@ -20,7 +20,7 @@ def build() -> None:
 
     for name in ("index.html", "privacy.html"):
         copy2(ROOT / name, DIST / name)
-    for name in ("dead-drop", "appeal-2049"):
+    for name in ("dead-drop", "appeal-2049", "antipersona", "shared"):
         copytree(ROOT / "apps" / name, DIST / "apps" / name)
     copytree(ROOT / "apps" / "status", DIST / "status")
     status_html = DIST / "status" / "index.html"
@@ -129,6 +129,10 @@ def build() -> None:
         "apps/dead-drop/app.js",
         "apps/dead-drop/i18n.js",
         "apps/appeal-2049/index.html",
+        "apps/antipersona/index.html",
+        "apps/antipersona/app.js",
+        "apps/antipersona/engine.mjs",
+        "apps/shared/studio.css",
     ):
         if not (DIST / name).is_file():
             raise RuntimeError(f"Missing static output: {name}")
