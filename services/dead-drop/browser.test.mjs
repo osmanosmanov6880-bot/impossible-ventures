@@ -727,3 +727,136 @@ test('Creative World -> Commercial Command: local JSON import, no auto-save, rea
   assert.equal(writes.length,1,'Invalid imports must not create any server records');
   assert.deepEqual(errors,[]);
 });
+
+
+test('WAVE 11–15: mobile launch studio -> actual first-party story -> opt-in event -> separate contact consent -> owner metrics and CSV',async t=>{
+  const operator='launch-browser-system-key-2026-this-is-strong-and-test-only';
+  const previous=process.env.OPERATOR_TOKEN;
+  process.env.OPERATOR_TOKEN=operator;
+  t.after(()=>previous===undefined?delete process.env.OPERATOR_TOKEN:process.env.OPERATOR_TOKEN=previous);
+  const {context,base}=await setup(t,390,844);
+  const errors=[];
+  const owner=await context.newPage();
+  attachErrors(owner,errors);
+  await owner.goto(base+'/commercial/');
+  await owner.locator('#ventureGrid .venture-card').first().waitFor({state:'attached'});
+  await owner.locator('#bootstrapForm input[name="name"]').fill('Northstar Interactive QA');
+  await owner.locator('#bootstrapForm input[name="systemToken"]').fill(operator);
+  await owner.locator('#bootstrapForm').evaluate(form=>form.requestSubmit());
+  await owner.locator('#workspaceApp').waitFor({state:'visible'});
+  assert.equal(await owner.locator('#launchCreate').isDisabled(),true);
+
+  // An actual published creative starts from a persisted draft + owner approval.
+  const values={
+    title:'Aurora Pilot Launch',audience:'Small independent marketing teams',
+    offer:'Interactive campaign discovery and strategy workshop',
+    headline:'Choose the next chapter of your creative campaign',
+    body:'A three-step example about transparent research, test design and responsible choices.',
+    ctaLabel:'Discuss a pilot'
+  };
+  for(const [key,value] of Object.entries(values)){
+    const field=owner.locator('#campaignForm [name="'+key+'"]');
+    await field.fill(value);
+  }
+  await owner.locator('#venture').selectOption('ad-biome');
+  await owner.locator('#campaignForm').evaluate(form=>form.requestSubmit());
+  await owner.locator('.campaign-card').first().waitFor();
+  assert.equal((await owner.locator('#countTotal').textContent()).trim(),'1');
+  await owner.getByRole('button',{name:/ОДОБРИТЬ МАКЕТ/}).first().click();
+  await owner.locator('#launchCreate').waitFor({state:'visible'});
+  await owner.waitForFunction(()=>document.querySelector('#launchCreate')?.disabled===false);
+  await owner.locator('#launchCreate').click();
+  await owner.locator('.launch-item').first().waitFor();
+  assert.match(await owner.locator('.launch-item .stage').first().textContent(),/ЧЕРНОВИК/);
+  await owner.getByRole('button',{name:/ОПУБЛИКОВАТЬ/}).first().click();
+  const firstLive=owner.locator('.launch-item a.primary').first();
+  await firstLive.waitFor({state:'visible'});
+  const publicUrl=await firstLive.getAttribute('href');
+  assert.match(publicUrl,/^\/play\/\?id=[a-f0-9]{24}$/);
+  mkdirSync('artifacts',{recursive:true});
+  await owner.screenshot({path:'artifacts/launch-studio-mobile.png',fullPage:true});
+  assert.equal(await owner.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+
+  // Play without opting into analytics; no POST /sessions should be made.
+  const visitor=await context.newPage();
+  attachErrors(visitor,errors);
+  const noConsentWrites=[];
+  visitor.on('request',r=>{
+    if(r.method()==='POST'&&new URL(r.url()).pathname.includes('/launches/'))noConsentWrites.push(r.url());
+  });
+  await visitor.goto(base+publicUrl);
+  await visitor.locator('#start').waitFor({state:'visible'});
+  await visitor.waitForFunction(()=>document.querySelector('#start')?.disabled===false);
+  assert.equal(await visitor.locator('#consentAnalytics').isChecked(),false);
+  await visitor.locator('#start').click();
+  for(let i=0;i<3;i++){
+    await visitor.locator('#answers button').first().click();
+    await visitor.locator('#next').click();
+  }
+  await visitor.locator('#finishPanel').waitFor({state:'visible'});
+  assert.equal(await visitor.locator('#pathSummary > div').count(),3);
+  assert.equal(noConsentWrites.length,0,'Non-consenting visitor must not produce any first-party event');
+  assert.equal(await visitor.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+  await visitor.screenshot({path:'artifacts/launch-story-no-consent-mobile.png',fullPage:true});
+
+  // Separate visitor opts into technical event measurement, then makes
+  // an independent opt-in decision about submitting personal contact data.
+  const participant=await context.newPage();
+  attachErrors(participant,errors);
+  await participant.goto(base+publicUrl);
+  await participant.waitForFunction(()=>document.querySelector('#start')?.disabled===false);
+  await participant.locator('#locale').selectOption('en');
+  assert.equal(await participant.locator('html').getAttribute('lang'),'en');
+  await participant.locator('#locale').selectOption('zh');
+  assert.equal(await participant.locator('html').getAttribute('lang'),'zh-CN');
+  await participant.locator('#locale').selectOption('ru');
+  await participant.locator('#consentAnalytics').check();
+  await participant.locator('#start').click();
+  await participant.locator('#storyPanel').waitFor({state:'visible'});
+  for(let i=0;i<3;i++){
+    await participant.locator('#answers button').nth(1).click();
+    await participant.locator('#consequence').waitFor({state:'visible'});
+    await participant.locator('#next').click();
+  }
+  await participant.locator('#finishPanel').waitFor({state:'visible'});
+  assert.equal(await participant.locator('#pathSummary > div').count(),3);
+  await owner.evaluate(()=>refreshLaunches());
+  await owner.waitForFunction(()=>
+    [...document.querySelectorAll('#launchList .launch-kpi strong')].slice(0,3)
+      .map(x=>x.textContent.trim()).join(',')==='1,1,0'
+  );
+
+  await Promise.all([
+    participant.waitForURL('**/pilot/'),
+    participant.locator('#ctaButton').click()
+  ]);
+  assert.match(await participant.evaluate(()=>sessionStorage.getItem('iv_launch_attribution')),/ivl_/);
+  await participant.locator('#leadForm [name="company"]').fill('Opt-in First-Party Customer');
+  await participant.locator('#leadForm [name="contact"]').fill('Ada Morgan');
+  await participant.locator('#leadForm [name="email"]').fill('ada@example.org');
+  await participant.locator('#leadGoal').selectOption('validation');
+  await participant.locator('#consent').check();
+  await participant.locator('#leadForm').evaluate(form=>form.requestSubmit());
+  await participant.locator('#leadResult code').waitFor();
+  assert.match(await participant.locator('#leadResult').textContent(),/Заявка связана с добровольным CTA/);
+  assert.equal(await participant.evaluate(()=>sessionStorage.getItem('iv_launch_attribution')),null);
+  await owner.evaluate(()=>refreshLaunches());
+  await owner.waitForFunction(()=>
+    [...document.querySelectorAll('#launchList .launch-kpi strong')].slice(0,4)
+      .map(x=>x.textContent.trim()).join(',')==='1,1,1,1'
+  );
+  const download=owner.waitForEvent('download');
+  await owner.getByRole('button',{name:/СКАЧАТЬ ОТЧЁТ CSV/}).first().click();
+  const csv=await download;
+  assert.match(csv.suggestedFilename(),/^iv-launch-[a-f0-9]{24}-metrics\.csv$/);
+  await owner.getByRole('button',{name:/ПАУЗА/}).first().click();
+  await owner.waitForFunction(()=>
+    document.querySelector('#launchList .stage')?.textContent.includes('НА ПАУЗЕ')
+  );
+  const unavailable=await context.newPage();
+  attachErrors(unavailable,errors);
+  await unavailable.goto(base+publicUrl);
+  await unavailable.locator('#message.error').waitFor();
+  assert.equal(await unavailable.locator('#preflight').isVisible(),false);
+  assert.deepEqual(errors,[]);
+});
