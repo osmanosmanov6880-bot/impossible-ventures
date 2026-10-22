@@ -1,5 +1,13 @@
 # Deployment playbook — Impossible Ventures staged deployment (v0.8)
 
+## v1.1 creative worlds: no-account static products
+
+Five new worlds are served from /apps/anti-persona/, /apps/brief-theatre/, /apps/ad-biome/, /apps/museum-of-attention/ and /apps/attention-republic/. Their static runner is common under /apps/creative-worlds/. They do not invoke a backend API or require OPERATOR_TOKEN, but normal HTTP delivery of ES modules is required. The .mjs response MIME must be JavaScript; a wrong MIME blocks these apps in Chromium.
+
+GitHub Pages static preview includes all five. Static-only mode is honest: no remote campaign management, tracking, customer login or payment collection. The full server and experiment workspace features still require a protected Node.js staging host.
+
+See [five playable worlds v1.1](five-playable-worlds-v11.md).
+
 ## Five-WAVE v1.0 commercial staging additions
 
 This code branch adds **/commercial/** (seven-world creative demo and operator-provisioned workspaces), **/showcase/** (approved public creative), and **/proposal/** (private commercial offer and recorded customer decision), alongside /experiments/, /pilot/ and the existing /status/ diagnostics.
