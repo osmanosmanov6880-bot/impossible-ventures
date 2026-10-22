@@ -156,6 +156,10 @@ def build() -> None:
         copytree(ROOT / "apps" / name, DIST / "apps" / name)
     copytree(ROOT / "apps" / "shared", DIST / "apps" / "shared", dirs_exist_ok=True)
     copytree(ROOT / "apps" / "pipeline", DIST / "apps" / "pipeline")
+    # THE SIGNAL is intentionally static, including its three-scene prototype:
+    # original SVG artworks and small ES modules, no backend or customer data.
+    copytree(ROOT / "apps" / "cinema", DIST / "cinema")
+
     copytree(ROOT / "apps" / "economics", DIST / "economics")
     republic = DIST / "apps" / "attention-republic-live"
     republic.mkdir()
@@ -258,6 +262,23 @@ def build() -> None:
         if "http://" in document or 'src="https://' in document:
             raise RuntimeError("Unexpected remote script or asset in world " + world)
     print("Safe static worlds included: 5; browser-only, no paid-ads API, no operator credentials")
+
+    # Validate every scene actually exists in the static preview and that
+    # no remote script, password, generated fake audience or API is bundled.
+    for edition in ("index.html", "prototype/index.html"):
+        page = (DIST / "cinema" / edition).read_text(encoding="utf-8")
+        if 'data-edition=' not in page or "<main" not in page:
+            raise RuntimeError("Cinematic entrypoint is malformed: " + edition)
+        if 'src="http' in page or 'href="http' in page:
+            raise RuntimeError("Cinema must not depend on third-party scripts")
+    for i in range(15):
+        keyframe = DIST / "cinema" / "assets" / "scenes" / f"scene_{i:02d}.svg"
+        if not keyframe.is_file() or keyframe.stat().st_size < 1000:
+            raise RuntimeError("Missing illustrated cinema keyframe: " + keyframe.name)
+    for asset in ("cinema.css", "story.mjs", "engine.mjs", "audio.mjs", "app.mjs"):
+        if not (DIST / "cinema" / asset).is_file():
+            raise RuntimeError("Missing cinematic engine module " + asset)
+    print("Cinematic interactive film included: 15 keyframes and 3-scene prototype")
 
     print("Static preview built:", DIST)
 
