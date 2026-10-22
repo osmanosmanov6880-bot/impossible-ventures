@@ -22,7 +22,7 @@ const dictionary = {
     total: 'ВСЕГО', new: 'НОВЫЕ', contacted: 'НА СВЯЗИ', qualified: 'ЦЕЛЕВЫЕ',
     won: 'ВЫИГРАНО', lost: 'ОТКАЗ',
     company: 'КОМПАНИЯ', contact: 'КОНТАКТ', email: 'EMAIL', website: 'САЙТ',
-    goal: 'ЦЕЛЬ', budget: 'БЮДЖЕТ', locale: 'ЯЗЫК', status: 'СТАТУС',
+    goal: 'ЦЕЛЬ', budget: 'БЮДЖЕТ', locale: 'ЯЗЫК', attributed: 'A/B ЭКСПЕРИМЕНТ', status: 'СТАТУС',
     saveStatus: 'СОХРАНИТЬ', noRequests: 'Заявок на этом сервере пока нет.',
     refreshed: 'Показаны только сохранённые заявки. Обновлено: ', updated: 'Обновлён статус заявки ',
     loggedOut: 'Сеанс завершён. Ключ удалён из памяти этой страницы.',
@@ -41,7 +41,7 @@ const dictionary = {
     total: 'TOTAL', new: 'NEW', contacted: 'CONTACTED', qualified: 'QUALIFIED',
     won: 'WON', lost: 'LOST',
     company: 'COMPANY', contact: 'CONTACT', email: 'EMAIL', website: 'WEBSITE',
-    goal: 'GOAL', budget: 'BUDGET', locale: 'LANGUAGE', status: 'STATUS',
+    goal: 'GOAL', budget: 'BUDGET', locale: 'LANGUAGE', attributed: 'A/B EXPERIMENT', status: 'STATUS',
     saveStatus: 'SAVE STATUS', noRequests: 'No real pilot requests have been received.',
     refreshed: 'Showing real stored pilot requests. Last refreshed: ', updated: 'Updated request ',
     loggedOut: 'Signed out. The access key was cleared from this page’s memory.',
@@ -60,7 +60,7 @@ const dictionary = {
     total: '总计', new: '新申请', contacted: '已联系', qualified: '有效客户',
     won: '成功', lost: '未成交',
     company: '公司', contact: '联系人', email: '邮箱', website: '网站',
-    goal: '目标', budget: '预算', locale: '语言', status: '状态',
+    goal: '目标', budget: '预算', locale: '语言', attributed: '关联 A/B 实验', status: '状态',
     saveStatus: '保存状态', noRequests: '这台服务器目前没有收到真实申请。',
     refreshed: '只显示服务器中实际保存的申请。更新时间：',
     updated: '已更新申请 ', loggedOut: '已退出，此页面内存中的令牌已清除。',
@@ -162,6 +162,14 @@ function render(data) {
       const block = makeNode('div');
       block.append(makeNode('small', '', phrase(label)), makeNode('span', '', value));
       details.appendChild(block);
+    }
+    if (item.experimentId) {
+      const linked = makeNode('div');
+      linked.append(
+        makeNode('small', '', phrase('attributed')),
+        makeNode('span', '', item.experimentId + ' / ' + (item.experimentArm || '—'))
+      );
+      details.appendChild(linked);
     }
 
     const controls = makeNode('div', 'operator-controls');
