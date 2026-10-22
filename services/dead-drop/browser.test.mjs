@@ -616,3 +616,48 @@ test('AntiPersona mobile adversarial debate challenges idea, scores rebuttal, ex
   assert.deepEqual(mutations,[]);
   assert.deepEqual(errors,[]);
 });
+
+
+test('Brief Theatre three-act creative rehearsal changes direction, finishes a real script, exports JSON and changes languages',async t=>{
+  const {context,base}=await setup(t,390,844);
+  const page=await context.newPage();
+  const errors=[];attachErrors(page,errors);
+  const posts=[];page.on('request',req=>{if(!['GET','HEAD'].includes(req.method()))posts.push(req.method());});
+  await page.goto(base+'/apps/brief-theatre/');
+  await page.locator('#brand').fill('Aurora Studio');
+  await page.locator('#audience').fill('Creative agency account managers');
+  await page.locator('#concept').fill('Reveal where creative feedback gets lost, then offer a demonstrable project handoff workflow.');
+  await page.locator('#channel').selectOption('video');
+  await page.locator('#playForm').evaluate(form=>form.requestSubmit());
+  await page.locator('#playArea').waitFor({state:'visible'});
+  assert.match(await page.locator('#actHeading').textContent(),/АКТ 1/);
+  await page.locator('#sceneDraft').fill('Show an overwhelmed designer and one moment where feedback gets lost; viewers recognize the problem immediately.');
+  await page.locator('#direction').selectOption('bold');
+  await page.locator('#sceneForm').evaluate(form=>form.requestSubmit());
+  assert.match(await page.locator('#directorPressure').textContent(),/смелую/);
+  assert.match(await page.locator('#actHeading').textContent(),/АКТ 2/);
+  await page.locator('#sceneDraft').fill('Show a documented before-and-after demo, including a small sample and a transparent explanation of what was measured.');
+  await page.locator('#direction').selectOption('careful');
+  await page.locator('#sceneForm').evaluate(form=>form.requestSubmit());
+  assert.match(await page.locator('#actHeading').textContent(),/АКТ 3/);
+  await page.locator('#sceneDraft').fill('Invite viewers to request a controlled pilot demonstration, showing exactly what they will receive and what is unverified.');
+  await page.locator('#sceneForm').evaluate(form=>form.requestSubmit());
+  await page.locator('#complete').waitFor({state:'visible'});
+  assert.equal(await page.locator('#history .record').count(),3);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+  mkdirSync('artifacts',{recursive:true});
+  await page.screenshot({path:'artifacts/brief-theatre-mobile-final.png',fullPage:true});
+  const downloadPromise=page.waitForEvent('download');
+  await page.locator('#exportJSON').click();
+  const download=await downloadPromise;
+  const exported=JSON.parse(readFileSync(await download.path(),'utf8'));
+  assert.equal(exported.kind,'brief-theatre-script');
+  assert.equal(exported.scenes.length,3);
+  assert.equal(exported.factualClaimsUnverified,true);
+  await page.locator('#locale').selectOption('en');
+  assert.match(await page.locator('#complete').innerText(),/THIRD ACT COMPLETE/);
+  await page.locator('#locale').selectOption('zh');
+  assert.match(await page.locator('#complete').innerText(),/第三幕完成/);
+  assert.deepEqual(posts,[]);
+  assert.deepEqual(errors,[]);
+});
