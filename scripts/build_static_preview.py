@@ -156,6 +156,7 @@ def build() -> None:
         copytree(ROOT / "apps" / name, DIST / "apps" / name)
     copytree(ROOT / "apps" / "shared", DIST / "apps" / "shared", dirs_exist_ok=True)
     copytree(ROOT / "apps" / "pipeline", DIST / "apps" / "pipeline")
+    copytree(ROOT / "apps" / "economics", DIST / "economics")
     republic = DIST / "apps" / "attention-republic-live"
     republic.mkdir()
     for asset in ("index.html", "app.js"):
@@ -175,6 +176,10 @@ def build() -> None:
     for name in (
         "site.css", "site.js",
         "apps/pipeline/index.html",
+        "economics/index.html",
+        "economics/app.js",
+        "economics/engine.mjs",
+        "economics/style.css",
         "apps/pipeline/app.js",
         "apps/creative-worlds/studio-bridge.mjs",
         "apps/appeal-2049-studio/index.html",
