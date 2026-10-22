@@ -228,3 +228,47 @@ test('both agents consent independently before model assistance is available', a
   assert.equal(modelCalls, 1);
   assert.deepEqual(errors, []);
 });
+
+
+test('Pilot Studio mobile form, three-language localization, real application and operator pipeline', async t => {
+  const prior = process.env.OPERATOR_TOKEN;
+  const operatorKey = 'pilot-browser-test-token-longer-than-32-characters';
+  process.env.OPERATOR_TOKEN = operatorKey;
+  t.after(() => {
+    if (prior === undefined) delete process.env.OPERATOR_TOKEN;
+    else process.env.OPERATOR_TOKEN = prior;
+  });
+  const { context, base } = await setup(t, 390, 844);
+  const page = await context.newPage();
+  const errors = [];
+  attachErrors(page, errors);
+  await page.goto(base + '/pilot/');
+  await page.locator('#language').selectOption('ru');
+  await page.getByText('Спроектируйте первый пилот.').waitFor();
+  await page.locator('#spend').fill('4000');
+  await page.locator('#cpm').fill('10');
+  assert.equal((await page.locator('#impressions').textContent()).trim(), '400,000');
+  const tooWide = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2);
+  assert.equal(tooWide, false, 'Pilot Studio should not horizontally overflow mobile width');
+  await page.locator('#company').fill('Pilot Browser Research');
+  await page.locator('#contact').fill('Alex Morgan');
+  await page.locator('#email').fill('alex@example.com');
+  await page.locator('#leadGoal').selectOption('validation');
+  await page.locator('select[name="budget"]').selectOption('1k-5k');
+  await page.locator('#consent').check();
+  await page.locator('#leadForm').evaluate(form => form.requestSubmit());
+  await page.getByText(/Заявка сохранена/).waitFor();
+  const receipt = await page.locator('#leadResult code').textContent();
+  assert.match(receipt, /DELETE TOKEN:/);
+  const operator = await context.newPage();
+  attachErrors(operator, errors);
+  await operator.goto(base + '/pilot/operator/');
+  await operator.locator('#operatorToken').fill(operatorKey);
+  await operator.locator('#operatorLogin').evaluate(form => form.requestSubmit());
+  await operator.getByText('Pilot Browser Research').waitFor();
+  assert.match(await operator.locator('#operatorStats').innerText(), /TOTAL/);
+  await operator.locator('.operator-controls select').selectOption('qualified');
+  await operator.getByRole('button', { name: 'SAVE STATUS' }).click();
+  await operator.getByText('QUALIFIED').first().waitFor();
+  assert.deepEqual(errors, []);
+});
