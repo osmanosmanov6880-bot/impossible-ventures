@@ -71,3 +71,13 @@ No live hosted cooperative server, production security certification, LLM connec
 3. Independent privacy/security review of consent, supplier processing and rate/spend controls.
 4. User testing (including Russian/English/Chinese usability and accessibility) and paid pilot validation.
 5. Improve model evaluations against factuality, creativity and conversion-oriented usefulness.
+
+
+## v0.7 operational reliability milestone (source)
+
+- Real process vs writable-SQLite readiness endpoints and a readable localized public status dashboard.
+- Consistent live SQLite `VACUUM INTO` snapshots, SHA-256/integrity verification, non-overwriting restore CLI.
+- Docker integration smoke that backs up a running database and boots the restored data in a separate container.
+- Operator console localized to RU/EN/ZH with in-page logout and basic IP request throttling.
+
+**Next release gates, not yet finished:** encrypted off-host backup scheduling, automatic restore drills, real hosting with a verified HTTPS domain, production identity and anti-abuse infrastructure, operational alerts and privacy/legal supplier review. A working status page does not imply a global SLA.
