@@ -606,6 +606,9 @@ document.getElementById('cancelDeleteButton').addEventListener('click', () => de
 deleteDialog.addEventListener('click', event => {
   if (event.target === deleteDialog) deleteDialog.close();
 });
+document.getElementById('deleteConfirmCode').addEventListener('input', () => {
+  document.getElementById('deleteError').textContent = '';
+});
 document.getElementById('deleteMissionForm').addEventListener('submit', async event => {
   event.preventDefault();
   const errorNode = document.getElementById('deleteError');
