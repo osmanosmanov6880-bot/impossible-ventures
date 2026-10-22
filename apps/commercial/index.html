@@ -174,6 +174,42 @@
         </div>
       </div>
     </section>
+
+    <section class="section shell" id="launchStudio">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow"><span class="line"></span> 06 / FIRST-PARTY LAUNCH STUDIO</div>
+          <h2 data-i18n="launchTitle">От макета к настоящей интерактивной странице.</h2>
+          <p data-i18n="launchDescription">Владелец публикует отдельную защищённую версию одобренной кампании. Посетитель проходит историю без регистрации. Учёт действий — только после его добровольного согласия.</p>
+        </div>
+        <span class="section-no">06 / LIVE ALPHA</span>
+      </div>
+      <div class="launch-summary" id="launchSummary" aria-live="polite">
+        <div class="score"><span>ACTIVE / FIRST-PARTY</span><strong>0</strong><small>NOT PAID AD DELIVERY</small></div>
+      </div>
+      <div class="builder-grid launch-builder">
+        <div class="surface">
+          <div class="panel-bar"><span data-i18n="launchEditor">ЦЕНТР УПРАВЛЕНИЯ ПУБЛИКАЦИЕЙ</span><span>OWNER APPROVAL / SNAPSHOT</span></div>
+          <div class="form-stack">
+            <p class="small" data-i18n="launchRules">Нельзя запускать неутверждённую кампанию. Публикация фиксирует её проверенную версию; позже можно временно остановить или навсегда закрыть ссылку.</p>
+            <label class="form-field" for="launchCampaign">
+              <span data-i18n="launchSelectLabel">ОДОБРЕННАЯ КАМПАНИЯ</span>
+              <select id="launchCampaign" aria-label="Approved campaign"></select>
+            </label>
+            <button class="primary" id="launchCreate" type="button" data-i18n="launchCreate">СОЗДАТЬ ВЕРСИЮ ДЛЯ ЗАПУСКА ↗</button>
+            <div id="launchNotice" class="small launch-feedback" role="status" aria-live="polite"></div>
+            <div class="launch-disclosure">
+              <strong data-i18n="launchPrivateTitle">ПРОВЕРЯЕМЫЕ ОГРАНИЧЕНИЯ</strong>
+              <p data-i18n="launchPrivacy">Нет рекламных сетей, пикселей слежки или покупки трафика. Счётчики — добровольные технические сигналы, а не уникальные реальные люди. Отдельное согласие требуется для заявки.</p>
+            </div>
+          </div>
+        </div>
+        <div class="preview-surface">
+          <div class="panel-bar"><span data-i18n="launchJournal">АКТИВНЫЕ И ЗАВЕРШЁННЫЕ ПУБЛИКАЦИИ</span><span>REAL DATABASE / NO FAKE IMPRESSIONS</span></div>
+          <div class="launch-list" id="launchList"><p class="small" data-i18n="launchEmpty">Вы ещё не создали интерактивную публикацию.</p></div>
+        </div>
+      </div>
+    </section>
   </div>
 </main>
 <footer class="footer shell"><span>© 2026 IMPOSSIBLE VENTURES / BUILD 1.0 BETA</span><span data-i18n="footnote">Черновики и публичные макеты не являются закупленными рекламными размещениями.</span><a href="/privacy.html" data-i18n="privacy">ПРИВАТНОСТЬ ↗</a></footer>
