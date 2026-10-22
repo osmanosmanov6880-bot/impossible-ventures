@@ -35,6 +35,7 @@ jobs:
               'apps/status/index.html',
               'apps/dead-drop/index.html',
               'apps/appeal-2049/index.html',
+              'apps/antipersona/index.html',
               'apps/pilot-studio/index.html',
               'apps/pilot-studio/operator.html',
               'apps/experiment-lab/index.html',
