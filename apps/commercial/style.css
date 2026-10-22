@@ -226,3 +226,14 @@ input::placeholder,textarea::placeholder{color:#8196aa}
 .workspace-privacy .danger{color:#ffcbca;border-color:#b66b6d}
 .workspace-privacy .danger:hover{border-color:#ffc2c0;background:#512e38}
 @media(max-width:520px){.workspace-privacy{margin:24px 19px 4px}.workspace-privacy button{width:100%}}
+
+/* Creative Worlds v1.1: a semantic separate CTA for each playable world.
+   The template selection remains a button; no nested interactive elements. */
+.venture-shell{display:flex;flex-direction:column;gap:10px;min-width:0}
+.venture-shell .venture-card{width:100%;flex:1}
+.venture-play{border:1px solid #739fa7;border-radius:9px;
+ background:linear-gradient(110deg,#182f3d,#1b3047);
+ color:#d3fae9;text-align:center;display:flex;align-items:center;justify-content:center;
+ min-height:47px;font:11px/1.4 monospace;letter-spacing:.045em;padding:11px 12px}
+.venture-play:hover{border-color:#c7ffe9;color:#fff;box-shadow:0 6px 22px #9fe8df25}
+.venture-play:focus-visible{outline:3px solid #d2fff2;outline-offset:3px}
