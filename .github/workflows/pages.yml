@@ -35,6 +35,7 @@ jobs:
         run: |
           mkdir -p _site/apps
           cp index.html _site/index.html
+          cp privacy.html _site/privacy.html
           cp -R apps/dead-drop _site/apps/dead-drop
           cp -R apps/appeal-2049 _site/apps/appeal-2049
           touch _site/.nojekyll
