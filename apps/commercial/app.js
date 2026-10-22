@@ -161,6 +161,8 @@ function translate() {
   renderCampaigns();
   renderTemplates();
   renderPreview();
+  renderProposals();
+  estimateProposal();
 }
 function emptyForm() {
   elements.campaignForm.reset();
@@ -218,6 +220,8 @@ function setPermission() {
   for(const input of elements.campaignForm.querySelectorAll('input,select,textarea'))input.disabled=!canEdit;
   elements.saveCampaign.disabled=!canEdit;
   elements.ownerTools.hidden=state.role!=='owner';
+  for(const input of document.querySelectorAll('#proposalForm input,#proposalForm select,#proposalForm textarea'))input.disabled=!canEdit;
+  document.getElementById('saveProposal').disabled=!canEdit;
   if(!canEdit)feedback(t('readOnly'));
 }
 function renderCampaigns() {
@@ -280,6 +284,7 @@ async function refresh() {
   const data=await api('/api/v1/workspaces/'+state.workspaceId+'/campaigns');
   state.campaigns=data.items||[];
   renderCampaigns();
+  prepareProposalCampaigns();
 }
 async function loadWorkspace() {
   const data=await api('/api/v1/workspaces/'+state.workspaceId);
@@ -290,6 +295,7 @@ async function loadWorkspace() {
   elements.workspaceApp.hidden=false;
   setPermission();
   await refresh();
+  await refreshProposals();
   if(state.role==='owner')await refreshOwner();
   feedback(t('loaded'));
 }
@@ -332,6 +338,8 @@ elements.newCampaign.addEventListener('click',()=>{emptyForm();feedback(t('newRe
 elements.logout.addEventListener('click',()=>{
   state.token='';state.workspaceId='';state.role='';state.workspaceName='';state.campaigns=[];state.editing=null;
   elements.workspaceApp.hidden=true;elements.receipt.replaceChildren();elements.bootstrapForm.reset();elements.loginForm.reset();
+  proposalState.items=[];proposalState.summary=null;proposalState.editing=null;
+  proposalUI.receipt.replaceChildren();proposalUI.form.reset();
   feedback('Session cleared.');emptyForm();
 });
 elements.bootstrapForm.addEventListener('submit',async e=>{
@@ -402,4 +410,220 @@ async function init(){
     renderTemplates();emptyForm();
   }catch(err){feedback(err.message,true)}
 }
+
+/* WAVE 5: Commercial proposals live in the same tenant as their source creative.
+   Figures here describe offers/contracts, not Stripe charges or recognized revenue. */
+const proposalUI={
+ form:document.getElementById('proposalForm'),
+ campaign:document.getElementById('proposalCampaign'),
+ list:document.getElementById('proposalList'),
+ summary:document.getElementById('proposalSummary'),
+ receipt:document.getElementById('proposalReceipt'),
+ total:document.getElementById('estimateTotal'),
+ revision:document.getElementById('proposalRevision'),
+ save:document.getElementById('saveProposal'),
+ clear:document.getElementById('clearProposal')
+};
+const proposalState={items:[],summary:null,editing:null};
+Object.assign(dict.ru,{
+ proposalTitle:'Предложения, которые можно принять.',
+ proposalExplain:'Создайте предложение по конкретной кампании, определите стоимость и передайте приватную ссылку заказчику. Принятие не является оплатой.',
+ proposalEditor:'РЕДАКТОР ПРЕДЛОЖЕНИЯ',linkedCampaign:'СВЯЗАННАЯ КАМПАНИЯ',
+ clientName:'КОМПАНИЯ ЗАКАЗЧИКА',contactEmail:'ПОЧТА ДЛЯ СВЯЗИ',serviceScope:'ОПИСАНИЕ ОБЪЁМА РАБОТ',
+ currency:'ВАЛЮТА',months:'МЕСЯЦЕВ',setup:'РАЗОВАЯ РАБОТА (ВАЛЮТА)',monthly:'ЕЖЕМЕСЯЧНАЯ УСЛУГА (ВАЛЮТА)',
+ totalEstimate:'ОБЩАЯ СУММА ПРЕДЛОЖЕНИЯ',quoteCaveat:'Это расчётная сумма, а не оплаченный доход.',
+ saveProposal:'СОХРАНИТЬ ПРЕДЛОЖЕНИЕ ↗',newProposal:'НОВОЕ ПРЕДЛОЖЕНИЕ',proposalJournal:'ЖУРНАЛ ПРЕДЛОЖЕНИЙ',
+ proposalEmpty:'Пока нет коммерческих предложений.',quoteTerms:'Система не отправляет email автоматически, не выставляет счёт-фактуру и не проводит оплату. Ссылка передаётся отдельно.',
+ sentLink:'ПРИВАТНАЯ ССЫЛКА НА ПРЕДЛОЖЕНИЕ (СОХРАНИТЕ ЕЁ)',offerSaved:'Черновик предложения действительно сохранён.',
+ offerSent:'Предложение отмечено отправленным; передайте приватную ссылку клиенту самостоятельно.',
+ offerChanged:'Данные предложения обновлены.',offerCancelled:'Предложение отменено. Принятие недоступно.',
+ sendProposal:'ПОДГОТОВИТЬ ССЫЛКУ',rotateLink:'ПЕРЕВЫПУСТИТЬ ССЫЛКУ',cancelProposal:'ОТМЕНИТЬ',editProposal:'РЕДАКТИРОВАТЬ',
+ acceptedNominal:'ПРИНЯТЫХ ПРЕДЛОЖЕНИЙ',sentNominal:'ОЖИДАЮТ РЕШЕНИЯ',realRevenue:'ПОДТВЕРЖДЁННЫХ ПЛАТЕЖЕЙ: НЕТ ИНТЕГРАЦИИ'
+});
+Object.assign(dict.en,{
+ proposalTitle:'Proposals clients can actually review.',
+ proposalExplain:'Create a quote from a saved campaign and share a private link. Acceptance is not verified payment.',
+ proposalEditor:'PROPOSAL EDITOR',linkedCampaign:'LINKED CAMPAIGN',
+ clientName:'CLIENT COMPANY',contactEmail:'CONTACT EMAIL',serviceScope:'SCOPE OF SERVICES',
+ currency:'CURRENCY',months:'MONTHS',setup:'ONE-TIME FEE',monthly:'MONTHLY SERVICE',
+ totalEstimate:'TOTAL QUOTED VALUE',quoteCaveat:'Proposed amount, not collected revenue.',
+ saveProposal:'SAVE PROPOSAL ↗',newProposal:'NEW PROPOSAL',proposalJournal:'PROPOSAL PIPELINE',
+ proposalEmpty:'No proposals created.',quoteTerms:'No email is sent, no invoice generated and no money charged. Share the private link separately.',
+ sentLink:'PRIVATE PROPOSAL LINK (SAVE IT)',offerSaved:'Draft proposal saved.',
+ offerSent:'Proposal marked as sent. Share the link with the customer securely.',
+ offerChanged:'Proposal updated.',offerCancelled:'Proposal cancelled; acceptance disabled.',
+ sendProposal:'ISSUE PRIVATE LINK',rotateLink:'ROTATE PRIVATE LINK',cancelProposal:'CANCEL',editProposal:'EDIT PROPOSAL',
+ acceptedNominal:'ACCEPTED PROPOSALS',sentNominal:'AWAITING DECISION',realRevenue:'VERIFIED PAYMENTS: NOT INTEGRATED'
+});
+Object.assign(dict.zh,{
+ proposalTitle:'客户可以查看的真实报价。',
+ proposalExplain:'从保存的广告活动创建报价并分享私人链接。接受不等于已付款。',
+ proposalEditor:'报价编辑器',linkedCampaign:'关联广告活动',
+ clientName:'客户公司',contactEmail:'联系邮箱',serviceScope:'服务范围',
+ currency:'货币',months:'月数',setup:'一次性费用',monthly:'每月服务',
+ totalEstimate:'报价总额',quoteCaveat:'只是报价，不代表已收款。',
+ saveProposal:'保存报价 ↗',newProposal:'新建报价',proposalJournal:'报价管理',
+ proposalEmpty:'暂无报价。',quoteTerms:'不自动发送邮件，不生成正式发票，也不收款。请自行安全分享私人链接。',
+ sentLink:'私人报价链接（请保存）',offerSaved:'报价草稿已保存。',
+ offerSent:'报价已标记发送。请安全地将链接分享给客户。',
+ offerChanged:'报价已更新。',offerCancelled:'报价已取消，无法接受。',
+ sendProposal:'创建私人链接',rotateLink:'重置私人链接',cancelProposal:'取消',editProposal:'编辑报价',
+ acceptedNominal:'已接受报价',sentNominal:'等待决定',realRevenue:'已验证付款：尚未集成'
+});
+function quotationCents(input) {
+ const number=Number(input);
+ if(!Number.isFinite(number)||number<0||number>5_000_000)throw Error('Invalid proposal price');
+ const amount=Math.round(number*100);
+ if(!Number.isSafeInteger(amount))throw Error('Invalid price precision');
+ return amount;
+}
+function moneyDisplay(cents,currency){
+ try{return new Intl.NumberFormat(elements.lang.value==='zh'?'zh-CN':elements.lang.value,
+   {style:'currency',currency:currency||'USD'}).format(cents/100)}
+ catch{return String(cents/100)+' '+currency}
+}
+function proposalValues() {
+ const d=Object.fromEntries(new FormData(proposalUI.form));
+ const months=Number(d.months);
+ if(!Number.isInteger(months)||months<1||months>24)throw Error('Invalid number of months');
+ return {
+  campaignId:d.campaignId,clientName:d.clientName,contactEmail:d.contactEmail,
+  description:d.description,currency:d.currency,months,
+  setupCents:quotationCents(d.setup),monthlyCents:quotationCents(d.monthly)
+ };
+}
+function estimateProposal() {
+ try{
+  const d=proposalValues(),total=d.setupCents+d.monthlyCents*d.months;
+  proposalUI.total.textContent=moneyDisplay(total,d.currency);
+ }catch{proposalUI.total.textContent='—'}
+}
+function prepareProposalCampaigns() {
+ const selected=proposalUI.campaign.value;
+ proposalUI.campaign.replaceChildren();
+ for(const c of state.campaigns){
+  if(c.status==='archived')continue;
+  const opt=el('option','',c.title+' / '+c.venture+' / '+c.status);
+  opt.value=c.id;proposalUI.campaign.appendChild(opt);
+ }
+ if([...proposalUI.campaign.options].some(o=>o.value===selected))proposalUI.campaign.value=selected;
+ estimateProposal();
+}
+function clearProposal() {
+ proposalState.editing=null;proposalUI.revision.textContent='NEW / DRAFT';
+ proposalUI.form.reset();prepareProposalCampaigns();
+ proposalUI.save.textContent=t('saveProposal');estimateProposal();
+}
+function editProposal(item) {
+ if(item.status!=='draft'||state.role==='viewer')return;
+ proposalState.editing={id:item.id,revision:item.revision};
+ const values={
+  campaignId:item.campaignId,clientName:item.clientName,contactEmail:item.contactEmail,
+  description:item.description,currency:item.currency,months:item.months,
+  setup:item.setupCents/100,monthly:item.monthlyCents/100
+ };
+ for(const [key,value] of Object.entries(values))if(proposalUI.form.elements[key])proposalUI.form.elements[key].value=value;
+ proposalUI.revision.textContent='REV '+item.revision+' / '+item.id.slice(0,8);
+ estimateProposal();proposalUI.form.scrollIntoView({behavior:'smooth'});
+}
+function showProposalReceipt(relative){
+ proposalUI.receipt.replaceChildren();
+ const heading=el('strong','',t('sentLink'));
+ const code=el('code','',location.origin+relative);
+ const copy=el('button','secondary','COPY ↗');copy.type='button';
+ copy.addEventListener('click',async()=>{
+  if(navigator.clipboard?.writeText) {
+    try { await navigator.clipboard.writeText(location.origin+relative);feedback('Copied.');return; }
+    catch {}
+  }
+  feedback('Select and copy the private link above.');
+ });
+ proposalUI.receipt.append(heading,code,copy);
+}
+function proposalStageTag(status){
+ return {draft:'DRAFT',sent:'AWAITING CUSTOMER',accepted:'ACCEPTED (UNPAID)',declined:'DECLINED',cancelled:'CANCELLED'}[status]||status;
+}
+function financeTile(label,value,detail){
+ const tile=el('div','score');tile.append(el('span','',label),el('strong','',value),el('small','',detail));return tile;
+}
+function renderProposals(){
+ proposalUI.summary.replaceChildren();
+ const summary=proposalState.summary;
+ const items=proposalState.items;
+ proposalUI.summary.append(
+  financeTile('TOTAL PROPOSALS',String(items.length),'SERVER RECORDS'),
+  financeTile(t('sentNominal'),String(summary?.count?.sent||0),'NOT COLLECTED'),
+  financeTile(t('acceptedNominal'),String(summary?.count?.accepted||0),'NOT A PAYMENT')
+ );
+ for(const currency of ['USD','EUR']){
+  const sum=['sent','accepted'].reduce((total,status)=>total+(summary?.byCurrency?.[currency]?.[status]?.nominalCents||0),0);
+  if(sum)proposalUI.summary.append(financeTile('PIPELINE / '+currency,moneyDisplay(sum,currency),'PROPOSED VALUE ONLY'));
+ }
+ proposalUI.list.replaceChildren();
+ if(!items.length){proposalUI.list.append(el('p','small',t('proposalEmpty')));return}
+ for(const item of items){
+  const card=el('article','proposal-item');
+  const top=el('div','campaign-top');
+  top.append(el('h3','',item.clientName),el('span','stage',proposalStageTag(item.status)));
+  card.appendChild(top);
+  card.append(el('p','campaign-meta',item.currency+' / '+item.id+' / REV '+item.revision));
+  card.append(el('p','',item.description));
+  card.append(el('strong','proposal-money',moneyDisplay(item.totalCents,item.currency)));
+  const actions=el('div','campaign-actions');
+  if(item.status==='draft'&&state.role!=='viewer'){
+    const edit=el('button','secondary',t('editProposal'));edit.type='button';
+    edit.addEventListener('click',()=>editProposal(item));actions.appendChild(edit);
+  }
+  if(item.status==='draft'&&state.role==='owner'){
+    const send=el('button','primary',t('sendProposal'));send.type='button';
+    send.addEventListener('click',()=>actProposal(item,'send'));actions.appendChild(send);
+  }
+  if(item.status==='sent'&&state.role==='owner'){
+    const rotate=el('button','secondary',t('rotateLink'));rotate.type='button';
+    rotate.addEventListener('click',()=>actProposal(item,'reissue'));
+    const cancel=el('button','secondary',t('cancelProposal'));cancel.type='button';
+    cancel.addEventListener('click',()=>actProposal(item,'cancel'));
+    actions.append(rotate,cancel);
+  }
+  card.appendChild(actions);proposalUI.list.appendChild(card);
+ }
+}
+async function refreshProposals(){
+ if(!state.workspaceId)return;
+ const result=await api('/api/v1/workspaces/'+state.workspaceId+'/proposals');
+ proposalState.items=result.items||[];
+ proposalState.summary=result.summary||null;
+ renderProposals();
+}
+async function actProposal(item,action){
+ try{
+  const root='/api/v1/workspaces/'+state.workspaceId+'/proposals/'+item.id;
+  const result=await api(root+'/'+action,{method:'POST'});
+  if(result.secureShareFragment)showProposalReceipt(result.secureShareFragment);
+  await refreshProposals();await refreshOwner();
+  feedback(t(action==='cancel'?'offerCancelled':'offerSent'));
+ }catch(err){feedback(err.message,true)}
+}
+proposalUI.form.addEventListener('input',estimateProposal);
+proposalUI.clear.addEventListener('click',clearProposal);
+proposalUI.form.addEventListener('submit',async event=>{
+ event.preventDefault();
+ if(!proposalUI.form.reportValidity()||!state.workspaceId)return;
+ const save=proposalUI.save;save.disabled=true;
+ try{
+  const data=proposalValues();
+  if(!data.campaignId)throw Error('Create a campaign first.');
+  const editing=proposalState.editing;
+  const path='/api/v1/workspaces/'+state.workspaceId+'/proposals'+(editing?'/'+editing.id:'');
+  const result=await api(path,{
+   method:editing?'PATCH':'POST',body:editing?{...data,expectedRevision:editing.revision}:data
+  });
+  if(!result.proposal?.id)throw Error('Proposal was not persisted');
+  clearProposal();await refreshProposals();await refreshOwner();
+  feedback(t(editing?'offerChanged':'offerSaved'));
+ }catch(err){feedback(err.message,true)}
+ finally{save.disabled=state.role==='viewer'}
+});
+elements.logout.addEventListener('click',()=>{proposalState.items=[];proposalState.summary=null;proposalUI.receipt.replaceChildren()});
+
 init();
