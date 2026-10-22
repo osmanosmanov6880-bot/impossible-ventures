@@ -80,6 +80,19 @@ No live hosted cooperative server, production security certification, LLM connec
 4. User testing (including Russian/English/Chinese usability and accessibility) and paid pilot validation.
 5. Improve model evaluations against factuality, creativity and conversion-oriented usefulness.
 
+
+## Five new playable worlds v1.1 — source implementation
+
+- WAVE 6 AntiPersona: counter-audience lab with real four-stage choices and authored pitch.
+- WAVE 7 Brief Theatre: four-act script builder requiring human-authored lines.
+- WAVE 8 AdBiome: deterministic four-generation creativity simulator and transparent A/B-plan export.
+- WAVE 9 Museum of Attention: four interactive attention exhibits and ethics checklist.
+- WAVE 10 Attention Republic: five policy council decisions with simulated trust/inclusion/sustainability effects.
+- Shared RU/EN/ZH localization, no-registration local input, keyboard-friendly layout, on-demand JSON export, ES-module CSP and static Pages distribution.
+- QA: pure state tests, route/CSP tests, mobile Chromium playthrough, checked GitHub CI, preserving Commercial Command and v0.8 SQLite recovery.
+
+**Limits:** scores are authored game mechanics. Real users, ad delivery, payment collection, independent research and verified uplift are separate future validation tasks. [Release guide](five-playable-worlds-v11.md).
+
 ## Five-WAVE v1.0 commercial beta extension (source)
 
 1. Published-artifact CI and a premium seven-world website with safe no-registration static previews (not a verified public domain).

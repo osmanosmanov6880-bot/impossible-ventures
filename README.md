@@ -1,6 +1,25 @@
 # Impossible Ventures
 
-**Platform v1.0 beta — Commercial Command plus v0.8 Operations & Recovery.** Dead Drop, Pilot Studio and Experiment Lab now share writable SQLite diagnostics, a backup/restore tool and a multilingual server status page. This is source-level staging readiness, **not a confirmed public deployment**.
+**Platform v1.1 beta — seven browser creative worlds plus Commercial Command v1.0 and v0.8 Operations & Recovery.** Dead Drop, Pilot Studio and Experiment Lab now share writable SQLite diagnostics, a backup/restore tool and a multilingual server status page. This is source-level staging readiness, **not a confirmed public deployment**.
+
+
+## NEW — Five fully playable worlds / v1.1 beta
+
+Five independent interactive world workshops have moved beyond placeholder cards. Each has a unique deterministic story, choices that alter authored outcomes, independent chapter mechanics, a premium responsive interface, complete Russian/English/Chinese copy, transparent game-only heuristics and a locally downloadable JSON creative deliverable. No registration is required.
+
+| Wave | World | Playable browser experience |
+|---|---|---|
+| 6 | [AntiPersona](apps/anti-persona/) | Counter-audience investigation, objections, custom pitch and reality check |
+| 7 | [Brief Theatre](apps/brief-theatre/) | Four-act screenplay with mandatory authored lines and evidence scene |
+| 8 | [AdBiome](apps/ad-biome/) | Four rounds of creative mutations and a proposed honest A/B test |
+| 9 | [Museum of Attention](apps/museum-of-attention/) | Four interactive exhibits about attention, clarity and visitor agency |
+| 10 | [Attention Republic](apps/attention-republic/) | Five policy choices balancing modeled trust, inclusion and sustainability |
+
+**Browser paths:** /apps/anti-persona/, /apps/brief-theatre/, /apps/ad-biome/, /apps/museum-of-attention/, /apps/attention-republic/.
+
+**Real workflow bridge:** Download a finished world’s JSON, open /commercial/, choose the local file under Creative World import and review the prepared draft. Import does not automatically save, send private inputs or publish an ad. A separately authorized Save Draft action is required.
+
+**Evidence and limits:** [Five playable worlds — release guide](docs/five-playable-worlds-v11.md). All five are scripted creative workshops, **not** ad-delivery networks, production AI services, real audience panels or paying customers. Scores are fictional design heuristics and must not be mistaken for CTR or conversion lift.
 
 ## Five-WAVE Commercial Command v1.0 beta — implemented in source
 
@@ -170,11 +189,11 @@ GitHub Actions additionally runs Chromium end-to-end tests for two agents, langu
 | Experiment Lab | Anonymous opt-in A/B research alpha with local counters and separately consented lead attribution (not verified lift) |
 | Commercial Command | Seven editable creative worlds, tenant-scoped campaign/proposal beta; no third-party ad buying or payments |
 | Appeal 2049 | Deterministic browser critique demo |
-| AntiPersona | Concept |
-| Brief Theatre | Concept |
-| AdBiome | Concept |
-| Museum of Attention | Concept |
-| Attention Republic | Concept |
+| AntiPersona | Standalone 4-stage interactive browser workshop |
+| Brief Theatre | Standalone authored four-act interactive browser workshop |
+| AdBiome | Standalone creative mutation and experiment-planning workshop |
+| Museum of Attention | Standalone four-gallery interactive browser workshop |
+| Attention Republic | Standalone five-council strategy simulator |
 
 ## Documentation
 
@@ -186,6 +205,7 @@ GitHub Actions additionally runs Chromium end-to-end tests for two agents, langu
 - [Multilingual Dead Drop data handling notice](privacy.html)
 - [Operations & Recovery Runbook](docs/operations-runbook.md)
 - [Five-WAVE commercial beta specification](docs/five-wave-release.md)
+- [Five playable-world game releases](docs/five-playable-worlds-v11.md)
 
 ## Operational and legal limitations
 

@@ -20,7 +20,11 @@ def build() -> None:
 
     for name in ("index.html", "privacy.html"):
         copy2(ROOT / name, DIST / name)
-    for name in ("dead-drop", "appeal-2049"):
+    # The new worlds are browser-only: authored scripts, no API credentials or
+    # hidden telemetry. Including them in Pages does not publish operator tools.
+    for name in ("dead-drop", "appeal-2049", "anti-persona",
+                 "brief-theatre", "ad-biome", "museum-of-attention",
+                 "attention-republic", "creative-worlds"):
         copytree(ROOT / "apps" / name, DIST / "apps" / name)
     copytree(ROOT / "apps" / "status", DIST / "status")
     status_html = DIST / "status" / "index.html"
@@ -162,6 +166,16 @@ def build() -> None:
         "apps/dead-drop/app.js",
         "apps/dead-drop/i18n.js",
         "apps/appeal-2049/index.html",
+        "apps/creative-worlds/runner.mjs",
+        "apps/creative-worlds/bridge.mjs",
+        "apps/creative-worlds/engine.mjs",
+        "apps/creative-worlds/worlds.mjs",
+        "apps/creative-worlds/style.css",
+        "apps/anti-persona/index.html",
+        "apps/brief-theatre/index.html",
+        "apps/ad-biome/index.html",
+        "apps/museum-of-attention/index.html",
+        "apps/attention-republic/index.html",
     ):
         if not (DIST / name).is_file():
             raise RuntimeError(f"Missing static output: {name}")
@@ -182,6 +196,17 @@ def build() -> None:
         raise RuntimeError("Commercial local-only preview declaration missing")
     if (DIST / "commercial" / "operator").exists() or (DIST / "proposal").exists():
         raise RuntimeError("Static preview must not include customer proposals or operator pages")
+
+    # All five standalone worlds must use the relative module bundle so
+    # github.io/<repository>/ deep links load without a backend.
+    for world in ("anti-persona", "brief-theatre", "ad-biome",
+                  "museum-of-attention", "attention-republic"):
+        document = (DIST / "apps" / world / "index.html").read_text(encoding="utf-8")
+        if '../creative-worlds/runner.mjs' not in document or 'data-world="' + world + '"' not in document:
+            raise RuntimeError("Invalid standalone world preview: " + world)
+        if "http://" in document or 'src="https://' in document:
+            raise RuntimeError("Unexpected remote script or asset in world " + world)
+    print("Safe static worlds included: 5; browser-only, no paid-ads API, no operator credentials")
 
     print("Static preview built:", DIST)
 

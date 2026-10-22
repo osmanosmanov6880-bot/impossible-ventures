@@ -3,6 +3,13 @@ import assert from 'node:assert/strict';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 import { createApp } from './server.mjs';
+import {
+  createRun as createWorldRun,
+  nextStage as nextWorldStage,
+  choose as chooseWorld,
+  progress as worldProgress,
+  report as worldReport
+} from '../../apps/creative-worlds/engine.mjs';
 
 async function setup(t, width = 1400, height = 900, options = {}) {
   const app = createApp({ dbPath: ':memory:', ...options });
@@ -558,4 +565,165 @@ test('status dashboard verifies live SQLite writes, multilingual copy and degrad
   await page.waitForFunction(() => document.getElementById('statusPlate')?.dataset.state === 'ok');
   assert.equal(await page.locator('#overallStatus').textContent(), '服务响应正常');
   assert.deepEqual(exceptions, []);
+});
+
+
+test('FIVE PLAYABLE WORLDS: five distinct RU/EN/ZH experiences on Chromium mobile, decisions, undo and local artifact export', async t => {
+  const { context, base } = await setup(t, 390, 844);
+  const errors = [];
+  const worlds = [
+    ['anti-persona', 4, false],
+    ['brief-theatre', 4, true],
+    ['ad-biome', 4, false],
+    ['museum-of-attention', 4, false],
+    ['attention-republic', 5, false]
+  ];
+  mkdirSync('artifacts', { recursive: true });
+  for (const [id, chapters, requiredScript] of worlds) {
+    const page = await context.newPage();
+    attachErrors(page, errors);
+    await page.goto(base + '/apps/' + id + '/');
+    await page.waitForFunction(() =>
+      document.querySelector('#worldMode')?.textContent?.includes('OF 07')
+    );
+    assert.equal(await page.locator('html').getAttribute('lang'), 'ru');
+    assert.equal(await page.locator('#sessionPanel').isHidden(), true);
+    assert.equal(await page.locator('#finishPanel').isHidden(), true);
+    const width = await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2);
+    assert.equal(width, true, 'Initial creative-world screen must fit a 390px viewport: ' + id);
+
+    // The experience needs no registration, company account or server API.
+    await page.locator('#demoProject').click();
+    assert.ok((await page.locator('#product').inputValue()).length >= 3);
+    await page.locator('#projectForm').evaluate(form => form.requestSubmit());
+    await page.locator('#sessionPanel').waitFor({ state: 'visible' });
+    assert.equal(await page.locator('#choices button').count(), 3);
+
+    for (let chapter = 0; chapter < chapters; chapter++) {
+      assert.equal(await page.locator('#sessionPanel').isVisible(), true);
+      assert.equal(await page.locator('#choices button').count(), 3);
+      assert.equal(await page.locator('#continueButton').isDisabled(), true);
+      await page.locator('#choices button').first().click();
+      await page.locator('#selectedPreview').waitFor({ state: 'visible' });
+      assert.equal(await page.locator('#continueButton').isEnabled(), true);
+      if (requiredScript) {
+        assert.equal(await page.locator('#note').getAttribute('required'), '');
+        await page.locator('#note').fill('A meaningful authored line for chapter ' + chapter);
+      } else {
+        await page.locator('#note').fill('A design hypothesis for a truthful real-world pilot');
+      }
+
+      if (chapter === 0) {
+        await page.locator('#decisionForm').evaluate(form => form.requestSubmit());
+        await page.locator('#backButton').click();
+        assert.equal(await page.locator('#progress').evaluate(x => x.value), 0);
+        await page.locator('#choices button').nth(1).click();
+        if (requiredScript) await page.locator('#note').fill('Alternative cinematic opening written by the user');
+        await page.locator('#decisionForm').evaluate(form => form.requestSubmit());
+      } else {
+        await page.locator('#decisionForm').evaluate(form => form.requestSubmit());
+      }
+    }
+    await page.locator('#finishPanel').waitFor({ state: 'visible' });
+    assert.equal(await page.locator('#finishDecisions article').count(), chapters);
+    assert.equal(await page.locator('#finishMetrics .metric').count(), 3);
+    assert.equal(await page.locator('#sessionPanel').isHidden(), true);
+    const after = await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2);
+    assert.equal(after, true, 'Final creative report must fit 390px screen: ' + id);
+
+    await page.locator('#locale').selectOption('en');
+    assert.equal(await page.locator('html').getAttribute('lang'), 'en');
+    assert.equal(await page.locator('#finishDecisions article').count(), chapters);
+    await page.locator('#locale').selectOption('zh');
+    assert.equal(await page.locator('html').getAttribute('lang'), 'zh-CN');
+    assert.equal(await page.locator('#finishDecisions article').count(), chapters);
+    await page.locator('#locale').selectOption('ru');
+
+    const download = page.waitForEvent('download');
+    await page.locator('#download').click();
+    const artifact = await download;
+    assert.equal(artifact.suggestedFilename(), 'iv-' + id + '-creative-brief.json');
+    await page.screenshot({
+      path: 'artifacts/creative-world-' + id + '-mobile-report.png', fullPage: true
+    });
+    await page.locator('#restart').click();
+    assert.equal(await page.locator('#setupPanel').isVisible(), true);
+    assert.equal(await page.locator('#finishPanel').isHidden(), true);
+    await page.close();
+  }
+  assert.deepEqual(errors, [], 'No uncaught browser exceptions, CSP violations or client-side code errors');
+});
+
+
+test('Creative World -> Commercial Command: local JSON import, no auto-save, real authenticated draft and safe invalid-file handling',async t=>{
+  const previous=process.env.OPERATOR_TOKEN;
+  const operatorToken='playable-world-bridge-system-token-987654321abcdefghijklmnopqrstuvwxyz';
+  process.env.OPERATOR_TOKEN=operatorToken;
+  t.after(()=>previous===undefined?delete process.env.OPERATOR_TOKEN:process.env.OPERATOR_TOKEN=previous);
+  const {context,base}=await setup(t,390,844);
+  const errors=[];
+
+  let creative=createWorldRun('brief-theatre',{
+    brand:'Aurora Script Lab',
+    product:'Evidence based campaign workshop for marketing teams',
+    audience:'Marketing teams preparing an honest advertising pilot'
+  },'ru');
+  while(!worldProgress(creative).finished){
+    const chapter=nextWorldStage(creative);
+    creative=chooseWorld(creative,chapter.choices[0].id,'A meaningful original dialogue line');
+  }
+  const goodJson=JSON.stringify(worldReport(creative));
+  const file={
+    name:'creative-brief.json',mimeType:'application/json',
+    buffer:Buffer.from(goodJson,'utf8')
+  };
+
+  // Read-only no-registration demo: load local JSON, but cannot save.
+  const demo=await context.newPage();
+  attachErrors(demo,errors);
+  await demo.goto(base+'/commercial/');
+  await demo.locator('#ventureGrid .venture-card').first().waitFor({state:'attached'});
+  await demo.locator('#viewDemo').click();
+  await demo.locator('#worldImport').setInputFiles(file);
+  await demo.getByText(/Творческий результат загружен в редактор/).first().waitFor();
+  assert.equal(await demo.locator('#venture').inputValue(),'brief-theatre');
+  assert.equal(await demo.locator('#saveCampaign').isDisabled(),true);
+  assert.match(await demo.locator('#previewHeadline').textContent(),/Evidence based campaign workshop/);
+
+  // Persist only after a real operator-provisioned workspace and explicit Save Draft.
+  const owner=await context.newPage();
+  attachErrors(owner,errors);
+  await owner.goto(base+'/commercial/');
+  await owner.locator('#ventureGrid .venture-card').first().waitFor({state:'attached'});
+  await owner.locator('#bootstrapForm input[name="name"]').fill('Aurora Verified Internal QA');
+  await owner.locator('#bootstrapForm input[name="systemToken"]').fill(operatorToken);
+  await owner.locator('#bootstrapForm').evaluate(form=>form.requestSubmit());
+  await owner.locator('#workspaceApp').waitFor({state:'visible'});
+  const writes=[];
+  owner.on('request',req=>{
+    if(req.method()==='POST'&&/\/api\/v1\/workspaces\/[^/]+\/campaigns$/.test(new URL(req.url()).pathname)){
+      writes.push(req.url());
+    }
+  });
+  await owner.locator('#worldImport').setInputFiles(file);
+  await owner.getByText(/Творческий результат загружен в редактор/).first().waitFor();
+  assert.equal(writes.length,0,'Import must not create a campaign until Save Draft');
+  assert.equal(await owner.locator('#venture').inputValue(),'brief-theatre');
+  assert.equal(await owner.locator('#campaignForm input[name="title"]').inputValue(),'Brief Theatre / Aurora Script Lab');
+  assert.equal(await owner.locator('#saveCampaign').isEnabled(),true);
+  assert.match(await owner.locator('#previewBody').textContent(),/ТВОРЧЕСКАЯ ГИПОТЕЗА/);
+  const fits=await owner.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2);
+  assert.equal(fits,true,'Imported campaign editor must fit a 390px screen');
+
+  await owner.locator('#campaignForm').evaluate(form=>form.requestSubmit());
+  await owner.locator('.campaign-card').first().waitFor();
+  assert.equal(writes.length,1);
+  assert.equal(await owner.locator('#countTotal').textContent(),'1');
+  assert.match(await owner.locator('.campaign-card').first().textContent(),/Brief Theatre/);
+
+  const invalid={name:'bogus.json',mimeType:'application/json',buffer:Buffer.from('{"schema":"bad","project":{}}')};
+  await owner.locator('#worldImport').setInputFiles(invalid);
+  await owner.locator('#worldImportState.error').waitFor();
+  assert.equal(writes.length,1,'Invalid imports must not create any server records');
+  assert.deepEqual(errors,[]);
 });
