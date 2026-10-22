@@ -167,6 +167,15 @@ function changeFields(next) {
     if (next[name] !== undefined) el(name).value = next[name];
   }
 }
+function invalidateReview() {
+  if (!lastReview) return;
+  lastReview = null;
+  lastTime = null;
+  el('reviewContent').hidden = true;
+  el('reviewEmpty').hidden = false;
+  el('reportStatus').textContent = '';
+}
+form.addEventListener('input', invalidateReview);
 function safeReport() {
   if (!lastReview) throw new Error('No review has been created');
   return {
@@ -277,6 +286,7 @@ fileInput.addEventListener('change', async () => {
     const payload = JSON.parse(await file.text());
     const imported = extractDeadDropDossier(payload);
     changeFields(imported);
+    invalidateReview();
     el('reportStatus').textContent = '';
     el('formError').textContent = t('importSuccess');
   } catch {
