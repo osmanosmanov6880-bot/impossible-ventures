@@ -12,6 +12,7 @@ const CURRENT_FILE = fileURLToPath(import.meta.url);
 const ROOM_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const MAX_MESSAGES = 3;
 const MAX_ROOM_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+const CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
 
 class ApiError extends Error {
   constructor(status, message) {
@@ -88,6 +89,7 @@ function sessionView(mission, role) {
       partnerUsed: mission.messages.filter(m => m.role !== role).length
     },
     createdAt: mission.createdAt,
+    expiresAt: mission.createdAt + MAX_ROOM_AGE_MS,
     dossier: mission.status === 'finalized' ? mission.dossier : null
   };
 }
@@ -237,7 +239,20 @@ export function createApp({
 } = {}) {
   if (dbPath !== ':memory:') mkdirSync(dirname(resolve(dbPath)), { recursive: true });
   const db = new DatabaseSync(dbPath);
-  db.exec('PRAGMA journal_mode = WAL; CREATE TABLE IF NOT EXISTS missions (code TEXT PRIMARY KEY, created_at INTEGER NOT NULL, payload TEXT NOT NULL);');
+  db.exec('PRAGMA journal_mode = WAL; PRAGMA secure_delete = ON; CREATE TABLE IF NOT EXISTS missions (code TEXT PRIMARY KEY, created_at INTEGER NOT NULL, payload TEXT NOT NULL); CREATE INDEX IF NOT EXISTS missions_created_at_idx ON missions (created_at);');
+  // Scheduled cleanup is independent of whether the room is ever opened again.
+  // A checkpoint shrinks WAL residue on persistent single-instance SQLite.
+  function checkpointAfterDeletion() {
+    if (dbPath !== ':memory:') db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
+  }
+  function pruneExpired() {
+    const result = db.prepare('DELETE FROM missions WHERE created_at < ?').run(now() - MAX_ROOM_AGE_MS);
+    if (result.changes > 0) checkpointAfterDeletion();
+    return Number(result.changes);
+  }
+  pruneExpired();
+  const cleanupTimer = setInterval(pruneExpired, CLEANUP_INTERVAL_MS);
+  cleanupTimer.unref();
   const requestsByIP = new Map();
   const aiAvailable = Boolean(aiKey && aiModel);
   const finalizing = new Set();
@@ -253,7 +268,7 @@ export function createApp({
         return sendJSON(response, 200, { ok: true, service: 'dead-drop', mode: 'cooperative', persistent: dbPath !== ':memory:', aiAvailable });
       }
       if (pathname.startsWith('/api/')) {
-        if (request.method === 'POST') throttle(requestsByIP, request, now);
+        if (request.method === 'POST' || request.method === 'DELETE') throttle(requestsByIP, request, now);
         if (pathname === '/api/v1/missions' && request.method === 'POST') {
           const body = await jsonBody(request);
           const host = {
@@ -275,7 +290,7 @@ export function createApp({
           saveMission(db, mission);
           return sendJSON(response, 201, { code, token, mission: sessionView(mission, 'product') });
         }
-        const match = /^\/api\/v1\/missions\/([A-Z2-9]{8})(?:\/(join|messages|finalize|ai-consent))?$/.exec(pathname);
+        const match = /^\/api\/v1\/missions\/([A-Z2-9]{8})(?:\/(join|messages|finalize|ai-consent|export))?$/.exec(pathname);
         if (!match) throw new ApiError(404, 'API route not found');
         let mission = loadMission(db, match[1], now);
         const action = match[2];
@@ -300,6 +315,27 @@ export function createApp({
         const role = authorizedRole(request, mission);
         if (!action && request.method === 'GET') {
           return sendJSON(response, 200, { mission: sessionView(mission, role) });
+        }
+        if (action === 'export' && request.method === 'GET') {
+          // Export only what the requesting role can view. Raw opposing-agent
+          // private fields and both bearer-token hashes never leave the server.
+          return sendJSON(response, 200, {
+            kind: 'dead-drop-agent-export',
+            exportedAt: now(),
+            scope: 'current-agent-view',
+            mission: sessionView(mission, role)
+          });
+        }
+        if (!action && request.method === 'DELETE') {
+          const body = await jsonBody(request);
+          if (body.confirmCode !== match[1]) throw new ApiError(400, 'Enter the exact mission code to delete');
+          mission = loadMission(db, match[1], now);
+          authorizedRole(request, mission);
+          if (finalizing.has(mission.code)) throw new ApiError(409, 'Cannot delete while the dossier is being generated');
+          const result = db.prepare('DELETE FROM missions WHERE code = ?').run(mission.code);
+          if (result.changes !== 1) throw new ApiError(404, 'Mission not found');
+          checkpointAfterDeletion();
+          return sendJSON(response, 200, { deleted: true, code: mission.code });
         }
         if (action === 'ai-consent' && request.method === 'POST') {
           const body = await jsonBody(request);
@@ -376,7 +412,8 @@ export function createApp({
       else response.destroy();
     }
   });
-  return { server, db, close: () => { server.close(); db.close(); } };
+  server.on('close', () => clearInterval(cleanupTimer));
+  return { server, db, pruneExpired, close: () => { server.close(() => db.close()); } };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve(CURRENT_FILE)) {
