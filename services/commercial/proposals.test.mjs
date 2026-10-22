@@ -14,10 +14,10 @@ const quote={
   description:'Discovery workshop, two creative concepts and a time-boxed validation study; ad spend excluded.',
   currency:'USD',setupCents:125000,monthlyCents:35000,months:3
 };
-async function setup(t){
+async function setup(t,clock={now:Date.now()}){
   const old=process.env.OPERATOR_TOKEN;process.env.OPERATOR_TOKEN=SYS;
   t.after(()=>old===undefined?delete process.env.OPERATOR_TOKEN:process.env.OPERATOR_TOKEN=old);
-  const app=createApp({dbPath:':memory:'});
+  const app=createApp({dbPath:':memory:',now:()=>clock.now});
   await new Promise(ok=>app.server.listen(0,'127.0.0.1',ok));
   t.after(async()=>{await new Promise(ok=>app.server.close(ok));app.db.close()});
   return 'http://127.0.0.1:'+app.server.address().port;
@@ -126,4 +126,55 @@ test('WAVE 5: cross-organization finance access blocked; company-facing preview 
   assert.equal((await api(base,root,{token:B.token})).status,403);
   assert.equal((await api(base,root+'/'+one.data.proposal.id,{token:B.token})).status,403);
   assert.equal((await api(base,root+'/'+one.data.proposal.id+'/send',{method:'POST',token:B.token})).status,403);
+});
+
+
+test('WAVE 5: owner export contains private data without plaintext credentials; exact-name deletion removes all tenant records',async t=>{
+  const base=await setup(t);
+  const ws=await provision(base,'Deleting Creative Workspace');
+  const root='/api/v1/workspaces/'+ws.id;
+  const quoteCreated=await api(base,root+'/proposals',{
+    method:'POST',token:ws.token,body:{...quote,campaignId:ws.campaignId}
+  });
+  assert.equal(quoteCreated.status,201);
+  const sent=await api(base,root+'/proposals/'+quoteCreated.data.proposal.id+'/send',{
+    method:'POST',token:ws.token
+  });
+  assert.equal(sent.status,200);
+  const secret=sent.data.secureShareFragment.split('#token=')[1];
+  const exported=await api(base,root+'/export',{token:ws.token});
+  assert.equal(exported.status,200);
+  assert.equal(exported.data.campaigns.length,1);
+  assert.equal(exported.data.proposals.length,1);
+  assert.equal(exported.data.proposals[0].contact_email,'cfo@example.org');
+  assert.equal(JSON.stringify(exported.data).includes(ws.token),false);
+  assert.equal(JSON.stringify(exported.data).includes(secret),false);
+  assert.equal((await api(base,root,{method:'DELETE',token:ws.token,body:{confirmName:'wrong'}})).status,422);
+  const deleted=await api(base,root,{method:'DELETE',token:ws.token,body:{confirmName:'Deleting Creative Workspace'}});
+  assert.equal(deleted.status,200);
+  assert.equal(deleted.data.deleted,true);
+  assert.equal((await api(base,root,{token:ws.token})).status,403);
+  assert.equal((await api(base,root+'/proposals',{token:ws.token})).status,403);
+  assert.equal((await api(base,'/api/v1/proposals/'+quoteCreated.data.proposal.id,{token:secret})).status,404);
+  assert.equal((await api(base,'/api/v1/operator/workspaces',{token:SYS})).data.total,0);
+});
+
+test('WAVE 5: proposal contact information is removed at 180-day alpha retention',async t=>{
+  const clock={now:Date.parse('2026-10-22T12:00:00Z')};
+  const base=await setup(t,clock),ws=await provision(base,'Time Limited Studio');
+  const root='/api/v1/workspaces/'+ws.id+'/proposals';
+  assert.equal((await api(base,root,{method:'POST',token:ws.token,
+    body:{...quote,campaignId:ws.campaignId}})).status,201);
+  assert.equal((await api(base,root,{token:ws.token})).data.items.length,1);
+  clock.now+=181*86_400_000;
+  // The initial owner credential also expires at 180 days. Rotate it using
+  // the system operator before inspecting automatically expired proposal data.
+  const rotated=await api(base,'/api/v1/operator/workspaces/'+ws.id+'/rotate-owner',{
+    method:'POST',token:SYS
+  });
+  assert.equal(rotated.status,200);
+  const report=await api(base,root,{token:rotated.data.ownerCredential.token});
+  assert.equal(report.status,200);
+  assert.equal(report.data.items.length,0);
+  assert.equal(report.data.summary.count.draft,0);
 });
